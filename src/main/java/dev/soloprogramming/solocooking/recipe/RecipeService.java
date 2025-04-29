@@ -1,9 +1,8 @@
-package dev.soloprogramming.solocooking.services;
+package dev.soloprogramming.solocooking.recipe;
 
-import dev.soloprogramming.solocooking.dto.RecipeDTO;
-import dev.soloprogramming.solocooking.entities.Recipe;
-import dev.soloprogramming.solocooking.mappers.RecipeMapper;
-import dev.soloprogramming.solocooking.repository.RecipeRepository;
+import dev.soloprogramming.solocooking.recipe.dto.RecipeDTO;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,16 +11,18 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class RecipeService {
+class RecipeService implements RecipeFacade {
 
     private final RecipeRepository recipeRepository;
     private final RecipeMapper recipeMapper;
 
-    public Recipe createRecipe(RecipeDTO recipeDTO) {
-        Recipe recipe = recipeMapper.fromDto(recipeDTO);
-        return recipeRepository.save(recipe);
+    public RecipeDTO createRecipe(RecipeDTO recipeDTO) {
+        RecipeEntity entity = recipeMapper.fromDto(recipeDTO);
+        RecipeEntity saved = recipeRepository.save(entity);
+        return recipeMapper.toDto(saved);
     }
 
+    @Override
     public List<RecipeDTO> getAllRecipes() {
         return recipeRepository.findAll().stream()
                 .map(recipeMapper::toDto)

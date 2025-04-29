@@ -5,18 +5,19 @@ spring:
     username: "solotest"
     password: "solotest"
 
-  flyway:
-    enabled: false
-    baseline-on-migrate: true
-    locations: classpath:db/migration
-    clean-disabled: false
-
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
 
   logging:
     level:
-      org.flywaydb: DEBUG
       org.hibernate.SQL: DEBUG
       org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  security:
+    enabled: false

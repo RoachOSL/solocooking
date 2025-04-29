@@ -1,4 +1,4 @@
-package dev.soloprogramming.solocooking.dto;
+package dev.soloprogramming.solocooking.recipe.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

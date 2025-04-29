@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SolocookingApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SolocookingApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(SolocookingApplication.class, args);
+    }
 }
