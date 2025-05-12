@@ -16,10 +16,12 @@ class RecipeService implements RecipeFacade {
     private final RecipeRepository recipeRepository;
     private final RecipeMapper recipeMapper;
 
+    @Override
+    @Transactional
     public RecipeDTO createRecipe(RecipeDTO recipeDTO) {
-        RecipeEntity entity = recipeMapper.fromDto(recipeDTO);
-        RecipeEntity saved = recipeRepository.save(entity);
-        return recipeMapper.toDto(saved);
+        var recipeEntity = recipeMapper.fromDto(recipeDTO);
+        var savedEntity = recipeRepository.save(recipeEntity);
+        return recipeMapper.toDto(savedEntity);
     }
 
     @Override
