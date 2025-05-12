@@ -14,7 +14,7 @@ import java.net.URI;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RequestMapping("/recipe")
+@RequestMapping("/recipes")
 @RestController
 public class RecipeController {
 
