@@ -1,4 +1,8 @@
 spring:
+  mvc:
+    servlet:
+      path: /api
+
   datasource:
     url: jdbc:postgresql://localhost:5432/solocookingtest-db
     driver-class-name: org.postgresql.Driver
