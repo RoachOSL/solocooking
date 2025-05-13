@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -25,6 +26,9 @@ class RecipeEntity {
     private String name;
     private String imageUrl;
     private String description;
+    private String ingredients;
+    private Instant updatedAt;
+    private Instant createdAt;
 
     @Override
     public boolean equals(Object o) {

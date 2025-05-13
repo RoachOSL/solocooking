@@ -1,11 +1,12 @@
 package dev.soloprogramming.solocooking.recipe;
 
 import dev.soloprogramming.solocooking.recipe.dto.RecipeDTO;
-
+import dev.soloprogramming.solocooking.recipe.dto.RecipeRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,8 +19,11 @@ class RecipeService implements RecipeFacade {
 
     @Override
     @Transactional
-    public RecipeDTO createRecipe(RecipeDTO recipeDTO) {
-        var recipeEntity = recipeMapper.fromDto(recipeDTO);
+    public RecipeDTO createRecipe(RecipeRequest recipeRequest) {
+        var recipeEntity = recipeMapper.fromRequest(recipeRequest);
+        recipeEntity.setCreatedAt(Instant.now());
+        recipeEntity.setUpdatedAt(Instant.now());
+
         var savedEntity = recipeRepository.save(recipeEntity);
         return recipeMapper.toDto(savedEntity);
     }
