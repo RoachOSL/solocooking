@@ -1,49 +1,71 @@
 package dev.soloprogramming.solocooking.recipe;
 
-import dev.soloprogramming.solocooking.recipe.dto.RecipeDTO;
-import dev.soloprogramming.solocooking.recipe.dto.RecipeRequest;
+import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
+import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
-import java.util.List;
+import java.util.UUID;
 
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/recipes")
-@RestController
-public class RecipeController {
+@Tag(name = "recipe-controller", description = "Endpoints for recipe management.")
+final class RecipeController {
 
     private final RecipeFacade recipeFacade;
 
     @Operation(
-            summary = "Create a new recipe",
-            description = "Creates a new recipe from the provided data and returns a Location header pointing to the created resource"
+            summary = "Creates new recipe"
     )
-    @ApiResponse(responseCode = "201", description = "Recipe created")
-    @ApiResponse(responseCode = "400", description = "Bad request")
     @PostMapping
-    public ResponseEntity<RecipeDTO> createRecipe(@Valid @RequestBody RecipeRequest recipeRequest) {
-        RecipeDTO created = recipeFacade.createRecipe(recipeRequest);
-        URI location = URI.create("/recipes/" + created.id());
-        return ResponseEntity.created(location).body(created);
+    @ResponseStatus(HttpStatus.CREATED)
+    RecipeDTO createRecipe(@RequestBody CreateRecipeRequest createRecipeRequest) {
+        return recipeFacade.createRecipe(createRecipeRequest);
     }
 
     @Operation(
             summary = "Get all recipes",
-            description = "Returns a list of all available recipes"
+            description = "Returns a paginated list of all available recipes"
     )
-    @ApiResponse(responseCode = "200", description = "Recipe returned")
     @GetMapping
-    public ResponseEntity<List<RecipeDTO>> getAllRecipes() {
-        List<RecipeDTO> recipeDTOList = recipeFacade.getAllRecipes();
-        return ResponseEntity.ok(recipeDTOList);
+    Page<RecipeDTO> getRecipes(@ParameterObject Pageable pageable) {
+        return recipeFacade.getRecipes(pageable);
     }
+
+    @Operation(
+            summary = "Get recipe by id",
+            description = "Returns a recipe for given id"
+    )
+    @GetMapping("/{recipeId}")
+    RecipeDTO getRecipe(@PathVariable UUID recipeId) {
+        return recipeFacade.findById(recipeId);
+    }
+
+    @Operation(summary = "Delete recipe by id")
+    @DeleteMapping("/{recipeId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteRecipeById(@PathVariable UUID recipeId) {
+        recipeFacade.deleteById(recipeId);
+    }
+
+//    @Operation(summary = "Partially update recipe")
+//    @PatchMapping("/recipeId")
+//    RecipeDTO updateRecipe(@PathVariable UUID recipeId, @RequestBody UpdateRecipeRequest updateRecipeRequest) {
+//        return recipeFacade.update(recipeId, updateRecipeRequest);
+//    }
 }
