@@ -37,11 +37,11 @@ class RecipeEntity {
     // TODO -> It should probably be some list maybe or enum dunno think trough
     private String ingredients;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Basic(optional = false)
     private Instant updatedAt;
 
-    @UpdateTimestamp
+    @CreationTimestamp
     @Basic(optional = false)
     private Instant createdAt;
 }
