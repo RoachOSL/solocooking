@@ -1,9 +1,8 @@
 package dev.soloprogramming.solocooking.recipe.model.dto;
 
-import lombok.Builder;
-
 import java.time.Instant;
 import java.util.UUID;
+import lombok.Builder;
 
 @Builder
 public record RecipeDTO(

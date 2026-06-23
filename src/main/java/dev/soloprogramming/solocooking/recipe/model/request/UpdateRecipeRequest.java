@@ -1,7 +1,5 @@
 package dev.soloprogramming.solocooking.recipe.model.request;
 
-import jakarta.persistence.Basic;
-import lombok.Builder;
 
 //@Builder
 //public record UpdateRecipeRequest() {
