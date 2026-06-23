@@ -1,11 +1,10 @@
 package dev.soloprogramming.solocooking.config;
 
 import io.swagger.v3.oas.models.servers.Server;
+import java.util.List;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
 
 @Configuration
 class SwaggerConfig {

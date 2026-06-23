@@ -1,8 +1,7 @@
 package dev.soloprogramming.solocooking.recipe;
 
-import dev.soloprogramming.solocooking.common.TestConstants;
 import dev.soloprogramming.solocooking.common.InMemoryRepository;
-
+import dev.soloprogramming.solocooking.common.TestConstants;
 import java.util.UUID;
 
 final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UUID>
