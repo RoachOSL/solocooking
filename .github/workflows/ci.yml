@@ -19,6 +19,9 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v7
 
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -40,6 +43,9 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v7
 
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -60,6 +66,9 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v7
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
 
       - name: Set up JDK
         uses: actions/setup-java@v5
