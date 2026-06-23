@@ -7,7 +7,7 @@ import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguratio
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TestComparisonConfig {
 
-    public static RecursiveComparisonConfiguration ignoringAuditFields() {
+    public static RecursiveComparisonConfiguration defaultRecursiveComparisonConfiguration() {
         return RecursiveComparisonConfiguration.builder()
                 .withIgnoredFields("createdAt", "updatedAt")
                 .build();

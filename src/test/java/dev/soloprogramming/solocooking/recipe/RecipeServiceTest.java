@@ -1,12 +1,12 @@
 package dev.soloprogramming.solocooking.recipe;
 
-import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
+import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RecipeServiceTest {
@@ -24,11 +24,11 @@ class RecipeServiceTest {
         var result = recipeService.createRecipe(createRecipeRequest);
 
         assertThat(result)
-                .usingRecursiveComparison()
+                .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedRecipe);
         assertThat(recipeRepository.findAll())
                 .singleElement()
-                .usingRecursiveComparison()
+                .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedRecipeEntity);
     }
 
@@ -43,7 +43,7 @@ class RecipeServiceTest {
         var result = recipeService.getRecipes(pageable);
 
         assertThat(result)
-                .usingRecursiveComparison()
+                .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedPage);
     }
 }

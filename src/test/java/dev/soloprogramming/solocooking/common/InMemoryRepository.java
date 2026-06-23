@@ -25,9 +25,6 @@ public abstract class InMemoryRepository<T, ID> implements JpaRepository<T, ID> 
 
     protected abstract ID generateId();
 
-    protected void prepareForSave(T entity) {
-    }
-
     @Override
     public <S extends T> S save(S entity) {
         var entityId = getId(entity);
@@ -36,7 +33,6 @@ public abstract class InMemoryRepository<T, ID> implements JpaRepository<T, ID> 
             setId(entity, entityId);
         }
 
-        prepareForSave(entity);
         entities.put(entityId, entity);
         return entity;
     }

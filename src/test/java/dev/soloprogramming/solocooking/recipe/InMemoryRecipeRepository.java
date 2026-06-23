@@ -22,12 +22,4 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
     protected UUID generateId() {
         return TestConstants.RECIPE_ID;
     }
-
-    @Override
-    protected void prepareForSave(RecipeEntity recipeEntity) {
-        if (recipeEntity.getCreatedAt() == null) {
-            recipeEntity.setCreatedAt(TestConstants.RECIPE_CREATED_AT);
-        }
-        recipeEntity.setUpdatedAt(TestConstants.RECIPE_UPDATED_AT);
-    }
 }
