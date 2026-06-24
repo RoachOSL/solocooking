@@ -1,15 +1,15 @@
 plugins {
     id 'java'
     id 'jacoco'
-    id 'com.diffplug.spotless' version '8.7.0'
-    id 'org.springframework.boot' version '3.5.15'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id 'io.freefair.lombok' version '9.5.0'
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.dependency.management)
+    alias(libs.plugins.lombok)
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${libs.versions.spring.cloud.get()}"
     }
 }
 
@@ -33,25 +33,25 @@ repositories {
 }
 
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-    implementation "org.springframework.boot:spring-boot-starter-web"
-    implementation "org.springframework.boot:spring-boot-starter-validation"
-    implementation "org.springframework.boot:spring-boot-starter-security"
-    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.validation
+    implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.actuator
 
-    implementation "org.postgresql:postgresql"
-    implementation "org.mapstruct:mapstruct:${mapStructVersion}"
-    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${openApiVersion}"
+    implementation libs.postgresql
+    implementation libs.mapstruct
+    implementation libs.springdoc.openapi.starter.webmvc.ui
 
-    testImplementation "org.springframework.boot:spring-boot-starter-test"
-    testImplementation "org.springframework.boot:spring-boot-testcontainers"
-    testImplementation "org.testcontainers:postgresql"
-    testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.spring.boot.testcontainers
+    testImplementation libs.testcontainers.postgresql
+    testImplementation libs.testcontainers.junit.jupiter
 
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
-    testRuntimeOnly "com.h2database:h2"
+    testRuntimeOnly libs.junit.platform.launcher
+    testRuntimeOnly libs.h2
 
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapStructVersion}"
+    annotationProcessor libs.mapstruct.processor
 }
 
 tasks.named('test') {
@@ -88,7 +88,7 @@ spotless {
     }
 }
 
-tasks.withType(JavaCompile).configureEach {
+tasks.named('compileJava') {
     options.compilerArgs += [
             "-Amapstruct.defaultComponentModel=spring",
             "-Amapstruct.defaultInjectionStrategy=constructor",
