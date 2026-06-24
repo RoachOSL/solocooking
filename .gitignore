@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Local AI assistants ###
+.claude/
+AI_GUIDELINES.md
