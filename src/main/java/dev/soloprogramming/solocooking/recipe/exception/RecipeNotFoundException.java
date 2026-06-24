@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2026 dev.soloprogramming
+ */
 package dev.soloprogramming.solocooking.recipe.exception;
 
 import org.springframework.http.HttpStatus;

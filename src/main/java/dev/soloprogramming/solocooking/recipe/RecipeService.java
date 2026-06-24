@@ -1,8 +1,12 @@
+/*
+ * Copyright (c) 2026 dev.soloprogramming
+ */
 package dev.soloprogramming.solocooking.recipe;
+
+import java.util.UUID;
 
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

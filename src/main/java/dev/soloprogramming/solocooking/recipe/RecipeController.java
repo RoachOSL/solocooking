@@ -1,10 +1,14 @@
+/*
+ * Copyright (c) 2026 dev.soloprogramming
+ */
 package dev.soloprogramming.solocooking.recipe;
+
+import java.util.UUID;
 
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
