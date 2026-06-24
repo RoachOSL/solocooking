@@ -1,12 +1,16 @@
+/*
+ * Copyright (c) 2026 dev.soloprogramming
+ */
 package dev.soloprogramming.solocooking.recipe;
 
-import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+
+import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class RecipeServiceTest {
 

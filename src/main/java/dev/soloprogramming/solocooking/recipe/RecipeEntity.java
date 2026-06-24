@@ -1,4 +1,10 @@
+/*
+ * Copyright (c) 2026 dev.soloprogramming
+ */
 package dev.soloprogramming.solocooking.recipe;
+
+import java.time.Instant;
+import java.util.UUID;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.Entity;
@@ -6,8 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.Instant;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

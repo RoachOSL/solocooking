@@ -67,9 +67,16 @@ jacocoTestReport {
 
 spotless {
     java {
-        importOrder()
+        targetExclude 'build/generated/**'
+        importOrder('java|javax', '', '\\#')
         removeUnusedImports()
         forbidWildcardImports()
+        cleanthat()
+                .addMutators([
+                        'SafeAndConsensual',
+                        'SafeButNotConsensual'
+                ])
+        licenseHeader '/*\n * Copyright (c) $YEAR dev.soloprogramming\n */\n'
         trimTrailingWhitespace()
         endWithNewline()
     }
