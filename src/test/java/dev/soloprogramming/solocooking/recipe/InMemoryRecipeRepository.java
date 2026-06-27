@@ -3,21 +3,21 @@
  */
 package dev.soloprogramming.solocooking.recipe;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import dev.soloprogramming.solocooking.common.InMemoryRepository;
+import dev.soloprogramming.solocooking.common.TestIdGenerator;
 
 final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UUID>
         implements RecipeRepository {
 
-    private int recipeIdSequence;
-    private int sectionIdSequence;
-    private int ingredientIdSequence;
+    private final TestIdGenerator recipeIdGenerator = new TestIdGenerator();
+    private final TestIdGenerator sectionIdGenerator = new TestIdGenerator();
+    private final TestIdGenerator ingredientIdGenerator = new TestIdGenerator();
 
     @Override
     public <S extends RecipeEntity> S save(S recipeEntity) {
@@ -42,23 +42,23 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
 
     @Override
     protected UUID generateId() {
-        return nextRecipeId();
+        return recipeIdGenerator.nextId(RecipeTestConstants.RECIPE_ID, "recipe", usedRecipeIds());
     }
 
     private void fillChildIds(RecipeEntity recipeEntity) {
         recipeEntity.getSections().forEach(section -> {
             if (section.getId() == null) {
-                section.setId(nextId(
+                section.setId(sectionIdGenerator.nextId(
                         RecipeTestConstants.RECIPE_SECTION_ID,
-                        this::nextSectionGeneratedId,
+                        "recipe-section",
                         usedSectionIds(recipeEntity)
                 ));
             }
             section.getIngredients().forEach(ingredient -> {
                 if (ingredient.getId() == null) {
-                    ingredient.setId(nextId(
+                    ingredient.setId(ingredientIdGenerator.nextId(
                             RecipeTestConstants.RECIPE_INGREDIENT_ID,
-                            this::nextIngredientGeneratedId,
+                            "recipe-ingredient",
                             usedIngredientIds(recipeEntity)
                     ));
                 }
@@ -66,45 +66,16 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
         });
     }
 
-    private UUID nextRecipeId() {
-        if (!existsById(RecipeTestConstants.RECIPE_ID)) {
-            return RecipeTestConstants.RECIPE_ID;
-        }
-
-        UUID recipeId;
-        do {
-            recipeId = generatedId("recipe", recipeIdSequence++);
-        } while (existsById(recipeId));
-
-        return recipeId;
+    private Set<UUID> usedRecipeIds() {
+        var usedIds = new HashSet<UUID>();
+        findAll().stream()
+                .map(RecipeEntity::getId)
+                .filter(Objects::nonNull)
+                .forEach(usedIds::add);
+        return usedIds;
     }
 
-    private UUID nextId(UUID firstId, Supplier<UUID> generatedId, HashSet<UUID> usedIds) {
-        if (!usedIds.contains(firstId)) {
-            return firstId;
-        }
-
-        UUID id;
-        do {
-            id = generatedId.get();
-        } while (usedIds.contains(id));
-
-        return id;
-    }
-
-    private UUID nextSectionGeneratedId() {
-        return generatedId("recipe-section", sectionIdSequence++);
-    }
-
-    private UUID nextIngredientGeneratedId() {
-        return generatedId("recipe-ingredient", ingredientIdSequence++);
-    }
-
-    private UUID generatedId(String idPrefix, int index) {
-        return UUID.nameUUIDFromBytes("%s-%d".formatted(idPrefix, index).getBytes(StandardCharsets.UTF_8));
-    }
-
-    private HashSet<UUID> usedSectionIds(RecipeEntity recipeEntity) {
+    private Set<UUID> usedSectionIds(RecipeEntity recipeEntity) {
         var usedIds = findAll().stream()
                 .flatMap(recipe -> recipe.getSections().stream())
                 .map(RecipeSectionEntity::getId)
@@ -119,7 +90,7 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
         return usedIds;
     }
 
-    private HashSet<UUID> usedIngredientIds(RecipeEntity recipeEntity) {
+    private Set<UUID> usedIngredientIds(RecipeEntity recipeEntity) {
         var usedIds = findAll().stream()
                 .flatMap(recipe -> recipe.getSections().stream())
                 .flatMap(section -> section.getIngredients().stream())

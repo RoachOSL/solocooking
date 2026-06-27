@@ -11,8 +11,8 @@ import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExi
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.DEFAULT_PAGEABLE;
 import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -28,12 +28,15 @@ class IngredientServiceTest {
 
     @Test
     void shouldCreateIngredient() {
+        // given
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder().build();
         var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
         var expectedIngredientEntity = IngredientMother.ingredientEntity();
 
+        // when
         var result = ingredientService.createIngredient(createIngredientRequest);
 
+        // then
         assertThat(result)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedIngredient);
@@ -45,12 +48,15 @@ class IngredientServiceTest {
 
     @Test
     void shouldNormalizeIngredientNameWhenCreatingIngredient() {
+        // given
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder()
                 .name("  Extra\tVirgin   Olive\nOil  ")
                 .build();
 
+        // when
         var result = ingredientService.createIngredient(createIngredientRequest);
 
+        // then
         assertThat(result.name()).isEqualTo("extra virgin olive oil");
         assertThat(ingredientRepository.findAll())
                 .singleElement()
@@ -59,35 +65,64 @@ class IngredientServiceTest {
     }
 
     @Test
+    void shouldCreateMultipleIngredientsWithUniqueIds() {
+        // given
+        var firstRequest = IngredientMother.createIngredientRequestBuilder()
+                .name("eggs")
+                .build();
+        var secondRequest = IngredientMother.createIngredientRequestBuilder()
+                .name("milk")
+                .build();
+
+        // when
+        var firstIngredient = ingredientService.createIngredient(firstRequest);
+        var secondIngredient = ingredientService.createIngredient(secondRequest);
+
+        // then
+        assertThat(firstIngredient.id()).isNotEqualTo(secondIngredient.id());
+        assertThat(ingredientRepository.findAll())
+                .extracting(IngredientEntity::getId)
+                .doesNotHaveDuplicates();
+    }
+
+    @Test
     void shouldRejectDuplicatedIngredient() {
+        // given
         ingredientRepository.save(IngredientMother.ingredientEntity());
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder().build();
 
+        // when
+        // then
         assertThatThrownBy(() -> ingredientService.createIngredient(createIngredientRequest))
                 .isInstanceOf(IngredientAlreadyExistsException.class);
     }
 
     @Test
     void shouldRejectDuplicatedIngredientAfterNormalization() {
+        // given
         ingredientRepository.save(IngredientMother.ingredientEntity());
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder()
                 .name("  EGGS  ")
                 .build();
 
+        // when
+        // then
         assertThatThrownBy(() -> ingredientService.createIngredient(createIngredientRequest))
                 .isInstanceOf(IngredientAlreadyExistsException.class);
     }
 
     @Test
     void shouldReturnIngredients() {
-        var pageable = PageRequest.of(0, 10);
+        // given
         var ingredientEntity = IngredientMother.ingredientEntity();
         var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
-        var expectedPage = new PageImpl<>(List.of(expectedIngredient), pageable, 1);
+        var expectedPage = new PageImpl<>(List.of(expectedIngredient), DEFAULT_PAGEABLE, 1);
         ingredientRepository.save(ingredientEntity);
 
-        var result = ingredientService.getIngredients(pageable);
+        // when
+        var result = ingredientService.getIngredients(DEFAULT_PAGEABLE);
 
+        // then
         assertThat(result)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedPage);
@@ -95,12 +130,15 @@ class IngredientServiceTest {
 
     @Test
     void shouldReturnIngredientById() {
+        // given
         var ingredientEntity = IngredientMother.ingredientEntity();
         var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
         ingredientRepository.save(ingredientEntity);
 
+        // when
         var result = ingredientService.findById(IngredientTestConstants.INGREDIENT_ID);
 
+        // then
         assertThat(result)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedIngredient);
@@ -108,20 +146,27 @@ class IngredientServiceTest {
 
     @Test
     void shouldThrowWhenIngredientDoesNotExist() {
+        // when
+        // then
         assertThatThrownBy(() -> ingredientService.findById(MISSING_INGREDIENT_ID))
                 .isInstanceOf(IngredientNotFoundException.class);
     }
 
     @Test
     void shouldValidateExistingIngredients() {
+        // given
         ingredientRepository.save(IngredientMother.ingredientEntity());
 
+        // when
+        // then
         assertThatCode(() -> ingredientService.validateIngredientsExist(Set.of(IngredientTestConstants.INGREDIENT_ID)))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void shouldThrowWhenValidatedIngredientDoesNotExist() {
+        // when
+        // then
         assertThatThrownBy(() -> ingredientService.validateIngredientsExist(Set.of(MISSING_INGREDIENT_ID)))
                 .isInstanceOf(IngredientNotFoundException.class);
     }

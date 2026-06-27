@@ -11,6 +11,8 @@ class SoloCookingApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// when
+		// then
 	}
 
 }

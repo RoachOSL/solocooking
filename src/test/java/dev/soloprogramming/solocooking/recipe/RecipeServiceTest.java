@@ -9,8 +9,8 @@ import java.util.UUID;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.DEFAULT_PAGEABLE;
 import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,12 +28,15 @@ class RecipeServiceTest {
 
     @Test
     void shouldCreateRecipe() {
+        // given
         var createRecipeRequest = RecipeMother.createRecipeRequestBuilder().build();
         var expectedRecipe = RecipeMother.recipeDtoBuilder().build();
         var expectedRecipeEntity = RecipeMother.recipeEntity();
 
+        // when
         var result = recipeService.createRecipe(createRecipeRequest);
 
+        // then
         assertThat(result)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedRecipe);
@@ -45,6 +48,7 @@ class RecipeServiceTest {
 
     @Test
     void shouldRejectRecipeWhenIngredientDoesNotExist() {
+        // given
         var createRecipeRequest = RecipeMother.createRecipeRequestBuilder()
                 .sections(List.of(RecipeMother.createRecipeSectionRequestBuilder()
                         .ingredients(List.of(RecipeMother.createRecipeIngredientRequestBuilder()
@@ -53,6 +57,8 @@ class RecipeServiceTest {
                         .build()))
                 .build();
 
+        // when
+        // then
         assertThatThrownBy(() -> recipeService.createRecipe(createRecipeRequest))
                 .isInstanceOf(IngredientNotFoundException.class);
         assertThat(recipeRepository.findAll()).isEmpty();
@@ -60,14 +66,16 @@ class RecipeServiceTest {
 
     @Test
     void shouldReturnRecipes() {
-        var pageable = PageRequest.of(0, 10);
+        // given
         var recipeEntity = RecipeMother.recipeEntity();
         var expectedRecipe = RecipeMother.recipeSummaryDtoBuilder().build();
-        var expectedPage = new PageImpl<>(List.of(expectedRecipe), pageable, 1);
+        var expectedPage = new PageImpl<>(List.of(expectedRecipe), DEFAULT_PAGEABLE, 1);
         recipeRepository.save(recipeEntity);
 
-        var result = recipeService.getRecipes(pageable);
+        // when
+        var result = recipeService.getRecipes(DEFAULT_PAGEABLE);
 
+        // then
         assertThat(result)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedPage);

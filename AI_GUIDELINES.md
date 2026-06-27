@@ -76,3 +76,8 @@ but does not run `git commit` or `git push`.
   no per-test setup is needed.
 - Use `@BeforeEach` only when every test needs additional initialization or an
   explicit state reset.
+- Structure test methods with `// given`, `// when`, and `// then` comments.
+  Keep the sections meaningful and omit only when a section is genuinely empty.
+- Controller tests compare response bodies against expected JSON files stored in
+  `src/test/resources`, so endpoint contracts stay visible outside Java object
+  serialization code.

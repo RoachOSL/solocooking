@@ -33,14 +33,14 @@ class IngredientService implements IngredientFacade {
     public IngredientDTO createIngredient(CreateIngredientRequest createIngredientRequest) {
         log.debug("Creating ingredient [{}]", createIngredientRequest);
         var ingredientEntity = ingredientMapper.fromRequest(createIngredientRequest);
-        if (ingredientExists(ingredientEntity.getName())) {
+        if (ingredientRepository.existsByName(ingredientEntity.getName())) {
             throw IngredientAlreadyExistsException.byName(ingredientEntity.getName());
         }
 
         try {
             return ingredientMapper.toDto(ingredientRepository.saveAndFlush(ingredientEntity));
         } catch (DataIntegrityViolationException exception) {
-            if (ingredientExists(ingredientEntity.getName())) {
+            if (ingredientRepository.existsByName(ingredientEntity.getName())) {
                 throw IngredientAlreadyExistsException.byName(ingredientEntity.getName());
             }
             throw exception;
@@ -76,9 +76,5 @@ class IngredientService implements IngredientFacade {
             log.debug("Missing ingredient ids [{}]", missingIngredientIds);
             throw IngredientNotFoundException.byIngredientIds(missingIngredientIds);
         }
-    }
-
-    private boolean ingredientExists(String ingredientName) {
-        return ingredientRepository.existsByName(ingredientName);
     }
 }
