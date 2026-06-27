@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -20,6 +22,7 @@ public record CreateRecipeRequest(
         @Size(max = 255)
         String name,
 
+        @NotBlank
         @Pattern(
                 regexp = "^(https?://).*$",
                 message = "Must be a valid URL starting with http:// or https://"
@@ -31,7 +34,8 @@ public record CreateRecipeRequest(
         @Size(max = 5000)
         String description,
 
-        List<@Valid CreateRecipeSectionRequest> sections
+        @NotEmpty
+        List<@NotNull @Valid CreateRecipeSectionRequest> sections
 ) {
 
     public Set<UUID> ingredientIds() {

@@ -9,9 +9,13 @@ SoloCooking-specific guidance. Keep reusable engineering rules in
 - Ingredient names are stored normalized in the `name` field. Do not add a
   separate `normalizedName` field unless the product later needs to preserve a
   display name distinct from the searchable unique name.
+- Ingredient name normalization trims surrounding whitespace, lowercases with
+  `Locale.ROOT`, and collapses internal whitespace sequences to a single space.
 - Creating a duplicate ingredient returns a conflict instead of behaving as an
   idempotent create operation. If the product needs idempotent ingredient
   creation later, introduce that as an explicit endpoint or command.
+- Ingredient creation checks duplicates before saving and also maps database
+  unique-constraint races to the same conflict response.
 - The `recipe` module owns `RecipeEntity -> RecipeSectionEntity ->
   RecipeIngredientEntity`.
 - `RecipeIngredientEntity` stores an `ingredientId` instead of referencing
@@ -21,6 +25,8 @@ SoloCooking-specific guidance. Keep reusable engineering rules in
 - Recipe sections and recipe ingredients store a persisted `position` field.
   Create requests do not accept `position`; the backend assigns positions from
   the order of the submitted lists.
+- Recipe create requests require at least one section, and each section requires
+  at least one ingredient.
 - Do not use JPA `@OrderBy` on recipe collections. Sort by `position`
   explicitly at the use-case or API boundary when ordered output is needed.
 - Create recipe aggregates through `RecipeFactory`. The factory translates

@@ -3,11 +3,16 @@
  */
 package dev.soloprogramming.solocooking.recipe;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.common.InMemoryRepository;
 final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UUID>
         implements RecipeRepository {
+
+    private int recipeIdSequence;
+    private int sectionIdSequence;
+    private int ingredientIdSequence;
 
     @Override
     public <S extends RecipeEntity> S save(S recipeEntity) {
@@ -27,19 +32,31 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
 
     @Override
     protected UUID generateId() {
-        return RecipeTestConstants.RECIPE_ID;
+        return nextId(RecipeTestConstants.RECIPE_ID, "recipe", recipeIdSequence++);
     }
 
     private void fillChildIds(RecipeEntity recipeEntity) {
         recipeEntity.getSections().forEach(section -> {
             if (section.getId() == null) {
-                section.setId(RecipeTestConstants.RECIPE_SECTION_ID);
+                section.setId(nextId(RecipeTestConstants.RECIPE_SECTION_ID, "recipe-section", sectionIdSequence++));
             }
             section.getIngredients().forEach(ingredient -> {
                 if (ingredient.getId() == null) {
-                    ingredient.setId(RecipeTestConstants.RECIPE_INGREDIENT_ID);
+                    ingredient.setId(nextId(
+                            RecipeTestConstants.RECIPE_INGREDIENT_ID,
+                            "recipe-ingredient",
+                            ingredientIdSequence++
+                    ));
                 }
             });
         });
+    }
+
+    private UUID nextId(UUID firstId, String idPrefix, int index) {
+        if (index == 0) {
+            return firstId;
+        }
+
+        return UUID.nameUUIDFromBytes("%s-%d".formatted(idPrefix, index).getBytes(StandardCharsets.UTF_8));
     }
 }

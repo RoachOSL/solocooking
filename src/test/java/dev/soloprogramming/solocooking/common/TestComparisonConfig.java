@@ -12,7 +12,7 @@ public final class TestComparisonConfig {
 
     public static RecursiveComparisonConfiguration defaultRecursiveComparisonConfiguration() {
         return RecursiveComparisonConfiguration.builder()
-                .withIgnoredFields("createdAt", "updatedAt", "recipe", "section")
+                .withIgnoredFields("createdAt", "updatedAt")
                 .build();
     }
 }

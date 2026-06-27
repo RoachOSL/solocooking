@@ -34,10 +34,6 @@ interface RecipeMapper {
     RecipeSummaryDTO toSummaryDto(RecipeEntity recipeEntity);
 
     private List<RecipeSectionDTO> toOrderedSectionDtos(List<RecipeSectionEntity> sections) {
-        if (sections == null) {
-            return List.of();
-        }
-
         return sections.stream()
                 .sorted(Comparator.comparing(RecipeSectionEntity::getPosition))
                 .map(this::toSectionDto)
@@ -54,10 +50,6 @@ interface RecipeMapper {
     }
 
     private List<RecipeIngredientDTO> toOrderedIngredientDtos(List<RecipeIngredientEntity> ingredients) {
-        if (ingredients == null) {
-            return List.of();
-        }
-
         return ingredients.stream()
                 .sorted(Comparator.comparing(RecipeIngredientEntity::getPosition))
                 .map(this::toIngredientDto)

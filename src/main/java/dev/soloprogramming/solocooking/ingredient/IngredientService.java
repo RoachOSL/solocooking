@@ -13,6 +13,7 @@ import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import dev.soloprogramming.solocooking.ingredient.model.request.CreateIngredientRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,11 @@ class IngredientService implements IngredientFacade {
             throw IngredientAlreadyExistsException.byName(ingredientEntity.getName());
         }
 
-        return ingredientMapper.toDto(ingredientRepository.save(ingredientEntity));
+        try {
+            return ingredientMapper.toDto(ingredientRepository.save(ingredientEntity));
+        } catch (DataIntegrityViolationException exception) {
+            throw IngredientAlreadyExistsException.byName(ingredientEntity.getName());
+        }
     }
 
     @Override
@@ -52,7 +57,8 @@ class IngredientService implements IngredientFacade {
     }
 
     @Override
-    public void validateExist(Set<UUID> ingredientIds) {
+    public void validateIngredientsExist(Set<UUID> ingredientIds) {
+        log.debug("Validating ingredient ids [{}]", ingredientIds);
         if (ingredientIds.isEmpty()) {
             return;
         }
@@ -64,6 +70,7 @@ class IngredientService implements IngredientFacade {
 
         missingIngredientIds.removeAll(foundIngredientIds);
         if (!missingIngredientIds.isEmpty()) {
+            log.debug("Missing ingredient ids [{}]", missingIngredientIds);
             throw IngredientNotFoundException.byIngredientIds(missingIngredientIds);
         }
     }

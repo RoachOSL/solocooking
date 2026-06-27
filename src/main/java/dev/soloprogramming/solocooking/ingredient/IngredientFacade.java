@@ -23,5 +23,5 @@ public interface IngredientFacade {
 
     IngredientDTO findById(UUID ingredientId);
 
-    void validateExist(@NotNull Set<@NotNull UUID> ingredientIds);
+    void validateIngredientsExist(@NotNull Set<@NotNull UUID> ingredientIds);
 }

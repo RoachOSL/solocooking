@@ -34,7 +34,7 @@ final class InMemoryIngredientFacade implements IngredientFacade {
     }
 
     @Override
-    public void validateExist(Set<UUID> ingredientIds) {
+    public void validateIngredientsExist(Set<UUID> ingredientIds) {
         var missingIngredientIds = new HashSet<>(ingredientIds);
         missingIngredientIds.removeAll(existingIngredientIds);
         if (!missingIngredientIds.isEmpty()) {

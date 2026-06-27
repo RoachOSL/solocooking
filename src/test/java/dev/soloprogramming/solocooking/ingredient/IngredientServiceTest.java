@@ -44,9 +44,35 @@ class IngredientServiceTest {
     }
 
     @Test
+    void shouldNormalizeIngredientNameWhenCreatingIngredient() {
+        var createIngredientRequest = IngredientMother.createIngredientRequestBuilder()
+                .name("  Extra\tVirgin   Olive\nOil  ")
+                .build();
+
+        var result = ingredientService.createIngredient(createIngredientRequest);
+
+        assertThat(result.name()).isEqualTo("extra virgin olive oil");
+        assertThat(ingredientRepository.findAll())
+                .singleElement()
+                .extracting(IngredientEntity::getName)
+                .isEqualTo("extra virgin olive oil");
+    }
+
+    @Test
     void shouldRejectDuplicatedIngredient() {
         ingredientRepository.save(IngredientMother.ingredientEntity());
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder().build();
+
+        assertThatThrownBy(() -> ingredientService.createIngredient(createIngredientRequest))
+                .isInstanceOf(IngredientAlreadyExistsException.class);
+    }
+
+    @Test
+    void shouldRejectDuplicatedIngredientAfterNormalization() {
+        ingredientRepository.save(IngredientMother.ingredientEntity());
+        var createIngredientRequest = IngredientMother.createIngredientRequestBuilder()
+                .name("  EGGS  ")
+                .build();
 
         assertThatThrownBy(() -> ingredientService.createIngredient(createIngredientRequest))
                 .isInstanceOf(IngredientAlreadyExistsException.class);
@@ -90,13 +116,13 @@ class IngredientServiceTest {
     void shouldValidateExistingIngredients() {
         ingredientRepository.save(IngredientMother.ingredientEntity());
 
-        assertThatCode(() -> ingredientService.validateExist(Set.of(IngredientTestConstants.INGREDIENT_ID)))
+        assertThatCode(() -> ingredientService.validateIngredientsExist(Set.of(IngredientTestConstants.INGREDIENT_ID)))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void shouldThrowWhenValidatedIngredientDoesNotExist() {
-        assertThatThrownBy(() -> ingredientService.validateExist(Set.of(MISSING_INGREDIENT_ID)))
+        assertThatThrownBy(() -> ingredientService.validateIngredientsExist(Set.of(MISSING_INGREDIENT_ID)))
                 .isInstanceOf(IngredientNotFoundException.class);
     }
 }

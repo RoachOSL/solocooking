@@ -32,12 +32,13 @@ class RecipeService implements RecipeFacade {
     @Transactional
     public RecipeDTO createRecipe(CreateRecipeRequest createRecipeRequest) {
         log.info("Creating recipe [{}]", createRecipeRequest);
-        ingredientFacade.validateExist(createRecipeRequest.ingredientIds());
+        ingredientFacade.validateIngredientsExist(createRecipeRequest.ingredientIds());
         var recipeEntity = recipeFactory.from(createRecipeRequest);
 
         return recipeMapper.toDto(recipeRepository.save(recipeEntity));
     }
 
+    @Override
     public Page<RecipeSummaryDTO> getRecipes(Pageable pageable) {
         return recipeRepository.findAll(pageable).map(recipeMapper::toSummaryDto);
     }
@@ -52,9 +53,9 @@ class RecipeService implements RecipeFacade {
     @Override
     @Transactional
     public void deleteById(UUID recipeID) {
-        if (!recipeRepository.existsById(recipeID)) {
-            throw RecipeNotFoundException.byRecipeId(recipeID);
-        }
-        recipeRepository.deleteById(recipeID);
+        var recipe = recipeRepository.findById(recipeID)
+                .orElseThrow(() -> RecipeNotFoundException.byRecipeId(recipeID));
+
+        recipeRepository.delete(recipe);
     }
 }
