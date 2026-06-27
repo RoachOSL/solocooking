@@ -66,10 +66,4 @@ final class RecipeController {
     void deleteById(@PathVariable UUID recipeId) {
         recipeFacade.deleteById(recipeId);
     }
-
-//    @Operation(summary = "Partially update recipe")
-//    @PatchMapping("/recipeId")
-//    RecipeDTO updateRecipe(@PathVariable UUID recipeId, @RequestBody UpdateRecipeRequest updateRecipeRequest) {
-//        return recipeFacade.update(recipeId, updateRecipeRequest);
-//    }
 }

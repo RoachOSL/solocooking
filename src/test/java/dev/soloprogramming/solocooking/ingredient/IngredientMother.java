@@ -5,11 +5,10 @@ package dev.soloprogramming.solocooking.ingredient;
 
 import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import dev.soloprogramming.solocooking.ingredient.model.request.CreateIngredientRequest;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-final class IngredientMother {
+@UtilityClass
+class IngredientMother {
 
     static IngredientEntity ingredientEntity() {
         var ingredient = new IngredientEntity();

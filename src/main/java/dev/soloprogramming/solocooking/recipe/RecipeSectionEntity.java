@@ -23,6 +23,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Getter
@@ -46,6 +47,7 @@ class RecipeSectionEntity extends BaseEntity {
     private Integer position;
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private List<RecipeIngredientEntity> ingredients = new ArrayList<>();
 
     List<RecipeIngredientEntity> getIngredients() {

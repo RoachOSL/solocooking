@@ -7,11 +7,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-final class RecipeTestConstants {
+@UtilityClass
+class RecipeTestConstants {
 
     static final UUID RECIPE_ID = UUID.fromString("2b1c02d4-dc91-4f78-a4b3-e342b492bc25");
     static final UUID RECIPE_SECTION_ID = UUID.fromString("bbf025ab-fcf7-466a-b939-d924831f3487");

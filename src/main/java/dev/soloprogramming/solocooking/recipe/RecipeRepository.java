@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 interface RecipeRepository extends JpaRepository<RecipeEntity, UUID> {
 
     @Override
-    @EntityGraph(attributePaths = {"sections", "sections.ingredients"})
+    @EntityGraph(attributePaths = "sections")
     Optional<RecipeEntity> findById(UUID recipeId);
 
     @Query("select recipe from RecipeEntity recipe where recipe.id = :recipeId")

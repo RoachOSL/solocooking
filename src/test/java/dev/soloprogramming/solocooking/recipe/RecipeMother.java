@@ -12,11 +12,10 @@ import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSummaryDTO;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeIngredientRequest;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeSectionRequest;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-final class RecipeMother {
+@UtilityClass
+class RecipeMother {
 
     static RecipeEntity recipeEntity() {
         var recipe = new RecipeEntity();

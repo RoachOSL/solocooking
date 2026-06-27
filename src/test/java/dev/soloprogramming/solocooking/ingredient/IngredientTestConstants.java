@@ -6,11 +6,10 @@ package dev.soloprogramming.solocooking.ingredient;
 import java.time.Instant;
 import java.util.UUID;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-final class IngredientTestConstants {
+@UtilityClass
+class IngredientTestConstants {
 
     static final UUID INGREDIENT_ID = UUID.fromString("39f9be9f-88f2-4a50-bc83-97af6016c509");
     static final UUID MISSING_INGREDIENT_ID = UUID.fromString("af4733da-7ded-4a07-9f92-c8fd5d479b76");

@@ -4,7 +4,6 @@
 package dev.soloprogramming.solocooking.recipe.model.request;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -41,17 +40,9 @@ public record CreateRecipeRequest(
 ) {
 
     public Set<UUID> ingredientIds() {
-        if (sections == null) {
-            return Set.of();
-        }
-
         return sections.stream()
-                .filter(Objects::nonNull)
-                .filter(section -> section.ingredients() != null)
                 .flatMap(section -> section.ingredients().stream())
-                .filter(Objects::nonNull)
                 .map(CreateRecipeIngredientRequest::ingredientId)
-                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 }

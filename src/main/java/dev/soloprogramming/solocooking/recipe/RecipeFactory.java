@@ -24,10 +24,6 @@ class RecipeFactory {
     }
 
     private List<RecipeSectionEntity> toSectionEntities(CreateRecipeRequest createRecipeRequest) {
-        if (createRecipeRequest.sections() == null) {
-            return List.of();
-        }
-
         return createRecipeRequest.sections().stream()
                 .map(this::toSectionEntity)
                 .toList();
@@ -42,10 +38,6 @@ class RecipeFactory {
     }
 
     private List<RecipeIngredientEntity> toIngredientEntities(CreateRecipeSectionRequest createRecipeSectionRequest) {
-        if (createRecipeSectionRequest.ingredients() == null) {
-            return List.of();
-        }
-
         return createRecipeSectionRequest.ingredients().stream()
                 .map(this::toIngredientEntity)
                 .toList();
