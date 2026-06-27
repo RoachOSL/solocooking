@@ -8,6 +8,7 @@ import java.util.Set;
 
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
+import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
@@ -118,10 +119,15 @@ class IngredientServiceTest {
     @Test
     void shouldReturnIngredients() {
         // given
-        var ingredientEntity = IngredientMother.ingredientEntity();
-        var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
-        var expectedPage = new PageImpl<>(List.of(expectedIngredient), DEFAULT_PAGEABLE, 1);
-        ingredientRepository.save(ingredientEntity);
+        ingredientRepository.save(IngredientMother.ingredientEntity());
+        var second = ingredientRepository.save(IngredientMother.ingredientEntityWithName("milk"));
+        var third = ingredientRepository.save(IngredientMother.ingredientEntityWithName("flour"));
+        var expectedIngredients = List.of(
+                IngredientMother.ingredientDtoBuilder().build(),
+                IngredientDTO.builder().id(second.getId()).name("milk").build(),
+                IngredientDTO.builder().id(third.getId()).name("flour").build()
+        );
+        var expectedPage = new PageImpl<>(expectedIngredients, DEFAULT_PAGEABLE, 3);
 
         // when
         var result = ingredientService.getIngredients(DEFAULT_PAGEABLE);
@@ -164,10 +170,13 @@ class IngredientServiceTest {
     @Test
     void shouldValidateExistingIngredients() {
         // given
-        ingredientRepository.save(IngredientMother.ingredientEntity());
+        var first = ingredientRepository.save(IngredientMother.ingredientEntity());
+        var second = ingredientRepository.save(IngredientMother.ingredientEntityWithName("milk"));
+        var third = ingredientRepository.save(IngredientMother.ingredientEntityWithName("flour"));
 
         // when & then
-        assertThatCode(() -> ingredientService.validateIngredientsExist(Set.of(IngredientTestConstants.INGREDIENT_ID)))
+        assertThatCode(() -> ingredientService.validateIngredientsExist(
+                        Set.of(first.getId(), second.getId(), third.getId())))
                 .doesNotThrowAnyException();
     }
 

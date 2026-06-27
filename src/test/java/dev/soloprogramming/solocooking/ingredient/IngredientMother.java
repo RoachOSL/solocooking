@@ -23,6 +23,12 @@ class IngredientMother {
                 .name(IngredientTestConstants.INGREDIENT_STORED_NAME);
     }
 
+    static IngredientEntity ingredientEntityWithName(String name) {
+        var ingredient = new IngredientEntity();
+        ingredient.setName(name);
+        return ingredient;
+    }
+
     static CreateIngredientRequest.CreateIngredientRequestBuilder createIngredientRequestBuilder() {
         return CreateIngredientRequest.builder()
                 .name(IngredientTestConstants.INGREDIENT_NAME);
