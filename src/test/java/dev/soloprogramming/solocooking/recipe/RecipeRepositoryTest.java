@@ -4,10 +4,10 @@
 package dev.soloprogramming.solocooking.recipe;
 
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +21,8 @@ class RecipeRepositoryTest {
     @Autowired
     private EntityManager entityManager;
 
-    private final RecipeFactory recipeFactory = new RecipeFactory();
+    @Autowired
+    private RecipeFactory recipeFactory;
 
     @Test
     void shouldFindRecipeWithSectionsAndIngredients() {

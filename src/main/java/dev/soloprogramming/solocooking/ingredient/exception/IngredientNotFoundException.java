@@ -4,6 +4,7 @@
 package dev.soloprogramming.solocooking.ingredient.exception;
 
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,6 @@ public class IngredientNotFoundException extends ResponseStatusException {
     }
 
     public static IngredientNotFoundException byIngredientIds(Set<UUID> ingredientIds) {
-        return new IngredientNotFoundException(INGREDIENTS_NOT_FOUND_MESSAGE.formatted(ingredientIds));
+        return new IngredientNotFoundException(INGREDIENTS_NOT_FOUND_MESSAGE.formatted(new TreeSet<>(ingredientIds)));
     }
 }

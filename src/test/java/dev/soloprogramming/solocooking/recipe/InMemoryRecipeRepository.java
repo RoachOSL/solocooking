@@ -43,21 +43,20 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
     }
 
     private void fillChildIds(RecipeEntity recipeEntity) {
+        var usedSectionIds = buildUsedSectionIds(recipeEntity);
+        var usedIngredientIds = buildUsedIngredientIds(recipeEntity);
+
         recipeEntity.getSections().forEach(section -> {
             if (section.getId() == null) {
-                section.setId(nextId(
-                        RecipeTestConstants.RECIPE_SECTION_ID,
-                        "recipe-section",
-                        usedSectionIds(recipeEntity)
-                ));
+                var id = nextId(RecipeTestConstants.RECIPE_SECTION_ID, "recipe-section", usedSectionIds);
+                section.setId(id);
+                usedSectionIds.add(id);
             }
             section.getIngredients().forEach(ingredient -> {
                 if (ingredient.getId() == null) {
-                    ingredient.setId(nextId(
-                            RecipeTestConstants.RECIPE_INGREDIENT_ID,
-                            "recipe-ingredient",
-                            usedIngredientIds(recipeEntity)
-                    ));
+                    var id = nextId(RecipeTestConstants.RECIPE_INGREDIENT_ID, "recipe-ingredient", usedIngredientIds);
+                    ingredient.setId(id);
+                    usedIngredientIds.add(id);
                 }
             });
         });
@@ -72,7 +71,7 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
         return usedIds;
     }
 
-    private Set<UUID> usedSectionIds(RecipeEntity recipeEntity) {
+    private Set<UUID> buildUsedSectionIds(RecipeEntity recipeEntity) {
         var usedIds = findAll().stream()
                 .flatMap(recipe -> recipe.getSections().stream())
                 .map(RecipeSectionEntity::getId)
@@ -87,7 +86,7 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
         return usedIds;
     }
 
-    private Set<UUID> usedIngredientIds(RecipeEntity recipeEntity) {
+    private Set<UUID> buildUsedIngredientIds(RecipeEntity recipeEntity) {
         var usedIds = findAll().stream()
                 .flatMap(recipe -> recipe.getSections().stream())
                 .flatMap(section -> section.getIngredients().stream())
