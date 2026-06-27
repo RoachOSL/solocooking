@@ -17,6 +17,9 @@ class RecipeTestConstants {
     static final UUID RECIPE_INGREDIENT_ID = UUID.fromString("4fbd5a73-8f33-4ac7-8a75-9f78d78b3594");
     static final UUID INGREDIENT_ID = UUID.fromString("39f9be9f-88f2-4a50-bc83-97af6016c509");
     static final UUID MISSING_INGREDIENT_ID = UUID.fromString("af4733da-7ded-4a07-9f92-c8fd5d479b76");
+    static final UUID MISSING_RECIPE_ID = UUID.fromString("c9b2a3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d");
+    static final String RECIPE_NOT_FOUND_MESSAGE =
+            "Recipe with id [%s] not found.".formatted(MISSING_RECIPE_ID);
     static final String RECIPE_NAME = "Pasta carbonara";
     static final String RECIPE_IMAGE_URL = "https://example.com/carbonara.jpg";
     static final String RECIPE_DESCRIPTION = "Classic pasta carbonara";
