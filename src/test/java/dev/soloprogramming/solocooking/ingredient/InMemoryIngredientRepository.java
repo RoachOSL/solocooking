@@ -3,8 +3,8 @@
  */
 package dev.soloprogramming.solocooking.ingredient;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.common.InMemoryRepository;
@@ -13,13 +13,13 @@ final class InMemoryIngredientRepository extends InMemoryRepository<IngredientEn
         implements IngredientRepository {
 
     @Override
-    public boolean existsByNormalizedName(String normalizedName) {
+    public boolean existsByName(String name) {
         return findAll().stream()
-                .anyMatch(ingredient -> ingredient.getNormalizedName().equals(normalizedName));
+                .anyMatch(ingredient -> ingredient.getName().equals(name));
     }
 
     @Override
-    public List<IngredientEntity> findAllByIdIn(Collection<UUID> ingredientIds) {
+    public List<IngredientEntity> findAllByIdIn(Set<UUID> ingredientIds) {
         return findAllById(ingredientIds);
     }
 

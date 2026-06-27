@@ -29,9 +29,6 @@ class IngredientEntity extends BaseEntity {
     private UUID id;
 
     @Basic(optional = false)
-    private String name;
-
-    @Basic(optional = false)
     @Column(unique = true)
-    private String normalizedName;
+    private String name;
 }

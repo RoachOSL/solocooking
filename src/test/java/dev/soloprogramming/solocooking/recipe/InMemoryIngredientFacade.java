@@ -3,7 +3,6 @@
  */
 package dev.soloprogramming.solocooking.recipe;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -35,7 +34,7 @@ final class InMemoryIngredientFacade implements IngredientFacade {
     }
 
     @Override
-    public void validateExist(Collection<UUID> ingredientIds) {
+    public void validateExist(Set<UUID> ingredientIds) {
         var missingIngredientIds = new HashSet<>(ingredientIds);
         missingIngredientIds.removeAll(existingIngredientIds);
         if (!missingIngredientIds.isEmpty()) {

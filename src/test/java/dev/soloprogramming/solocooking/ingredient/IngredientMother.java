@@ -14,16 +14,14 @@ final class IngredientMother {
     static IngredientEntity ingredientEntity() {
         var ingredient = new IngredientEntity();
         ingredient.setId(IngredientTestConstants.INGREDIENT_ID);
-        ingredient.setName(IngredientTestConstants.INGREDIENT_NAME);
-        ingredient.setNormalizedName(IngredientTestConstants.INGREDIENT_NORMALIZED_NAME);
+        ingredient.setName(IngredientTestConstants.INGREDIENT_STORED_NAME);
         return ingredient;
     }
 
     static IngredientDTO.IngredientDTOBuilder ingredientDtoBuilder() {
         return IngredientDTO.builder()
                 .id(IngredientTestConstants.INGREDIENT_ID)
-                .name(IngredientTestConstants.INGREDIENT_NAME)
-                .normalizedName(IngredientTestConstants.INGREDIENT_NORMALIZED_NAME);
+                .name(IngredientTestConstants.INGREDIENT_STORED_NAME);
     }
 
     static CreateIngredientRequest.CreateIngredientRequestBuilder createIngredientRequestBuilder() {

@@ -3,7 +3,7 @@
  */
 package dev.soloprogramming.solocooking.ingredient;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
@@ -23,5 +23,5 @@ public interface IngredientFacade {
 
     IngredientDTO findById(UUID ingredientId);
 
-    void validateExist(Collection<UUID> ingredientIds);
+    void validateExist(@NotNull Set<@NotNull UUID> ingredientIds);
 }

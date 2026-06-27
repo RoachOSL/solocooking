@@ -4,6 +4,7 @@
 package dev.soloprogramming.solocooking.ingredient;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
@@ -89,13 +90,13 @@ class IngredientServiceTest {
     void shouldValidateExistingIngredients() {
         ingredientRepository.save(IngredientMother.ingredientEntity());
 
-        assertThatCode(() -> ingredientService.validateExist(List.of(IngredientTestConstants.INGREDIENT_ID)))
+        assertThatCode(() -> ingredientService.validateExist(Set.of(IngredientTestConstants.INGREDIENT_ID)))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void shouldThrowWhenValidatedIngredientDoesNotExist() {
-        assertThatThrownBy(() -> ingredientService.validateExist(List.of(MISSING_INGREDIENT_ID)))
+        assertThatThrownBy(() -> ingredientService.validateExist(Set.of(MISSING_INGREDIENT_ID)))
                 .isInstanceOf(IngredientNotFoundException.class);
     }
 }

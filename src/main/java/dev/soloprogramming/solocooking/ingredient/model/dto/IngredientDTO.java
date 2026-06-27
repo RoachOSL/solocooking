@@ -10,7 +10,6 @@ import lombok.Builder;
 @Builder
 public record IngredientDTO(
         UUID id,
-        String name,
-        String normalizedName
+        String name
 ) {
 }

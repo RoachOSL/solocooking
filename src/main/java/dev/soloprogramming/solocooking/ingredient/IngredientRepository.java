@@ -3,15 +3,15 @@
  */
 package dev.soloprogramming.solocooking.ingredient;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 interface IngredientRepository extends JpaRepository<IngredientEntity, UUID> {
 
-    boolean existsByNormalizedName(String normalizedName);
+    boolean existsByName(String name);
 
-    List<IngredientEntity> findAllByIdIn(Collection<UUID> ingredientIds);
+    List<IngredientEntity> findAllByIdIn(Set<UUID> ingredientIds);
 }

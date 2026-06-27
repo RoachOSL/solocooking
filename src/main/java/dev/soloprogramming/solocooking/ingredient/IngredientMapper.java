@@ -17,7 +17,7 @@ interface IngredientMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "normalizedName", expression = "java(normalize(createIngredientRequest.name()))")
+    @Mapping(target = "name", expression = "java(normalize(createIngredientRequest.name()))")
     IngredientEntity fromRequest(CreateIngredientRequest createIngredientRequest);
 
     @Named("normalize")

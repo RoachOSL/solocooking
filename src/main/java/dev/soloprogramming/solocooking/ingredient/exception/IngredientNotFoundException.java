@@ -3,7 +3,7 @@
  */
 package dev.soloprogramming.solocooking.ingredient.exception;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ public class IngredientNotFoundException extends ResponseStatusException {
         return new IngredientNotFoundException(INGREDIENT_NOT_FOUND_MESSAGE.formatted(ingredientId));
     }
 
-    public static IngredientNotFoundException byIngredientIds(Collection<UUID> ingredientIds) {
+    public static IngredientNotFoundException byIngredientIds(Set<UUID> ingredientIds) {
         return new IngredientNotFoundException(INGREDIENTS_NOT_FOUND_MESSAGE.formatted(ingredientIds));
     }
 }

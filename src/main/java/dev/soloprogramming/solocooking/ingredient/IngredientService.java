@@ -3,8 +3,8 @@
  */
 package dev.soloprogramming.solocooking.ingredient;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
@@ -30,10 +30,10 @@ class IngredientService implements IngredientFacade {
     @Override
     @Transactional
     public IngredientDTO createIngredient(CreateIngredientRequest createIngredientRequest) {
-        log.info("Creating ingredient [{}]", createIngredientRequest);
+        log.debug("Creating ingredient [{}]", createIngredientRequest);
         var ingredientEntity = ingredientMapper.fromRequest(createIngredientRequest);
-        if (ingredientRepository.existsByNormalizedName(ingredientEntity.getNormalizedName())) {
-            throw IngredientAlreadyExistsException.byNormalizedName(ingredientEntity.getNormalizedName());
+        if (ingredientRepository.existsByName(ingredientEntity.getName())) {
+            throw IngredientAlreadyExistsException.byName(ingredientEntity.getName());
         }
 
         return ingredientMapper.toDto(ingredientRepository.save(ingredientEntity));
@@ -52,19 +52,19 @@ class IngredientService implements IngredientFacade {
     }
 
     @Override
-    public void validateExist(Collection<UUID> ingredientIds) {
+    public void validateExist(Set<UUID> ingredientIds) {
         if (ingredientIds.isEmpty()) {
             return;
         }
 
-        var uniqueIngredientIds = new HashSet<>(ingredientIds);
-        var foundIngredientIds = ingredientRepository.findAllByIdIn(uniqueIngredientIds).stream()
+        var missingIngredientIds = new HashSet<>(ingredientIds);
+        var foundIngredientIds = ingredientRepository.findAllByIdIn(ingredientIds).stream()
                 .map(IngredientEntity::getId)
                 .collect(HashSet::new, HashSet::add, HashSet::addAll);
 
-        uniqueIngredientIds.removeAll(foundIngredientIds);
-        if (!uniqueIngredientIds.isEmpty()) {
-            throw IngredientNotFoundException.byIngredientIds(uniqueIngredientIds);
+        missingIngredientIds.removeAll(foundIngredientIds);
+        if (!missingIngredientIds.isEmpty()) {
+            throw IngredientNotFoundException.byIngredientIds(missingIngredientIds);
         }
     }
 }

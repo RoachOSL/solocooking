@@ -8,9 +8,13 @@ but does not run `git commit` or `git push`.
 
 ## Architecture
 
-- When Codex and the user agree on an architectural decision, add it to this
-  file in the relevant section so the project keeps a durable record of chosen
-  conventions and future direction.
+- When Codex and the user agree on a reusable architectural or engineering
+  decision, add it to this file in the relevant section. Project-specific domain
+  and product decisions belong in `PROJECT_GUIDELINES.md`.
+- When the user adds GitHub code review comments, Codex reads and discusses
+  them with the user in the local console first. Agreed changes are then applied
+  locally, tested, and summarized for the user. Codex does not publish GitHub
+  comments unless explicitly asked.
 - Keep module boundaries explicit and independent. Internal implementation
   details, such as entities, repositories, mappers, and services, should stay
   package-private whenever possible.
