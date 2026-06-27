@@ -33,22 +33,35 @@ class IngredientService implements IngredientFacade {
         log.debug("Creating ingredient [{}]", createIngredientRequest);
         var ingredientEntity = ingredientMapper.fromRequest(createIngredientRequest);
         if (ingredientRepository.existsByName(ingredientEntity.getName())) {
+            log.debug("Ingredient with name [{}] already exists", ingredientEntity.getName());
             throw IngredientAlreadyExistsException.byName(ingredientEntity.getName());
         }
 
-        return ingredientMapper.toDto(ingredientRepository.save(ingredientEntity));
+        var savedIngredient = ingredientRepository.save(ingredientEntity);
+        log.debug("Created ingredient with id [{}] and name [{}]", savedIngredient.getId(), savedIngredient.getName());
+        return ingredientMapper.toDto(savedIngredient);
     }
 
     @Override
     public Page<IngredientDTO> getIngredients(Pageable pageable) {
-        return ingredientRepository.findAll(pageable).map(ingredientMapper::toDto);
+        log.debug("Getting ingredients page [{}]", pageable);
+        var ingredients = ingredientRepository.findAll(pageable).map(ingredientMapper::toDto);
+        log.debug("Returned ingredients page with [{}] elements", ingredients.getNumberOfElements());
+        return ingredients;
     }
 
     @Override
     public IngredientDTO findById(UUID ingredientId) {
+        log.debug("Finding ingredient by id [{}]", ingredientId);
         return ingredientRepository.findById(ingredientId)
-                .map(ingredientMapper::toDto)
-                .orElseThrow(() -> IngredientNotFoundException.byIngredientId(ingredientId));
+                .map(ingredient -> {
+                    log.debug("Found ingredient with id [{}]", ingredientId);
+                    return ingredientMapper.toDto(ingredient);
+                })
+                .orElseThrow(() -> {
+                    log.debug("Ingredient with id [{}] was not found", ingredientId);
+                    return IngredientNotFoundException.byIngredientId(ingredientId);
+                });
     }
 
     @Override
@@ -68,5 +81,6 @@ class IngredientService implements IngredientFacade {
             log.debug("Missing ingredient ids [{}]", missingIngredientIds);
             throw IngredientNotFoundException.byIngredientIds(missingIngredientIds);
         }
+        log.debug("All ingredient ids exist [{}]", ingredientIds);
     }
 }

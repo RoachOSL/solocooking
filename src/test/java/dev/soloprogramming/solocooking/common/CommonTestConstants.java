@@ -3,13 +3,12 @@
  */
 package dev.soloprogramming.solocooking.common;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class CommonTestConstants {
+@UtilityClass
+public class CommonTestConstants {
 
     public static final Pageable DEFAULT_PAGEABLE = PageRequest.of(0, 10);
 }

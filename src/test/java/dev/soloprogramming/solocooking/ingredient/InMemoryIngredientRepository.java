@@ -10,12 +10,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.common.InMemoryRepository;
-import dev.soloprogramming.solocooking.common.TestIdGenerator;
+
+import static dev.soloprogramming.solocooking.common.TestIdGenerator.nextId;
 
 final class InMemoryIngredientRepository extends InMemoryRepository<IngredientEntity, UUID>
         implements IngredientRepository {
-
-    private final TestIdGenerator idGenerator = new TestIdGenerator();
 
     @Override
     public boolean existsByName(String name) {
@@ -40,7 +39,7 @@ final class InMemoryIngredientRepository extends InMemoryRepository<IngredientEn
 
     @Override
     protected UUID generateId() {
-        return idGenerator.nextId(IngredientTestConstants.INGREDIENT_ID, "ingredient", usedIds());
+        return nextId(IngredientTestConstants.INGREDIENT_ID, "ingredient", usedIds());
     }
 
     private Set<UUID> usedIds() {

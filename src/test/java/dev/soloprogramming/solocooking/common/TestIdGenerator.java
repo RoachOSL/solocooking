@@ -7,15 +7,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.UUID;
 
-public final class TestIdGenerator {
+import lombok.experimental.UtilityClass;
 
-    private int sequence;
+@UtilityClass
+public class TestIdGenerator {
 
-    public UUID nextId(UUID firstId, String prefix, Set<UUID> usedIds) {
+    public static UUID nextId(UUID firstId, String prefix, Set<UUID> usedIds) {
         if (!usedIds.contains(firstId)) {
             return firstId;
         }
 
+        var sequence = 0;
         UUID id;
         do {
             id = UUID.nameUUIDFromBytes("%s-%d".formatted(prefix, sequence++).getBytes(StandardCharsets.UTF_8));

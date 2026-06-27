@@ -31,31 +31,50 @@ class RecipeService implements RecipeFacade {
     @Override
     @Transactional
     public RecipeDTO createRecipe(CreateRecipeRequest createRecipeRequest) {
-        log.info("Creating recipe [{}]", createRecipeRequest);
-        ingredientFacade.validateIngredientsExist(createRecipeRequest.ingredientIds());
+        log.debug("Creating recipe [{}]", createRecipeRequest);
+        var ingredientIds = createRecipeRequest.ingredientIds();
+        log.debug("Validating recipe ingredient ids [{}]", ingredientIds);
+        ingredientFacade.validateIngredientsExist(ingredientIds);
         var recipeEntity = recipeFactory.from(createRecipeRequest);
+        var savedRecipe = recipeRepository.save(recipeEntity);
 
-        return recipeMapper.toDto(recipeRepository.save(recipeEntity));
+        log.debug("Created recipe with id [{}]", savedRecipe.getId());
+        return recipeMapper.toDto(savedRecipe);
     }
 
     @Override
     public Page<RecipeSummaryDTO> getRecipes(Pageable pageable) {
-        return recipeRepository.findAll(pageable).map(recipeMapper::toSummaryDto);
+        log.debug("Getting recipes page [{}]", pageable);
+        var recipes = recipeRepository.findAll(pageable).map(recipeMapper::toSummaryDto);
+        log.debug("Returned recipes page with [{}] elements", recipes.getNumberOfElements());
+        return recipes;
     }
 
     @Override
     public RecipeDTO findById(UUID recipeId) {
+        log.debug("Finding recipe by id [{}]", recipeId);
         return recipeRepository.findById(recipeId)
-                .map(recipeMapper::toDto)
-                .orElseThrow(() -> RecipeNotFoundException.byRecipeId(recipeId));
+                .map(recipe -> {
+                    log.debug("Found recipe with id [{}]", recipeId);
+                    return recipeMapper.toDto(recipe);
+                })
+                .orElseThrow(() -> {
+                    log.debug("Recipe with id [{}] was not found", recipeId);
+                    return RecipeNotFoundException.byRecipeId(recipeId);
+                });
     }
 
     @Override
     @Transactional
     public void deleteById(UUID recipeId) {
+        log.debug("Deleting recipe by id [{}]", recipeId);
         var recipe = recipeRepository.findByIdWithoutDetails(recipeId)
-                .orElseThrow(() -> RecipeNotFoundException.byRecipeId(recipeId));
+                .orElseThrow(() -> {
+                    log.debug("Recipe with id [{}] was not found for deletion", recipeId);
+                    return RecipeNotFoundException.byRecipeId(recipeId);
+                });
 
         recipeRepository.delete(recipe);
+        log.debug("Deleted recipe with id [{}]", recipeId);
     }
 }

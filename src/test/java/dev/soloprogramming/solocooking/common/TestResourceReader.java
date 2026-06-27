@@ -7,12 +7,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.springframework.core.io.ClassPathResource;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class TestResourceReader {
+@UtilityClass
+public class TestResourceReader {
 
     public static String readTestResource(String path) {
         try (var inputStream = new ClassPathResource(path).getInputStream()) {

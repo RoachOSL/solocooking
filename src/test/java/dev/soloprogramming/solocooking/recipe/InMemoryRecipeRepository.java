@@ -10,14 +10,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.common.InMemoryRepository;
-import dev.soloprogramming.solocooking.common.TestIdGenerator;
+
+import static dev.soloprogramming.solocooking.common.TestIdGenerator.nextId;
 
 final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UUID>
         implements RecipeRepository {
-
-    private final TestIdGenerator recipeIdGenerator = new TestIdGenerator();
-    private final TestIdGenerator sectionIdGenerator = new TestIdGenerator();
-    private final TestIdGenerator ingredientIdGenerator = new TestIdGenerator();
 
     @Override
     public <S extends RecipeEntity> S save(S recipeEntity) {
@@ -42,13 +39,13 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
 
     @Override
     protected UUID generateId() {
-        return recipeIdGenerator.nextId(RecipeTestConstants.RECIPE_ID, "recipe", usedRecipeIds());
+        return nextId(RecipeTestConstants.RECIPE_ID, "recipe", usedRecipeIds());
     }
 
     private void fillChildIds(RecipeEntity recipeEntity) {
         recipeEntity.getSections().forEach(section -> {
             if (section.getId() == null) {
-                section.setId(sectionIdGenerator.nextId(
+                section.setId(nextId(
                         RecipeTestConstants.RECIPE_SECTION_ID,
                         "recipe-section",
                         usedSectionIds(recipeEntity)
@@ -56,7 +53,7 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
             }
             section.getIngredients().forEach(ingredient -> {
                 if (ingredient.getId() == null) {
-                    ingredient.setId(ingredientIdGenerator.nextId(
+                    ingredient.setId(nextId(
                             RecipeTestConstants.RECIPE_INGREDIENT_ID,
                             "recipe-ingredient",
                             usedIngredientIds(recipeEntity)

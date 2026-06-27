@@ -5,7 +5,6 @@ package dev.soloprogramming.solocooking.ingredient;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
@@ -20,9 +19,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class IngredientServiceTest {
-
-    private static final UUID MISSING_INGREDIENT_ID = UUID.fromString("af4733da-7ded-4a07-9f92-c8fd5d479b76");
-    private static final String DUPLICATED_INGREDIENT_MESSAGE = "Ingredient [eggs] already exists.";
 
     private final InMemoryIngredientRepository ingredientRepository = new InMemoryIngredientRepository();
     private final IngredientMapper ingredientMapper = new IngredientMapperImpl();
@@ -92,7 +88,7 @@ class IngredientServiceTest {
         // given
         ingredientRepository.save(IngredientMother.ingredientEntity());
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder().build();
-        var expectedMessage = DUPLICATED_INGREDIENT_MESSAGE;
+        var expectedMessage = IngredientTestConstants.DUPLICATED_INGREDIENT_MESSAGE;
 
         // when & then
         assertThatThrownBy(() -> ingredientService.createIngredient(createIngredientRequest))
@@ -109,7 +105,7 @@ class IngredientServiceTest {
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder()
                 .name("  EGGS  ")
                 .build();
-        var expectedMessage = DUPLICATED_INGREDIENT_MESSAGE;
+        var expectedMessage = IngredientTestConstants.DUPLICATED_INGREDIENT_MESSAGE;
 
         // when & then
         assertThatThrownBy(() -> ingredientService.createIngredient(createIngredientRequest))
@@ -155,10 +151,10 @@ class IngredientServiceTest {
     @Test
     void shouldThrowWhenIngredientDoesNotExist() {
         // given
-        var expectedMessage = "Ingredient with id [%s] not found.".formatted(MISSING_INGREDIENT_ID);
+        var expectedMessage = IngredientTestConstants.MISSING_INGREDIENT_MESSAGE;
 
         // when & then
-        assertThatThrownBy(() -> ingredientService.findById(MISSING_INGREDIENT_ID))
+        assertThatThrownBy(() -> ingredientService.findById(IngredientTestConstants.MISSING_INGREDIENT_ID))
                 .isInstanceOfSatisfying(IngredientNotFoundException.class, exception -> {
                     assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
                     assertThat(exception.getBody().getDetail()).isEqualTo(expectedMessage);
@@ -178,10 +174,10 @@ class IngredientServiceTest {
     @Test
     void shouldThrowWhenValidatedIngredientDoesNotExist() {
         // given
-        var expectedMessage = "Ingredients with ids [[%s]] not found.".formatted(MISSING_INGREDIENT_ID);
+        var expectedMessage = IngredientTestConstants.MISSING_INGREDIENTS_MESSAGE;
 
         // when & then
-        assertThatThrownBy(() -> ingredientService.validateIngredientsExist(Set.of(MISSING_INGREDIENT_ID)))
+        assertThatThrownBy(() -> ingredientService.validateIngredientsExist(Set.of(IngredientTestConstants.MISSING_INGREDIENT_ID)))
                 .isInstanceOfSatisfying(IngredientNotFoundException.class, exception -> {
                     assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
                     assertThat(exception.getBody().getDetail()).isEqualTo(expectedMessage);

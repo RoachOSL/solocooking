@@ -5,7 +5,6 @@ package dev.soloprogramming.solocooking.recipe;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import dev.soloprogramming.solocooking.ingredient.IngredientFacade;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
@@ -22,8 +21,6 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 
 class RecipeServiceTest {
-
-    private static final UUID MISSING_INGREDIENT_ID = UUID.fromString("af4733da-7ded-4a07-9f92-c8fd5d479b76");
 
     private final InMemoryRecipeRepository recipeRepository = new InMemoryRecipeRepository();
     private final RecipeMapper recipeMapper = new RecipeMapperImpl();
@@ -59,14 +56,14 @@ class RecipeServiceTest {
         var createRecipeRequest = RecipeMother.createRecipeRequestBuilder()
                 .sections(List.of(RecipeMother.createRecipeSectionRequestBuilder()
                         .ingredients(List.of(RecipeMother.createRecipeIngredientRequestBuilder()
-                                .ingredientId(MISSING_INGREDIENT_ID)
+                                .ingredientId(RecipeTestConstants.MISSING_INGREDIENT_ID)
                                 .build()))
                         .build()))
                 .build();
-        willThrow(IngredientNotFoundException.byIngredientIds(Set.of(MISSING_INGREDIENT_ID)))
+        willThrow(IngredientNotFoundException.byIngredientIds(Set.of(RecipeTestConstants.MISSING_INGREDIENT_ID)))
                 .given(ingredientFacade)
-                .validateIngredientsExist(Set.of(MISSING_INGREDIENT_ID));
-        var expectedMessage = "Ingredients with ids [[%s]] not found.".formatted(MISSING_INGREDIENT_ID);
+                .validateIngredientsExist(Set.of(RecipeTestConstants.MISSING_INGREDIENT_ID));
+        var expectedMessage = RecipeTestConstants.MISSING_INGREDIENTS_MESSAGE;
 
         // when & then
         assertThatThrownBy(() -> recipeService.createRecipe(createRecipeRequest))

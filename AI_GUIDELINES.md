@@ -35,6 +35,9 @@ but does not run `git commit` or `git push`.
 - Use `var` for local variables when the type is obvious from the right-hand side
   and readability does not suffer.
 - Use descriptive variable names that clearly communicate meaning and purpose.
+- Prefer detailed `debug` logs for normal application flow, validation
+  decisions, and useful identifiers. Use `info` logs sparingly for genuinely
+  high-level lifecycle or operational events, not routine CRUD flow.
 - After code changes, run the available formatting and import cleanup tool. If
   the project does not provide such a Gradle tool, clean up imports manually
   according to the project style.
@@ -59,9 +62,7 @@ but does not run `git commit` or `git push`.
   test case.
 - If a type has no builder, the Mother returns a new instance every time. Do not
   share mutable objects or builders between tests.
-- Stateless helper classes are marked `final`, their methods are explicitly
-  `static`, and construction is blocked with
-  `@NoArgsConstructor(access = AccessLevel.PRIVATE)`.
+- Stateless helper classes use Lombok `@UtilityClass`.
 - When possible, compare whole objects recursively instead of asserting
   individual fields.
 - Generated or time-dependent fields, such as `createdAt` and `updatedAt`, are
