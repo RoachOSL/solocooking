@@ -35,12 +35,10 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
             if (section.getId() == null) {
                 section.setId(RecipeTestConstants.RECIPE_SECTION_ID);
             }
-            section.setRecipe(recipeEntity);
             section.getIngredients().forEach(ingredient -> {
                 if (ingredient.getId() == null) {
                     ingredient.setId(RecipeTestConstants.RECIPE_INGREDIENT_ID);
                 }
-                ingredient.setSection(section);
             });
         });
     }

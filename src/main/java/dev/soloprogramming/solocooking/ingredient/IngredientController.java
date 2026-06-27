@@ -34,7 +34,7 @@ final class IngredientController {
     @Operation(summary = "Creates new ingredient")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    IngredientDTO createIngredient(@Valid @RequestBody CreateIngredientRequest createIngredientRequest) {
+    IngredientDTO create(@Valid @RequestBody CreateIngredientRequest createIngredientRequest) {
         return ingredientFacade.createIngredient(createIngredientRequest);
     }
 

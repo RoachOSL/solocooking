@@ -24,29 +24,25 @@ final class RecipeMother {
         recipe.setName(RecipeTestConstants.RECIPE_NAME);
         recipe.setImageUrl(RecipeTestConstants.RECIPE_IMAGE_URL);
         recipe.setDescription(RecipeTestConstants.RECIPE_DESCRIPTION);
-        recipe.setSections(List.of(recipeSectionEntity(recipe)));
+        recipe.replaceSections(List.of(recipeSectionEntity()));
         return recipe;
     }
 
-    private static RecipeSectionEntity recipeSectionEntity(RecipeEntity recipe) {
+    private static RecipeSectionEntity recipeSectionEntity() {
         var section = new RecipeSectionEntity();
         section.setId(RecipeTestConstants.RECIPE_SECTION_ID);
-        section.setRecipe(recipe);
         section.setName(RecipeTestConstants.RECIPE_SECTION_NAME);
-        section.setSortOrder(RecipeTestConstants.RECIPE_SECTION_SORT_ORDER);
-        section.setIngredients(List.of(recipeIngredientEntity(section)));
+        section.replaceIngredients(List.of(recipeIngredientEntity()));
         return section;
     }
 
-    private static RecipeIngredientEntity recipeIngredientEntity(RecipeSectionEntity section) {
+    private static RecipeIngredientEntity recipeIngredientEntity() {
         var ingredient = new RecipeIngredientEntity();
         ingredient.setId(RecipeTestConstants.RECIPE_INGREDIENT_ID);
-        ingredient.setSection(section);
         ingredient.setIngredientId(RecipeTestConstants.INGREDIENT_ID);
         ingredient.setAmount(RecipeTestConstants.RECIPE_INGREDIENT_AMOUNT);
         ingredient.setUnit(RecipeTestConstants.RECIPE_INGREDIENT_UNIT);
         ingredient.setNote(RecipeTestConstants.RECIPE_INGREDIENT_NOTE);
-        ingredient.setSortOrder(RecipeTestConstants.RECIPE_INGREDIENT_SORT_ORDER);
         return ingredient;
     }
 
@@ -75,7 +71,7 @@ final class RecipeMother {
         return RecipeSectionDTO.builder()
                 .id(RecipeTestConstants.RECIPE_SECTION_ID)
                 .name(RecipeTestConstants.RECIPE_SECTION_NAME)
-                .sortOrder(RecipeTestConstants.RECIPE_SECTION_SORT_ORDER)
+                .position(RecipeTestConstants.RECIPE_SECTION_POSITION)
                 .ingredients(List.of(recipeIngredientDto()))
                 .build();
     }
@@ -87,7 +83,7 @@ final class RecipeMother {
                 .amount(RecipeTestConstants.RECIPE_INGREDIENT_AMOUNT)
                 .unit(RecipeTestConstants.RECIPE_INGREDIENT_UNIT)
                 .note(RecipeTestConstants.RECIPE_INGREDIENT_NOTE)
-                .sortOrder(RecipeTestConstants.RECIPE_INGREDIENT_SORT_ORDER)
+                .position(RecipeTestConstants.RECIPE_INGREDIENT_POSITION)
                 .build();
     }
 
@@ -102,7 +98,6 @@ final class RecipeMother {
     static CreateRecipeSectionRequest.CreateRecipeSectionRequestBuilder createRecipeSectionRequestBuilder() {
         return CreateRecipeSectionRequest.builder()
                 .name(RecipeTestConstants.RECIPE_SECTION_NAME)
-                .sortOrder(RecipeTestConstants.RECIPE_SECTION_SORT_ORDER)
                 .ingredients(List.of(createRecipeIngredientRequestBuilder().build()));
     }
 
@@ -111,7 +106,6 @@ final class RecipeMother {
                 .ingredientId(RecipeTestConstants.INGREDIENT_ID)
                 .amount(RecipeTestConstants.RECIPE_INGREDIENT_AMOUNT)
                 .unit(RecipeTestConstants.RECIPE_INGREDIENT_UNIT)
-                .note(RecipeTestConstants.RECIPE_INGREDIENT_NOTE)
-                .sortOrder(RecipeTestConstants.RECIPE_INGREDIENT_SORT_ORDER);
+                .note(RecipeTestConstants.RECIPE_INGREDIENT_NOTE);
     }
 }

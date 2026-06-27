@@ -16,36 +16,46 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Setter
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "recipe_ingredient")
 class RecipeIngredientEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private RecipeSectionEntity section;
 
+    @Setter
     @Basic(optional = false)
     @Column(name = "ingredient_id")
     private UUID ingredientId;
 
+    @Setter
     @Basic(optional = false)
     private BigDecimal amount;
 
+    @Setter
     @Basic(optional = false)
     private String unit;
 
+    @Setter
     private String note;
 
     @Basic(optional = false)
-    private Integer sortOrder;
+    private Integer position;
+
+    void placeInSection(RecipeSectionEntity section, int position) {
+        this.section = section;
+        this.position = position;
+    }
 }

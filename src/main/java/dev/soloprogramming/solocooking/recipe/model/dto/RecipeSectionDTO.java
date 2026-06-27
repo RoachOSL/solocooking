@@ -12,7 +12,7 @@ import lombok.Builder;
 public record RecipeSectionDTO(
         UUID id,
         String name,
-        Integer sortOrder,
+        Integer position,
         List<RecipeIngredientDTO> ingredients
 ) {
 }

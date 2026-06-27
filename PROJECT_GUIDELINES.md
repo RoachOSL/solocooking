@@ -18,3 +18,21 @@ SoloCooking-specific guidance. Keep reusable engineering rules in
   `IngredientEntity` directly.
 - Recipe creation validates referenced ingredient IDs through
   `IngredientFacade`.
+- Recipe sections and recipe ingredients store a persisted `position` field.
+  Create requests do not accept `position`; the backend assigns positions from
+  the order of the submitted lists.
+- Do not use JPA `@OrderBy` on recipe collections. Sort by `position`
+  explicitly at the use-case or API boundary when ordered output is needed.
+- Create recipe aggregates through `RecipeFactory`. The factory translates
+  create requests into new entities and calls aggregate methods. `RecipeEntity`
+  and `RecipeSectionEntity` own the invariants for child links and positions
+  through domain methods such as `replaceSections` and `replaceIngredients`; do
+  not hide that logic in MapStruct `@AfterMapping` hooks.
+
+## Naming
+
+- Use plain `id` for an entity or DTO field that represents that object's own
+  identifier.
+- Use qualified identifier names, such as `recipeId`, `ingredientId`, or
+  `sectionId`, for method parameters, path variables, cross-module references,
+  and DTO fields that point to another object.

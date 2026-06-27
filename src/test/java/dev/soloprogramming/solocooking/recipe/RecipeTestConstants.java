@@ -21,11 +21,11 @@ final class RecipeTestConstants {
     static final String RECIPE_IMAGE_URL = "https://example.com/carbonara.jpg";
     static final String RECIPE_DESCRIPTION = "Classic pasta carbonara";
     static final String RECIPE_SECTION_NAME = "Main";
-    static final int RECIPE_SECTION_SORT_ORDER = 0;
+    static final int RECIPE_SECTION_POSITION = 0;
     static final BigDecimal RECIPE_INGREDIENT_AMOUNT = BigDecimal.valueOf(2);
     static final String RECIPE_INGREDIENT_UNIT = "pcs";
     static final String RECIPE_INGREDIENT_NOTE = "large eggs";
-    static final int RECIPE_INGREDIENT_SORT_ORDER = 0;
+    static final int RECIPE_INGREDIENT_POSITION = 0;
     static final Instant RECIPE_CREATED_AT = Instant.parse("2026-01-10T10:15:30Z");
     static final Instant RECIPE_UPDATED_AT = Instant.parse("2026-01-11T12:30:00Z");
 }

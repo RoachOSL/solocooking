@@ -25,6 +25,7 @@ class RecipeService implements RecipeFacade {
 
     private final RecipeRepository recipeRepository;
     private final RecipeMapper recipeMapper;
+    private final RecipeFactory recipeFactory;
     private final IngredientFacade ingredientFacade;
 
     @Override
@@ -32,7 +33,7 @@ class RecipeService implements RecipeFacade {
     public RecipeDTO createRecipe(CreateRecipeRequest createRecipeRequest) {
         log.info("Creating recipe [{}]", createRecipeRequest);
         ingredientFacade.validateExist(createRecipeRequest.ingredientIds());
-        var recipeEntity = recipeMapper.fromRequest(createRecipeRequest);
+        var recipeEntity = recipeFactory.from(createRecipeRequest);
 
         return recipeMapper.toDto(recipeRepository.save(recipeEntity));
     }

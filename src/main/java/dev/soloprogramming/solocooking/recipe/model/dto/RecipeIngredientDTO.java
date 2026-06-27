@@ -15,6 +15,6 @@ public record RecipeIngredientDTO(
         BigDecimal amount,
         String unit,
         String note,
-        Integer sortOrder
+        Integer position
 ) {
 }

@@ -21,8 +21,10 @@ class RecipeServiceTest {
 
     private final InMemoryRecipeRepository recipeRepository = new InMemoryRecipeRepository();
     private final RecipeMapper recipeMapper = new RecipeMapperImpl();
+    private final RecipeFactory recipeFactory = new RecipeFactory();
     private final InMemoryIngredientFacade ingredientFacade = new InMemoryIngredientFacade();
-    private final RecipeService recipeService = new RecipeService(recipeRepository, recipeMapper, ingredientFacade);
+    private final RecipeService recipeService =
+            new RecipeService(recipeRepository, recipeMapper, recipeFactory, ingredientFacade);
 
     @Test
     void shouldCreateRecipe() {
