@@ -3,22 +3,58 @@
  */
 package dev.soloprogramming.solocooking.recipe;
 
+import java.util.Comparator;
+import java.util.List;
+
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
-import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
+import dev.soloprogramming.solocooking.recipe.model.dto.RecipeIngredientDTO;
+import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSectionDTO;
+import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSummaryDTO;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper
 interface RecipeMapper {
 
-    // TODO -> For future make mapping required to not make mapper mistakes
+    default RecipeDTO toDto(RecipeEntity recipeEntity) {
+        if (recipeEntity == null) {
+            return null;
+        }
 
-    RecipeDTO toDto(RecipeEntity recipeEntity);
+        return RecipeDTO.builder()
+                .id(recipeEntity.getId())
+                .name(recipeEntity.getName())
+                .imageUrl(recipeEntity.getImageUrl())
+                .description(recipeEntity.getDescription())
+                .sections(orderedSections(recipeEntity.getSections()))
+                .createdAt(recipeEntity.getCreatedAt())
+                .updatedAt(recipeEntity.getUpdatedAt())
+                .build();
+    }
 
-    RecipeEntity fromDto(RecipeDTO recipeDTO);
+    RecipeSummaryDTO toSummaryDto(RecipeEntity recipeEntity);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    RecipeEntity fromRequest(CreateRecipeRequest createRecipeRequest);
+    default RecipeSectionDTO toSectionDto(RecipeSectionEntity section) {
+        return RecipeSectionDTO.builder()
+                .id(section.getId())
+                .name(section.getName())
+                .position(section.getPosition())
+                .ingredients(orderedIngredients(section.getIngredients()))
+                .build();
+    }
+
+    RecipeIngredientDTO toIngredientDto(RecipeIngredientEntity ingredient);
+
+    default List<RecipeSectionDTO> orderedSections(List<RecipeSectionEntity> sections) {
+        return sections.stream()
+                .sorted(Comparator.comparing(RecipeSectionEntity::getPosition))
+                .map(this::toSectionDto)
+                .toList();
+    }
+
+    default List<RecipeIngredientDTO> orderedIngredients(List<RecipeIngredientEntity> ingredients) {
+        return ingredients.stream()
+                .sorted(Comparator.comparing(RecipeIngredientEntity::getPosition))
+                .map(this::toIngredientDto)
+                .toList();
+    }
 }

@@ -3,48 +3,61 @@
  */
 package dev.soloprogramming.solocooking.recipe;
 
-import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
+import dev.soloprogramming.solocooking.common.persistence.BaseEntity;
 import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Setter
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "recipe")
-class RecipeEntity {
+class RecipeEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter
     private UUID id;
 
+    @Setter
     @Basic(optional = false)
     private String name;
 
+    @Setter
     @Basic(optional = false)
     private String imageUrl;
 
+    @Setter
     private String description;
 
-    // TODO -> It should probably be some list maybe or enum dunno think trough
-    private String ingredients;
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecipeSectionEntity> sections = new ArrayList<>();
 
-    @UpdateTimestamp
-    @Basic(optional = false)
-    private Instant updatedAt;
+    List<RecipeSectionEntity> getSections() {
+        return Collections.unmodifiableList(sections);
+    }
 
-    @CreationTimestamp
-    @Basic(optional = false)
-    private Instant createdAt;
+    void replaceSections(List<RecipeSectionEntity> newSections) {
+        sections.clear();
+
+        for (var position = 0; position < newSections.size(); position++) {
+            var section = newSections.get(position);
+            section.placeInRecipe(this, position);
+            sections.add(section);
+        }
+    }
 }

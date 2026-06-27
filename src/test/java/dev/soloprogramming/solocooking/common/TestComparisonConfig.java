@@ -3,12 +3,11 @@
  */
 package dev.soloprogramming.solocooking.common;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class TestComparisonConfig {
+@UtilityClass
+public class TestComparisonConfig {
 
     public static RecursiveComparisonConfiguration defaultRecursiveComparisonConfiguration() {
         return RecursiveComparisonConfiguration.builder()

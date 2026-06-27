@@ -3,7 +3,15 @@
  */
 package dev.soloprogramming.solocooking.recipe.model.request;
 
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -15,6 +23,7 @@ public record CreateRecipeRequest(
         @Size(max = 255)
         String name,
 
+        @NotBlank
         @Pattern(
                 regexp = "^(https?://).*$",
                 message = "Must be a valid URL starting with http:// or https://"
@@ -26,7 +35,14 @@ public record CreateRecipeRequest(
         @Size(max = 5000)
         String description,
 
-        @NotBlank
-        String ingredients
+        @NotEmpty
+        List<@NotNull @Valid CreateRecipeSectionRequest> sections
 ) {
+
+    public Set<UUID> ingredientIds() {
+        return sections.stream()
+                .flatMap(section -> section.ingredients().stream())
+                .map(CreateRecipeIngredientRequest::ingredientId)
+                .collect(Collectors.toSet());
+    }
 }
