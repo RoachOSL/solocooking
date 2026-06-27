@@ -4,8 +4,10 @@
 package dev.soloprogramming.solocooking.recipe.model.request;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -44,9 +46,12 @@ public record CreateRecipeRequest(
         }
 
         return sections.stream()
+                .filter(Objects::nonNull)
                 .filter(section -> section.ingredients() != null)
                 .flatMap(section -> section.ingredients().stream())
+                .filter(Objects::nonNull)
                 .map(CreateRecipeIngredientRequest::ingredientId)
-                .collect(java.util.stream.Collectors.toSet());
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 }

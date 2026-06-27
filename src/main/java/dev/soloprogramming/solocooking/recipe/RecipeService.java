@@ -52,9 +52,9 @@ class RecipeService implements RecipeFacade {
 
     @Override
     @Transactional
-    public void deleteById(UUID recipeID) {
-        var recipe = recipeRepository.findById(recipeID)
-                .orElseThrow(() -> RecipeNotFoundException.byRecipeId(recipeID));
+    public void deleteById(UUID recipeId) {
+        var recipe = recipeRepository.findByIdWithoutDetails(recipeId)
+                .orElseThrow(() -> RecipeNotFoundException.byRecipeId(recipeId));
 
         recipeRepository.delete(recipe);
     }

@@ -122,12 +122,12 @@ public abstract class InMemoryRepository<T, ID> implements JpaRepository<T, ID> 
 
     @Override
     public <S extends T> S saveAndFlush(S entity) {
-        throw unsupported("saveAndFlush");
+        return save(entity);
     }
 
     @Override
     public <S extends T> List<S> saveAllAndFlush(Iterable<S> entities) {
-        throw unsupported("saveAllAndFlush");
+        return saveAll(entities);
     }
 
     @Override
