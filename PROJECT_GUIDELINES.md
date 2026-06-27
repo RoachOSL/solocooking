@@ -28,6 +28,12 @@ SoloCooking-specific guidance. Keep reusable engineering rules in
   and `RecipeSectionEntity` own the invariants for child links and positions
   through domain methods such as `replaceSections` and `replaceIngredients`; do
   not hide that logic in MapStruct `@AfterMapping` hooks.
+- The `recipe` module intentionally uses a DDD-lite aggregate style because the
+  module will support structural operations such as add, remove, reorder, move,
+  and duplicate. This is not a hard safety boundary against all bad code inside
+  the package; it is the preferred structure for centralizing child-link and
+  position invariants. Simpler modules, such as `ingredient`, can stay
+  service-oriented and CRUD-friendly.
 
 ## Naming
 
