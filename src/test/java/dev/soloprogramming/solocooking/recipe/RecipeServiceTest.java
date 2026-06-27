@@ -4,16 +4,22 @@
 package dev.soloprogramming.solocooking.recipe;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import dev.soloprogramming.solocooking.ingredient.IngredientFacade;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpStatus;
 
 import static dev.soloprogramming.solocooking.common.CommonTestConstants.DEFAULT_PAGEABLE;
 import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.mock;
 
 class RecipeServiceTest {
 
@@ -22,7 +28,7 @@ class RecipeServiceTest {
     private final InMemoryRecipeRepository recipeRepository = new InMemoryRecipeRepository();
     private final RecipeMapper recipeMapper = new RecipeMapperImpl();
     private final RecipeFactory recipeFactory = new RecipeFactory();
-    private final InMemoryIngredientFacade ingredientFacade = new InMemoryIngredientFacade();
+    private final IngredientFacade ingredientFacade = mock(IngredientFacade.class);
     private final RecipeService recipeService =
             new RecipeService(recipeRepository, recipeMapper, recipeFactory, ingredientFacade);
 
@@ -44,6 +50,7 @@ class RecipeServiceTest {
                 .singleElement()
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedRecipeEntity);
+        then(ingredientFacade).should().validateIngredientsExist(Set.of(RecipeTestConstants.INGREDIENT_ID));
     }
 
     @Test
@@ -56,12 +63,17 @@ class RecipeServiceTest {
                                 .build()))
                         .build()))
                 .build();
+        willThrow(IngredientNotFoundException.byIngredientIds(Set.of(MISSING_INGREDIENT_ID)))
+                .given(ingredientFacade)
+                .validateIngredientsExist(Set.of(MISSING_INGREDIENT_ID));
+        var expectedMessage = "Ingredients with ids [[%s]] not found.".formatted(MISSING_INGREDIENT_ID);
 
-        // when
-        // then
+        // when & then
         assertThatThrownBy(() -> recipeService.createRecipe(createRecipeRequest))
-                .isInstanceOf(IngredientNotFoundException.class);
-        assertThat(recipeRepository.findAll()).isEmpty();
+                .isInstanceOfSatisfying(IngredientNotFoundException.class, exception -> {
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+                    assertThat(exception.getBody().getDetail()).isEqualTo(expectedMessage);
+                });
     }
 
     @Test

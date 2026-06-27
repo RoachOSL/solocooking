@@ -42,8 +42,10 @@ class RecipeControllerTest {
                 .content(objectMapper.writeValueAsString(createRecipeRequest)));
 
         // then
-        result.andExpect(status().isCreated())
-                .andExpect(content().json(readTestResource(RECIPE_RESPONSE_RESOURCE), true));
+        result.andExpectAll(
+                status().isCreated(),
+                content().json(readTestResource(RECIPE_RESPONSE_RESOURCE), true)
+        );
         then(recipeFacade).should().createRecipe(createRecipeRequest);
     }
 
@@ -57,8 +59,10 @@ class RecipeControllerTest {
         var result = mockMvc.perform(get("/recipes/{recipeId}", RecipeTestConstants.RECIPE_ID));
 
         // then
-        result.andExpect(status().isOk())
-                .andExpect(content().json(readTestResource(RECIPE_RESPONSE_RESOURCE), true));
+        result.andExpectAll(
+                status().isOk(),
+                content().json(readTestResource(RECIPE_RESPONSE_RESOURCE), true)
+        );
         then(recipeFacade).should().findById(RecipeTestConstants.RECIPE_ID);
     }
 
@@ -68,8 +72,10 @@ class RecipeControllerTest {
         var result = mockMvc.perform(delete("/recipes/{recipeId}", RecipeTestConstants.RECIPE_ID));
 
         // then
-        result.andExpect(status().isNoContent())
-                .andExpect(content().string(""));
+        result.andExpectAll(
+                status().isNoContent(),
+                content().string("")
+        );
         then(recipeFacade).should().deleteById(RecipeTestConstants.RECIPE_ID);
     }
 }

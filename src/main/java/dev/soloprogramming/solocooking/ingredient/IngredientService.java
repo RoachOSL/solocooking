@@ -13,7 +13,6 @@ import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import dev.soloprogramming.solocooking.ingredient.model.request.CreateIngredientRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,14 +36,7 @@ class IngredientService implements IngredientFacade {
             throw IngredientAlreadyExistsException.byName(ingredientEntity.getName());
         }
 
-        try {
-            return ingredientMapper.toDto(ingredientRepository.saveAndFlush(ingredientEntity));
-        } catch (DataIntegrityViolationException exception) {
-            if (ingredientRepository.existsByName(ingredientEntity.getName())) {
-                throw IngredientAlreadyExistsException.byName(ingredientEntity.getName());
-            }
-            throw exception;
-        }
+        return ingredientMapper.toDto(ingredientRepository.save(ingredientEntity));
     }
 
     @Override

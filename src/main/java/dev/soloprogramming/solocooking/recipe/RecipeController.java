@@ -38,7 +38,7 @@ final class RecipeController {
     )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    RecipeDTO createRecipe(@Valid @RequestBody CreateRecipeRequest createRecipeRequest) {
+    RecipeDTO create(@Valid @RequestBody CreateRecipeRequest createRecipeRequest) {
         return recipeFacade.createRecipe(createRecipeRequest);
     }
 
@@ -63,7 +63,7 @@ final class RecipeController {
     @Operation(summary = "Delete recipe by id")
     @DeleteMapping("/{recipeId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteRecipeById(@PathVariable UUID recipeId) {
+    void deleteById(@PathVariable UUID recipeId) {
         recipeFacade.deleteById(recipeId);
     }
 

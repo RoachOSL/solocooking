@@ -9,10 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class SoloCookingApplicationTests {
 
-	@Test
-	void contextLoads() {
-		// when
-		// then
-	}
-
+    @Test
+    void contextLoads() {
+        // when & then
+    }
 }

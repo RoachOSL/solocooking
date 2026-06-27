@@ -41,8 +41,10 @@ class IngredientControllerTest {
                 .content(objectMapper.writeValueAsString(createIngredientRequest)));
 
         // then
-        result.andExpect(status().isCreated())
-                .andExpect(content().json(readTestResource(INGREDIENT_RESPONSE_RESOURCE), true));
+        result.andExpectAll(
+                status().isCreated(),
+                content().json(readTestResource(INGREDIENT_RESPONSE_RESOURCE), true)
+        );
         then(ingredientFacade).should().createIngredient(createIngredientRequest);
     }
 
@@ -56,8 +58,10 @@ class IngredientControllerTest {
         var result = mockMvc.perform(get("/ingredients/{ingredientId}", IngredientTestConstants.INGREDIENT_ID));
 
         // then
-        result.andExpect(status().isOk())
-                .andExpect(content().json(readTestResource(INGREDIENT_RESPONSE_RESOURCE), true));
+        result.andExpectAll(
+                status().isOk(),
+                content().json(readTestResource(INGREDIENT_RESPONSE_RESOURCE), true)
+        );
         then(ingredientFacade).should().findById(IngredientTestConstants.INGREDIENT_ID);
     }
 }

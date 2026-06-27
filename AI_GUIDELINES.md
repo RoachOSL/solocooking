@@ -38,6 +38,10 @@ but does not run `git commit` or `git push`.
 - After code changes, run the available formatting and import cleanup tool. If
   the project does not provide such a Gradle tool, clean up imports manually
   according to the project style.
+- In controllers, use short command method names such as `create` and
+  `deleteById` when the controller class already names the resource. Keep read
+  methods explicit, for example `getRecipe` and `getRecipes`, because the
+  singular/plural distinction improves scanability.
 
 ## Test style
 
@@ -65,6 +69,13 @@ but does not run `git commit` or `git push`.
   of the test.
 - Service tests use in-memory repositories instead of mocks when behavior depends
   on persisted state.
+- Do not create in-memory implementations of module facades for tests. For
+  cross-module facade dependencies, use a mock in focused service tests or wire
+  the real module in broader integration tests.
+- Service tests are focused unit-style tests: use in-memory repositories for the
+  service's own persistence boundary and mocks for external module facades or
+  collaborators. Broader facade/integration tests can wire real modules,
+  database infrastructure, and Testcontainers in a separate test layer.
 - Shared test repository operations live in generic `InMemoryRepository<T, ID>`.
   Entity-specific repositories contain only behavior specific to that entity and
   custom repository methods.
@@ -77,7 +88,14 @@ but does not run `git commit` or `git push`.
 - Use `@BeforeEach` only when every test needs additional initialization or an
   explicit state reset.
 - Structure test methods with `// given`, `// when`, and `// then` comments.
+  Use `// when & then` when the action is embedded directly in the assertion.
   Keep the sections meaningful and omit only when a section is genuinely empty.
+- When testing HTTP-aware exceptions such as `ResponseStatusException`, use
+  fluent throwable assertions with `isInstanceOfSatisfying(...)` and assert the
+  status code plus response body detail inside the assertion lambda. Do not
+  duplicate the status assertion by also checking `exception.getBody().getStatus()`.
+- In MockMvc tests, prefer `andExpectAll(...)` when asserting status and body
+  for the same response.
 - Controller tests compare response bodies against expected JSON files stored in
   `src/test/resources`, so endpoint contracts stay visible outside Java object
   serialization code.

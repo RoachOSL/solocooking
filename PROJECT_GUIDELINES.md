@@ -14,8 +14,9 @@ SoloCooking-specific guidance. Keep reusable engineering rules in
 - Creating a duplicate ingredient returns a conflict instead of behaving as an
   idempotent create operation. If the product needs idempotent ingredient
   creation later, introduce that as an explicit endpoint or command.
-- Ingredient creation checks duplicates before saving and also maps database
-  unique-constraint races to the same conflict response.
+- Ingredient creation checks duplicates before saving. Do not catch broad
+  database integrity exceptions in the service just to map rare concurrent
+  duplicate creates; solve that deliberately later if the product needs it.
 - The `recipe` module owns `RecipeEntity -> RecipeSectionEntity ->
   RecipeIngredientEntity`.
 - `RecipeIngredientEntity` stores an `ingredientId` instead of referencing
