@@ -25,7 +25,7 @@ interface RecipeMapper {
                 .name(recipeEntity.getName())
                 .imageUrl(recipeEntity.getImageUrl())
                 .description(recipeEntity.getDescription())
-                .sections(toOrderedSectionDtos(recipeEntity.getSections()))
+                .sections(orderedSections(recipeEntity.getSections()))
                 .createdAt(recipeEntity.getCreatedAt())
                 .updatedAt(recipeEntity.getUpdatedAt())
                 .build();
@@ -33,37 +33,28 @@ interface RecipeMapper {
 
     RecipeSummaryDTO toSummaryDto(RecipeEntity recipeEntity);
 
-    private List<RecipeSectionDTO> toOrderedSectionDtos(List<RecipeSectionEntity> sections) {
+    default RecipeSectionDTO toSectionDto(RecipeSectionEntity section) {
+        return RecipeSectionDTO.builder()
+                .id(section.getId())
+                .name(section.getName())
+                .position(section.getPosition())
+                .ingredients(orderedIngredients(section.getIngredients()))
+                .build();
+    }
+
+    RecipeIngredientDTO toIngredientDto(RecipeIngredientEntity ingredient);
+
+    default List<RecipeSectionDTO> orderedSections(List<RecipeSectionEntity> sections) {
         return sections.stream()
                 .sorted(Comparator.comparing(RecipeSectionEntity::getPosition))
                 .map(this::toSectionDto)
                 .toList();
     }
 
-    private RecipeSectionDTO toSectionDto(RecipeSectionEntity section) {
-        return RecipeSectionDTO.builder()
-                .id(section.getId())
-                .name(section.getName())
-                .position(section.getPosition())
-                .ingredients(toOrderedIngredientDtos(section.getIngredients()))
-                .build();
-    }
-
-    private List<RecipeIngredientDTO> toOrderedIngredientDtos(List<RecipeIngredientEntity> ingredients) {
+    default List<RecipeIngredientDTO> orderedIngredients(List<RecipeIngredientEntity> ingredients) {
         return ingredients.stream()
                 .sorted(Comparator.comparing(RecipeIngredientEntity::getPosition))
                 .map(this::toIngredientDto)
                 .toList();
-    }
-
-    private RecipeIngredientDTO toIngredientDto(RecipeIngredientEntity ingredient) {
-        return RecipeIngredientDTO.builder()
-                .id(ingredient.getId())
-                .ingredientId(ingredient.getIngredientId())
-                .amount(ingredient.getAmount())
-                .unit(ingredient.getUnit())
-                .note(ingredient.getNote())
-                .position(ingredient.getPosition())
-                .build();
     }
 }

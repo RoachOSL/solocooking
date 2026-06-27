@@ -54,14 +54,8 @@ class IngredientService implements IngredientFacade {
     public IngredientDTO findById(UUID ingredientId) {
         log.debug("Finding ingredient by id [{}]", ingredientId);
         return ingredientRepository.findById(ingredientId)
-                .map(ingredient -> {
-                    log.debug("Found ingredient with id [{}]", ingredientId);
-                    return ingredientMapper.toDto(ingredient);
-                })
-                .orElseThrow(() -> {
-                    log.debug("Ingredient with id [{}] was not found", ingredientId);
-                    return IngredientNotFoundException.byIngredientId(ingredientId);
-                });
+                .map(ingredientMapper::toDto)
+                .orElseThrow(() -> IngredientNotFoundException.byIngredientId(ingredientId));
     }
 
     @Override
