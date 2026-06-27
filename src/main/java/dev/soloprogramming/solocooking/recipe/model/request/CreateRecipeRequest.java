@@ -3,6 +3,10 @@
  */
 package dev.soloprogramming.solocooking.recipe.model.request;
 
+import java.util.List;
+import java.util.UUID;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -26,7 +30,18 @@ public record CreateRecipeRequest(
         @Size(max = 5000)
         String description,
 
-        @NotBlank
-        String ingredients
+        List<@Valid CreateRecipeSectionRequest> sections
 ) {
+
+    public List<UUID> ingredientIds() {
+        if (sections == null) {
+            return List.of();
+        }
+
+        return sections.stream()
+                .filter(section -> section.ingredients() != null)
+                .flatMap(section -> section.ingredients().stream())
+                .map(CreateRecipeIngredientRequest::ingredientId)
+                .toList();
+    }
 }

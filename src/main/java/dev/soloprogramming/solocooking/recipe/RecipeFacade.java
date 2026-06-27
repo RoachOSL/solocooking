@@ -6,6 +6,7 @@ package dev.soloprogramming.solocooking.recipe;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
+import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSummaryDTO;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +19,7 @@ public interface RecipeFacade {
 
     RecipeDTO createRecipe(@NotNull @Valid CreateRecipeRequest createRecipeRequest);
 
-    Page<RecipeDTO> getRecipes(Pageable pageable);
+    Page<RecipeSummaryDTO> getRecipes(Pageable pageable);
 
     RecipeDTO findById(UUID recipeId);
 

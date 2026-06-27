@@ -5,7 +5,10 @@ package dev.soloprogramming.solocooking.recipe;
 
 import java.util.UUID;
 
+import dev.soloprogramming.solocooking.ingredient.IngredientFacade;
+import dev.soloprogramming.solocooking.recipe.exception.RecipeNotFoundException;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
+import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSummaryDTO;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,27 +25,35 @@ class RecipeService implements RecipeFacade {
 
     private final RecipeRepository recipeRepository;
     private final RecipeMapper recipeMapper;
+    private final IngredientFacade ingredientFacade;
 
     @Override
     @Transactional
     public RecipeDTO createRecipe(CreateRecipeRequest createRecipeRequest) {
         log.info("Creating recipe [{}]", createRecipeRequest);
+        ingredientFacade.validateExist(createRecipeRequest.ingredientIds());
         var recipeEntity = recipeMapper.fromRequest(createRecipeRequest);
 
         return recipeMapper.toDto(recipeRepository.save(recipeEntity));
     }
 
-    public Page<RecipeDTO> getRecipes(Pageable pageable) {
-        return recipeRepository.findAll(pageable).map(recipeMapper::toDto);
+    public Page<RecipeSummaryDTO> getRecipes(Pageable pageable) {
+        return recipeRepository.findAll(pageable).map(recipeMapper::toSummaryDto);
     }
 
     @Override
     public RecipeDTO findById(UUID recipeId) {
-        return null;
+        return recipeRepository.findById(recipeId)
+                .map(recipeMapper::toDto)
+                .orElseThrow(() -> RecipeNotFoundException.byRecipeId(recipeId));
     }
 
     @Override
+    @Transactional
     public void deleteById(UUID recipeID) {
-
+        if (!recipeRepository.existsById(recipeID)) {
+            throw RecipeNotFoundException.byRecipeId(recipeID);
+        }
+        recipeRepository.deleteById(recipeID);
     }
 }

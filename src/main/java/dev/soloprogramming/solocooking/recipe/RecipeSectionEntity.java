@@ -11,9 +11,11 @@ import dev.soloprogramming.solocooking.common.persistence.BaseEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -24,21 +26,22 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@Table(name = "recipe")
-class RecipeEntity extends BaseEntity {
+@Table(name = "recipe_section")
+class RecipeSectionEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private RecipeEntity recipe;
+
     @Basic(optional = false)
     private String name;
 
     @Basic(optional = false)
-    private String imageUrl;
+    private Integer sortOrder;
 
-    private String description;
-
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RecipeSectionEntity> sections = new ArrayList<>();
+    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecipeIngredientEntity> ingredients = new ArrayList<>();
 }

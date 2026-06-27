@@ -3,18 +3,18 @@
  */
 package dev.soloprogramming.solocooking.recipe;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.common.persistence.BaseEntity;
 import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,21 +24,28 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@Table(name = "recipe")
-class RecipeEntity extends BaseEntity {
+@Table(name = "recipe_ingredient")
+class RecipeIngredientEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Basic(optional = false)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private RecipeSectionEntity section;
 
     @Basic(optional = false)
-    private String imageUrl;
+    @Column(name = "ingredient_id")
+    private UUID ingredientId;
 
-    private String description;
+    @Basic(optional = false)
+    private BigDecimal amount;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RecipeSectionEntity> sections = new ArrayList<>();
+    @Basic(optional = false)
+    private String unit;
+
+    private String note;
+
+    @Basic(optional = false)
+    private Integer sortOrder;
 }

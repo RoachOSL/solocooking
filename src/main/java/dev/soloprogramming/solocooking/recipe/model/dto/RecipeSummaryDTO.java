@@ -4,18 +4,16 @@
 package dev.soloprogramming.solocooking.recipe.model.dto;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 import lombok.Builder;
 
 @Builder
-public record RecipeDTO(
+public record RecipeSummaryDTO(
         UUID id,
         String name,
         String imageUrl,
         String description,
-        List<RecipeSectionDTO> sections,
         Instant updatedAt,
         Instant createdAt
 ) {
