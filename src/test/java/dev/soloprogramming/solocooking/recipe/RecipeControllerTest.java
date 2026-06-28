@@ -13,6 +13,7 @@ import static dev.soloprogramming.solocooking.common.TestResourceReader.readTest
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
+import static org.springframework.test.json.JsonCompareMode.STRICT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -21,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class RecipeControllerTest {
 
-    private static final String RECIPE_RESPONSE_RESOURCE = "controller/recipe/recipe-response.json";
+    private static final String GET_RECIPE_RESPONSE_RESOURCE = "controller/recipe/get-recipe-response.json";
 
     private final RecipeFacade recipeFacade = mock(RecipeFacade.class);
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
@@ -44,7 +45,7 @@ class RecipeControllerTest {
         // then
         result.andExpectAll(
                 status().isCreated(),
-                content().json(readTestResource(RECIPE_RESPONSE_RESOURCE), true)
+                content().json(readTestResource(GET_RECIPE_RESPONSE_RESOURCE), STRICT)
         );
         then(recipeFacade).should().createRecipe(createRecipeRequest);
     }
@@ -61,7 +62,7 @@ class RecipeControllerTest {
         // then
         result.andExpectAll(
                 status().isOk(),
-                content().json(readTestResource(RECIPE_RESPONSE_RESOURCE), true)
+                content().json(readTestResource(GET_RECIPE_RESPONSE_RESOURCE), STRICT)
         );
         then(recipeFacade).should().findById(RecipeTestConstants.RECIPE_ID);
     }

@@ -41,6 +41,9 @@ but does not run `git commit` or `git push`.
 - After code changes, run the available formatting and import cleanup tool. If
   the project does not provide such a Gradle tool, clean up imports manually
   according to the project style.
+- Keep Gradle dependency and plugin coordinates in `gradle/libs.versions.toml`.
+  Reference them from build scripts through the version catalog (`libs.*`)
+  instead of hardcoding versions or coordinates directly in `build.gradle`.
 - In controllers, use short command method names such as `create` and
   `deleteById` when the controller class already names the resource. Keep read
   methods explicit, for example `getRecipe` and `getRecipes`, because the
@@ -100,3 +103,6 @@ but does not run `git commit` or `git push`.
 - Controller tests compare response bodies against expected JSON files stored in
   `src/test/resources`, so endpoint contracts stay visible outside Java object
   serialization code.
+- Name controller expected JSON files after the controller method or endpoint
+  scenario that uses them, for example `get-recipe-response.json`, so multiple
+  response contracts in one resource directory stay easy to distinguish.
