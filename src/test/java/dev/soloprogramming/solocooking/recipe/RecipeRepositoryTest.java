@@ -35,12 +35,18 @@ class RecipeRepositoryTest {
         var result = recipeRepository.findById(savedRecipe.getId());
 
         // then
+        assertThat(savedRecipe.getId().version()).isEqualTo(7);
         assertThat(result).isPresent();
         assertThat(result.get().getSections())
                 .singleElement()
-                .satisfies(section -> assertThat(section.getIngredients())
-                        .singleElement()
-                        .satisfies(ingredient -> assertThat(ingredient.getIngredientId())
-                                .isEqualTo(RecipeTestConstants.INGREDIENT_ID)));
+                .satisfies(section -> {
+                    assertThat(section.getId().version()).isEqualTo(7);
+                    assertThat(section.getIngredients())
+                            .singleElement()
+                            .satisfies(ingredient -> {
+                                assertThat(ingredient.getId().version()).isEqualTo(7);
+                                assertThat(ingredient.getIngredientId()).isEqualTo(RecipeTestConstants.INGREDIENT_ID);
+                            });
+                });
     }
 }
