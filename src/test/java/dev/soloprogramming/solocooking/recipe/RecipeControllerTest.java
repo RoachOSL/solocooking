@@ -22,7 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class RecipeControllerTest {
 
+    private static final String RECIPES_ENDPOINT = "/recipes";
+    private static final String RECIPE_BY_ID_ENDPOINT = "/recipes/{recipeId}";
     private static final String GET_RECIPE_RESPONSE_RESOURCE = "controller/recipe/get-recipe-response.json";
+    private static final String EMPTY_RESPONSE_BODY = "";
 
     private final RecipeFacade recipeFacade = mock(RecipeFacade.class);
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
@@ -38,7 +41,7 @@ class RecipeControllerTest {
         given(recipeFacade.createRecipe(createRecipeRequest)).willReturn(expectedRecipe);
 
         // when
-        var result = mockMvc.perform(post("/recipes")
+        var result = mockMvc.perform(post(RECIPES_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createRecipeRequest)));
 
@@ -57,7 +60,7 @@ class RecipeControllerTest {
         given(recipeFacade.findById(RecipeTestConstants.RECIPE_ID)).willReturn(expectedRecipe);
 
         // when
-        var result = mockMvc.perform(get("/recipes/{recipeId}", RecipeTestConstants.RECIPE_ID));
+        var result = mockMvc.perform(get(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID));
 
         // then
         result.andExpectAll(
@@ -70,12 +73,12 @@ class RecipeControllerTest {
     @Test
     void shouldDeleteRecipeById() throws Exception {
         // when
-        var result = mockMvc.perform(delete("/recipes/{recipeId}", RecipeTestConstants.RECIPE_ID));
+        var result = mockMvc.perform(delete(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID));
 
         // then
         result.andExpectAll(
                 status().isNoContent(),
-                content().string("")
+                content().string(EMPTY_RESPONSE_BODY)
         );
         then(recipeFacade).should().deleteById(RecipeTestConstants.RECIPE_ID);
     }

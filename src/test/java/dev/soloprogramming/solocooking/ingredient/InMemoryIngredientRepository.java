@@ -3,15 +3,11 @@
  */
 package dev.soloprogramming.solocooking.ingredient;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.common.InMemoryRepository;
-
-import static dev.soloprogramming.solocooking.common.TestIdGenerator.nextId;
 
 final class InMemoryIngredientRepository extends InMemoryRepository<IngredientEntity, UUID>
         implements IngredientRepository {
@@ -39,15 +35,6 @@ final class InMemoryIngredientRepository extends InMemoryRepository<IngredientEn
 
     @Override
     protected UUID generateId() {
-        return nextId(IngredientTestConstants.INGREDIENT_ID, "ingredient", usedIds());
-    }
-
-    private Set<UUID> usedIds() {
-        var usedIds = new HashSet<UUID>();
-        findAll().stream()
-                .map(IngredientEntity::getId)
-                .filter(Objects::nonNull)
-                .forEach(usedIds::add);
-        return usedIds;
+        return UUID.randomUUID();
     }
 }

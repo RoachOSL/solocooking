@@ -49,28 +49,26 @@ class IngredientServiceTest {
     void shouldNormalizeIngredientNameWhenCreatingIngredient() {
         // given
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder()
-                .name("  Extra\tVirgin   Olive\nOil  ")
+                .name(IngredientTestConstants.NORMALIZED_INGREDIENT_INPUT)
                 .build();
 
         // when
         var result = ingredientService.createIngredient(createIngredientRequest);
 
         // then
-        assertThat(result.name()).isEqualTo("extra virgin olive oil");
+        assertThat(result.name()).isEqualTo(IngredientTestConstants.NORMALIZED_INGREDIENT_NAME);
         assertThat(ingredientRepository.findAll())
                 .singleElement()
                 .extracting(IngredientEntity::getName)
-                .isEqualTo("extra virgin olive oil");
+                .isEqualTo(IngredientTestConstants.NORMALIZED_INGREDIENT_NAME);
     }
 
     @Test
     void shouldCreateMultipleIngredientsWithUniqueIds() {
         // given
-        var firstRequest = IngredientMother.createIngredientRequestBuilder()
-                .name("eggs")
-                .build();
+        var firstRequest = IngredientMother.createIngredientRequestBuilder().build();
         var secondRequest = IngredientMother.createIngredientRequestBuilder()
-                .name("milk")
+                .name(IngredientTestConstants.SECOND_INGREDIENT_NAME)
                 .build();
 
         // when
@@ -104,7 +102,7 @@ class IngredientServiceTest {
         // given
         ingredientRepository.save(IngredientMother.ingredientEntity());
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder()
-                .name("  EGGS  ")
+                .name(IngredientTestConstants.DUPLICATED_INGREDIENT_INPUT)
                 .build();
         var expectedMessage = IngredientTestConstants.DUPLICATED_INGREDIENT_MESSAGE;
 
@@ -120,12 +118,12 @@ class IngredientServiceTest {
     void shouldReturnIngredients() {
         // given
         ingredientRepository.save(IngredientMother.ingredientEntity());
-        var second = ingredientRepository.save(IngredientMother.ingredientEntityWithName("milk"));
-        var third = ingredientRepository.save(IngredientMother.ingredientEntityWithName("flour"));
+        var second = ingredientRepository.save(IngredientMother.ingredientEntityWithName(IngredientTestConstants.SECOND_INGREDIENT_NAME));
+        var third = ingredientRepository.save(IngredientMother.ingredientEntityWithName(IngredientTestConstants.THIRD_INGREDIENT_NAME));
         var expectedIngredients = List.of(
                 IngredientMother.ingredientDtoBuilder().build(),
-                IngredientDTO.builder().id(second.getId()).name("milk").build(),
-                IngredientDTO.builder().id(third.getId()).name("flour").build()
+                IngredientDTO.builder().id(second.getId()).name(IngredientTestConstants.SECOND_INGREDIENT_NAME).build(),
+                IngredientDTO.builder().id(third.getId()).name(IngredientTestConstants.THIRD_INGREDIENT_NAME).build()
         );
         var expectedPage = new PageImpl<>(expectedIngredients, DEFAULT_PAGEABLE, 3);
 
@@ -171,8 +169,8 @@ class IngredientServiceTest {
     void shouldValidateExistingIngredients() {
         // given
         var first = ingredientRepository.save(IngredientMother.ingredientEntity());
-        var second = ingredientRepository.save(IngredientMother.ingredientEntityWithName("milk"));
-        var third = ingredientRepository.save(IngredientMother.ingredientEntityWithName("flour"));
+        var second = ingredientRepository.save(IngredientMother.ingredientEntityWithName(IngredientTestConstants.SECOND_INGREDIENT_NAME));
+        var third = ingredientRepository.save(IngredientMother.ingredientEntityWithName(IngredientTestConstants.THIRD_INGREDIENT_NAME));
 
         // when & then
         assertThatCode(() -> ingredientService.validateIngredientsExist(
