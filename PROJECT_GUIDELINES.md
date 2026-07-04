@@ -49,3 +49,9 @@ SoloCooking-specific guidance. Keep reusable engineering rules in
 - Use qualified identifier names, such as `recipeId`, `ingredientId`, or
   `sectionId`, for method parameters, path variables, cross-module references,
   and DTO fields that point to another object.
+
+## Infrastructure
+
+- Use the latest stable PostgreSQL minor version for local development and
+  Testcontainers. Pin the exact Docker image tag instead of using `latest`, and
+  update `docker-compose.yml` and integration test containers together.

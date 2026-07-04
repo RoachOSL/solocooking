@@ -3,11 +3,10 @@
  */
 package dev.soloprogramming.solocooking;
 
+import dev.soloprogramming.solocooking.common.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class SoloCookingApplicationTests {
+class SoloCookingApplicationIT extends BaseIntegrationTest {
 
     @Test
     void contextLoads() {

@@ -5,6 +5,7 @@ package dev.soloprogramming.solocooking.recipe;
 
 import java.util.UUID;
 
+import dev.soloprogramming.solocooking.common.dto.PageResponse;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSummaryDTO;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
@@ -13,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,8 +47,8 @@ final class RecipeController {
             description = "Returns a paginated list of all available recipes"
     )
     @GetMapping
-    Page<RecipeSummaryDTO> getRecipes(@ParameterObject Pageable pageable) {
-        return recipeFacade.getRecipes(pageable);
+    PageResponse<RecipeSummaryDTO> getRecipes(@ParameterObject Pageable pageable) {
+        return PageResponse.from(recipeFacade.getRecipes(pageable));
     }
 
     @Operation(

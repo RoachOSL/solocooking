@@ -53,13 +53,19 @@ but does not run `git commit` or `git push`.
 
 - Shared immutable test data is exposed directly as clearly named constants,
   without unnecessary getters.
-- Keep test data close to the module that owns it. Domain-specific constants,
-  Mother classes, in-memory repositories, and module service tests live in that
-  module's test package, for example `recipe` or `ingredient`.
+- Keep test data close to the module that owns it. Domain-specific constants and
+  Mother classes shared by multiple test suites live under `src/testFixtures` in
+  that module's test package, for example `recipe` or `ingredient`. Suite-only
+  mechanics, such as in-memory repositories and module service tests, stay in the
+  suite that uses them.
 - The `common` test package is reserved for genuinely shared test
   infrastructure, such as comparison configuration or generic in-memory
   repository support. Do not put module-specific domain data in `common`.
 - Test objects are created through Mother classes, for example `RecipeMother`.
+- When tests in one module need persisted data owned by another module, use the
+  owning module's public test fixture helper and its public facade. Do not
+  expose entities or repositories across module boundaries just to arrange test
+  state.
 - For types with a builder, the Mother returns a new prefilled builder each time.
   The method name ends with `Builder`, and `.build()` is called explicitly in the
   test case.
@@ -106,3 +112,19 @@ but does not run `git commit` or `git push`.
 - Name controller expected JSON files after the controller method or endpoint
   scenario that uses them, for example `get-recipe-response.json`, so multiple
   response contracts in one resource directory stay easy to distinguish.
+- Integration tests use a separate Gradle `integrationTest` source set and task.
+  Keep integration test class names ending with `IT`, and keep unit, service,
+  and controller tests under the regular `test` task.
+- Integration tests exercise public facades through a real Spring context and
+  PostgreSQL Testcontainers. The shared `BaseIntegrationTest` should use
+  `@ServiceConnection` for Spring Boot Testcontainers wiring.
+- Do not put `@Transactional` on the shared integration test base by default.
+  Test production transaction boundaries and isolate data with explicit database
+  cleanup between tests instead.
+- In facade integration tests, compare returned DTOs recursively with the shared
+  comparison configuration whenever generated fields such as IDs or audit
+  timestamps are not the behavior under test.
+- CI should run unit tests and integration tests as separate steps. On GitHub
+  Actions, prefer `gradle/actions/setup-gradle` for Gradle dependency/wrapper
+  caching and do not add overlapping `actions/cache` or `setup-java` Gradle
+  cache configuration.

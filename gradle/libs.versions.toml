@@ -9,6 +9,9 @@ springdoc-openapi = "3.0.3"
 testcontainers = "2.0.5"
 
 [libraries]
+assertj-core = { module = "org.assertj:assertj-core" }
+lombok = { module = "org.projectlombok:lombok" }
+spring-data-commons = { module = "org.springframework.data:spring-data-commons" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
 spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
@@ -25,10 +28,10 @@ springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openap
 testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testcontainers" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
-h2 = { module = "com.h2database:h2" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 dependency-management = { id = "io.spring.dependency-management", version.ref = "dependency-management" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
+
