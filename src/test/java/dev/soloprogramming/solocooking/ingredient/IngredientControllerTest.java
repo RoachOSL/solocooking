@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class IngredientControllerTest {
 
+    private static final String INGREDIENTS_ENDPOINT = "/ingredients";
+    private static final String INGREDIENT_BY_ID_ENDPOINT = "/ingredients/{ingredientId}";
     private static final String GET_INGREDIENT_RESPONSE_RESOURCE = "controller/ingredient/get-ingredient-response.json";
 
     private final IngredientFacade ingredientFacade = mock(IngredientFacade.class);
@@ -37,7 +39,7 @@ class IngredientControllerTest {
         given(ingredientFacade.createIngredient(createIngredientRequest)).willReturn(expectedIngredient);
 
         // when
-        var result = mockMvc.perform(post("/ingredients")
+        var result = mockMvc.perform(post(INGREDIENTS_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createIngredientRequest)));
 
@@ -56,7 +58,7 @@ class IngredientControllerTest {
         given(ingredientFacade.findById(IngredientTestConstants.INGREDIENT_ID)).willReturn(expectedIngredient);
 
         // when
-        var result = mockMvc.perform(get("/ingredients/{ingredientId}", IngredientTestConstants.INGREDIENT_ID));
+        var result = mockMvc.perform(get(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID));
 
         // then
         result.andExpectAll(

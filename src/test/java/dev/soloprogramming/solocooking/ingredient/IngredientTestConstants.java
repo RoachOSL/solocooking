@@ -15,6 +15,11 @@ class IngredientTestConstants {
     static final UUID MISSING_INGREDIENT_ID = UUID.fromString("af4733da-7ded-4a07-9f92-c8fd5d479b76");
     static final String INGREDIENT_NAME = "Eggs";
     static final String INGREDIENT_STORED_NAME = "eggs";
+    static final String NORMALIZED_INGREDIENT_INPUT = "  Extra\tVirgin   Olive\nOil  ";
+    static final String NORMALIZED_INGREDIENT_NAME = "extra virgin olive oil";
+    static final String SECOND_INGREDIENT_NAME = "milk";
+    static final String THIRD_INGREDIENT_NAME = "flour";
+    static final String DUPLICATED_INGREDIENT_INPUT = "  EGGS  ";
     static final String DUPLICATED_INGREDIENT_MESSAGE = "Ingredient [eggs] already exists.";
     static final String MISSING_INGREDIENT_MESSAGE =
             "Ingredient with id [%s] not found.".formatted(MISSING_INGREDIENT_ID);

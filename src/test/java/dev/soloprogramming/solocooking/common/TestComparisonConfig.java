@@ -9,9 +9,15 @@ import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguratio
 @UtilityClass
 public class TestComparisonConfig {
 
+    private static final String CREATED_AT_FIELD = "createdAt";
+    private static final String UPDATED_AT_FIELD = "updatedAt";
+    private static final String ID_FIELD = "id";
+    private static final String NESTED_ID_FIELD_REGEX = ".*\\.id";
+
     public static RecursiveComparisonConfiguration defaultRecursiveComparisonConfiguration() {
         return RecursiveComparisonConfiguration.builder()
-                .withIgnoredFields("createdAt", "updatedAt")
+                .withIgnoredFields(CREATED_AT_FIELD, UPDATED_AT_FIELD, ID_FIELD)
+                .withIgnoredFieldsMatchingRegexes(NESTED_ID_FIELD_REGEX)
                 .build();
     }
 }
