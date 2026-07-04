@@ -38,6 +38,8 @@ out/
 
 ### Local AI assistants ###
 .claude/
+.agents/
+skills-lock.json
 AGENTS.md
 CLAUDE.md
 ai-notes/
