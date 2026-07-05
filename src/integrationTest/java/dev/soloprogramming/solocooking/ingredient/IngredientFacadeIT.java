@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
 import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
+import static dev.soloprogramming.solocooking.ingredient.IngredientTestFixtures.givenExistingIngredient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -43,7 +44,7 @@ class IngredientFacadeIT extends BaseIntegrationTest {
     @Test
     void shouldRejectDuplicatedIngredientNameAfterNormalization() {
         // given
-        ingredientFacade.createIngredient(IngredientMother.createIngredientRequestBuilder().build());
+        givenExistingIngredient(ingredientFacade);
         var duplicatedRequest = CreateIngredientRequest.builder()
                 .name(IngredientTestConstants.DUPLICATED_INGREDIENT_INPUT)
                 .build();
@@ -58,7 +59,7 @@ class IngredientFacadeIT extends BaseIntegrationTest {
     @Test
     void shouldReturnIngredientsPage() {
         // given
-        var expectedIngredient = ingredientFacade.createIngredient(IngredientMother.createIngredientRequestBuilder().build());
+        var expectedIngredient = givenExistingIngredient(ingredientFacade);
 
         // when
         var result = ingredientFacade.getIngredients(Pageable.unpaged());
@@ -72,7 +73,7 @@ class IngredientFacadeIT extends BaseIntegrationTest {
     @Test
     void shouldFindIngredientById() {
         // given
-        var expectedIngredient = ingredientFacade.createIngredient(IngredientMother.createIngredientRequestBuilder().build());
+        var expectedIngredient = givenExistingIngredient(ingredientFacade);
 
         // when
         var result = ingredientFacade.findById(expectedIngredient.id());

@@ -12,7 +12,6 @@ import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundEx
 import dev.soloprogramming.solocooking.recipe.exception.RecipeNotFoundException;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSummaryDTO;
-import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -33,8 +32,10 @@ class RecipeFacadeIT extends BaseIntegrationTest {
     void shouldCreateRecipe() {
         // given
         var ingredientId = givenExistingIngredientId();
-        var request = createRecipeRequest(ingredientId);
-        var expectedRecipe = expectedRecipe(ingredientId);
+        var request = RecipeMother.createRecipeRequestBuilder(ingredientId)
+                .build();
+        var expectedRecipe = RecipeMother.recipeDtoBuilder(ingredientId)
+                .build();
 
         // when
         var result = recipeFacade.createRecipe(request);
@@ -97,7 +98,8 @@ class RecipeFacadeIT extends BaseIntegrationTest {
     @Test
     void shouldRejectRecipeWithMissingIngredient() {
         // given
-        var request = createRecipeRequest(RecipeTestConstants.MISSING_INGREDIENT_ID);
+        var request = RecipeMother.createRecipeRequestBuilder(RecipeTestConstants.MISSING_INGREDIENT_ID)
+                .build();
 
         // when & then
         assertThatThrownBy(() -> recipeFacade.createRecipe(request))
@@ -121,16 +123,7 @@ class RecipeFacadeIT extends BaseIntegrationTest {
     }
 
     private RecipeDTO givenExistingRecipe() {
-        return recipeFacade.createRecipe(createRecipeRequest(givenExistingIngredientId()));
-    }
-
-    private CreateRecipeRequest createRecipeRequest(UUID ingredientId) {
-        return RecipeMother.createRecipeRequestBuilder(ingredientId)
-                .build();
-    }
-
-    private RecipeDTO expectedRecipe(UUID ingredientId) {
-        return RecipeMother.recipeDtoBuilder(ingredientId)
-                .build();
+        return recipeFacade.createRecipe(RecipeMother.createRecipeRequestBuilder(givenExistingIngredientId())
+                .build());
     }
 }

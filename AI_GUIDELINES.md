@@ -62,6 +62,7 @@ but does not run `git commit` or `git push`.
   infrastructure, such as comparison configuration or generic in-memory
   repository support. Do not put module-specific domain data in `common`.
 - Test objects are created through Mother classes, for example `RecipeMother`.
+- Do not add private test helper methods that only delegate to a Mother builder and call `.build()`. Call the Mother directly in the test unless the helper also creates meaningful scenario state, such as persisted data.
 - When tests in one module need persisted data owned by another module, use the
   owning module's public test fixture helper and its public facade. Do not
   expose entities or repositories across module boundaries just to arrange test
@@ -104,12 +105,14 @@ but does not run `git commit` or `git push`.
   fluent throwable assertions with `isInstanceOfSatisfying(...)` and assert the
   status code plus response body detail inside the assertion lambda. Do not
   duplicate the status assertion by also checking `exception.getBody().getStatus()`.
-- Controller slice tests use `@WebMvcTest` with `MockMvcTester` and AssertJ
-  assertions. Legacy raw `MockMvc` tests may use `andExpectAll(...)` when
-  asserting status and body for the same response.
+- Controller slice tests use `@WebMvcTest` with `MockMvcTester`, AssertJ
+  assertions, `@MockitoBean` for facade dependencies, and the application-provided
+  `ObjectMapper` injected from the test slice. Legacy raw `MockMvc` tests may use
+  `andExpectAll(...)` when asserting status and body for the same response.
 - Controller tests compare response bodies against expected JSON files stored in
   `src/test/resources`, so endpoint contracts stay visible outside Java object
-  serialization code.
+  serialization code. Controller test requests should use shared constants/helpers for
+  the API servlet path instead of repeating literal base paths.
 - Paged controller responses use `PageResponse.from(...)` instead of returning
   Spring Data `Page` directly, so the API response shape stays explicit and
   stable.
