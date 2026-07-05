@@ -3,7 +3,6 @@
  */
 package dev.soloprogramming.solocooking.common;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,10 +29,6 @@ public abstract class BaseIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    static {
-        POSTGRES.start();
-    }
 
     @BeforeEach
     void cleanDatabase() {
