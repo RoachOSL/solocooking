@@ -22,7 +22,7 @@ class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("soloprogramming")
                 .displayName("SoloCooking")
-                .pathsToMatch("/recipes/**")
+                .pathsToMatch("/recipes/**", "/ingredients/**")
                 .addOpenApiCustomizer(openApi -> openApi
                         .servers(List.of(server)))
                 .build();

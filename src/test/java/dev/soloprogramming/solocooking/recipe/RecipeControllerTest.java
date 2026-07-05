@@ -3,83 +3,124 @@
  */
 package dev.soloprogramming.solocooking.recipe;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import java.util.List;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import tools.jackson.databind.ObjectMapper;
+
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.API_SERVLET_PATH;
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.DEFAULT_WEB_PAGE_REQUEST;
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.MAX_WEB_PAGE_REQUEST;
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.OVERSIZED_WEB_PAGE_SIZE;
 import static dev.soloprogramming.solocooking.common.TestResourceReader.readTestResource;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.json.JsonCompareMode.STRICT;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(RecipeController.class)
 class RecipeControllerTest {
 
-    private static final String RECIPES_ENDPOINT = "/recipes";
-    private static final String RECIPE_BY_ID_ENDPOINT = "/recipes/{recipeId}";
+    private static final String RECIPES_ENDPOINT = API_SERVLET_PATH + "/recipes";
+    private static final String RECIPE_BY_ID_ENDPOINT = API_SERVLET_PATH + "/recipes/{recipeId}";
     private static final String GET_RECIPE_RESPONSE_RESOURCE = "controller/recipe/get-recipe-response.json";
+    private static final String GET_RECIPES_RESPONSE_RESOURCE = "controller/recipe/get-recipes-response.json";
     private static final String EMPTY_RESPONSE_BODY = "";
 
-    private final RecipeFacade recipeFacade = mock(RecipeFacade.class);
-    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
-    private final MockMvc mockMvc = MockMvcBuilders
-            .standaloneSetup(new RecipeController(recipeFacade))
-            .build();
+    @MockitoBean
+    private RecipeFacade recipeFacade;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private MockMvcTester mockMvcTester;
 
     @Test
-    void shouldCreateRecipe() throws Exception {
+    void shouldCreateRecipe() {
         // given
         var createRecipeRequest = RecipeMother.createRecipeRequestBuilder().build();
         var expectedRecipe = RecipeMother.recipeDtoBuilder().build();
         given(recipeFacade.createRecipe(createRecipeRequest)).willReturn(expectedRecipe);
 
-        // when
-        var result = mockMvc.perform(post(RECIPES_ENDPOINT)
+        // when & then
+        assertThat(post()
+                .uri(RECIPES_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createRecipeRequest)));
-
-        // then
-        result.andExpectAll(
-                status().isCreated(),
-                content().json(readTestResource(GET_RECIPE_RESPONSE_RESOURCE), STRICT)
-        );
-        then(recipeFacade).should().createRecipe(createRecipeRequest);
+                .content(objectMapper.writeValueAsString(createRecipeRequest)))
+                .hasStatus(HttpStatus.CREATED)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_RECIPE_RESPONSE_RESOURCE));
     }
 
     @Test
-    void shouldReturnRecipeById() throws Exception {
+    void shouldReturnRecipeById() {
         // given
         var expectedRecipe = RecipeMother.recipeDtoBuilder().build();
         given(recipeFacade.findById(RecipeTestConstants.RECIPE_ID)).willReturn(expectedRecipe);
 
-        // when
-        var result = mockMvc.perform(get(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID));
-
-        // then
-        result.andExpectAll(
-                status().isOk(),
-                content().json(readTestResource(GET_RECIPE_RESPONSE_RESOURCE), STRICT)
-        );
-        then(recipeFacade).should().findById(RecipeTestConstants.RECIPE_ID);
+        // when & then
+        assertThat(get()
+                .uri(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_RECIPE_RESPONSE_RESOURCE));
     }
 
     @Test
-    void shouldDeleteRecipeById() throws Exception {
-        // when
-        var result = mockMvc.perform(delete(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID));
+    void shouldReturnRecipes() {
+        // given
+        var expectedRecipe = RecipeMother.recipeSummaryDtoBuilder().build();
+        given(recipeFacade.getRecipes(DEFAULT_WEB_PAGE_REQUEST))
+                .willReturn(new PageImpl<>(List.of(expectedRecipe), DEFAULT_WEB_PAGE_REQUEST, 1));
 
-        // then
-        result.andExpectAll(
-                status().isNoContent(),
-                content().string(EMPTY_RESPONSE_BODY)
-        );
+        // when & then
+        assertThat(get()
+                .uri(RECIPES_ENDPOINT))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_RECIPES_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldClampPageSizeToMaximum() {
+        // given
+        given(recipeFacade.getRecipes(MAX_WEB_PAGE_REQUEST))
+                .willReturn(new PageImpl<>(List.of(), MAX_WEB_PAGE_REQUEST, 0));
+
+        // when & then
+        assertThat(get()
+                .uri(RECIPES_ENDPOINT)
+                .param("size", OVERSIZED_WEB_PAGE_SIZE))
+                .hasStatusOk();
+        then(recipeFacade).should().getRecipes(MAX_WEB_PAGE_REQUEST);
+    }
+
+    @Test
+    void shouldDeleteRecipeById() {
+        // when & then
+        assertThat(delete()
+                .uri(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID))
+                .hasStatus(HttpStatus.NO_CONTENT)
+                .hasBodyTextEqualTo(EMPTY_RESPONSE_BODY);
         then(recipeFacade).should().deleteById(RecipeTestConstants.RECIPE_ID);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder get() {
+        return mockMvcTester.get().servletPath(API_SERVLET_PATH);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder post() {
+        return mockMvcTester.post().servletPath(API_SERVLET_PATH);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder delete() {
+        return mockMvcTester.delete().servletPath(API_SERVLET_PATH);
     }
 }

@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'java-test-fixtures'
     id 'jacoco'
     alias(libs.plugins.spotless)
     alias(libs.plugins.spring.boot)
@@ -28,6 +29,20 @@ configurations {
     }
 }
 
+sourceSets {
+    integrationTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations.named('integrationTestImplementation') {
+    extendsFrom configurations.testImplementation
+}
+
+configurations.named('integrationTestRuntimeOnly') {
+    extendsFrom configurations.testRuntimeOnly
+}
 repositories {
     mavenCentral()
 }
@@ -44,12 +59,21 @@ dependencies {
     implementation libs.springdoc.openapi.starter.webmvc.ui
 
     testImplementation libs.spring.boot.starter.test
-    testImplementation libs.spring.boot.testcontainers
-    testImplementation libs.testcontainers.postgresql
-    testImplementation libs.testcontainers.junit.jupiter
+    testImplementation libs.spring.boot.starter.jackson.test
+    testImplementation libs.spring.boot.starter.webmvc.test
+
+    testFixturesImplementation libs.assertj.core
+    testFixturesImplementation libs.spring.boot.starter.data.jpa
+    testFixturesImplementation libs.spring.data.commons
+    testFixturesCompileOnly libs.lombok
+    testFixturesAnnotationProcessor libs.lombok
+
+    integrationTestImplementation testFixtures(project)
+    integrationTestImplementation libs.spring.boot.testcontainers
+    integrationTestImplementation libs.testcontainers.postgresql
+    integrationTestImplementation libs.testcontainers.junit.jupiter
 
     testRuntimeOnly libs.junit.platform.launcher
-    testRuntimeOnly libs.h2
 
     annotationProcessor libs.mapstruct.processor
 }
@@ -59,11 +83,25 @@ tasks.named('test') {
     finalizedBy jacocoTestReport
 }
 
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
 tasks.named('check') {
     dependsOn spotlessCheck
 }
 
 jacocoTestReport {
+    executionData fileTree(layout.buildDirectory.dir('jacoco')) {
+        include '*.exec'
+    }
+
     reports {
         xml.required = true
     }
@@ -86,7 +124,7 @@ spotless {
     }
 
     format 'misc', {
-        target '*.gradle', '*.md', '.github/**/*.yml', '.gitignore', '.gitattributes'
+        target '*.gradle', '*.md', '**/*.yaml', '**/*.yml', '.gitignore', '.gitattributes'
         trimTrailingWhitespace()
         endWithNewline()
     }

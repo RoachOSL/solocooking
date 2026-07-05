@@ -5,6 +5,7 @@ package dev.soloprogramming.solocooking.ingredient;
 
 import java.util.UUID;
 
+import dev.soloprogramming.solocooking.common.dto.PageResponse;
 import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import dev.soloprogramming.solocooking.ingredient.model.request.CreateIngredientRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,8 +40,8 @@ final class IngredientController {
 
     @Operation(summary = "Get all ingredients")
     @GetMapping
-    Page<IngredientDTO> getIngredients(@ParameterObject Pageable pageable) {
-        return ingredientFacade.getIngredients(pageable);
+    PageResponse<IngredientDTO> getIngredients(@ParameterObject Pageable pageable) {
+        return PageResponse.from(ingredientFacade.getIngredients(pageable));
     }
 
     @Operation(summary = "Get ingredient by id")

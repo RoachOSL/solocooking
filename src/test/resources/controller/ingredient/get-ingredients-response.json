@@ -1,0 +1,15 @@
+{
+  "content": [
+    {
+      "id": "39f9be9f-88f2-4a50-bc83-97af6016c509",
+      "name": "eggs"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 20,
+    "totalElements": 1,
+    "totalPages": 1
+  }
+}
+

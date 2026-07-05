@@ -3,68 +3,109 @@
  */
 package dev.soloprogramming.solocooking.ingredient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import java.util.List;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import tools.jackson.databind.ObjectMapper;
+
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.API_SERVLET_PATH;
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.DEFAULT_WEB_PAGE_REQUEST;
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.MAX_WEB_PAGE_REQUEST;
+import static dev.soloprogramming.solocooking.common.CommonTestConstants.OVERSIZED_WEB_PAGE_SIZE;
 import static dev.soloprogramming.solocooking.common.TestResourceReader.readTestResource;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.json.JsonCompareMode.STRICT;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(IngredientController.class)
 class IngredientControllerTest {
 
-    private static final String INGREDIENTS_ENDPOINT = "/ingredients";
-    private static final String INGREDIENT_BY_ID_ENDPOINT = "/ingredients/{ingredientId}";
+    private static final String INGREDIENTS_ENDPOINT = API_SERVLET_PATH + "/ingredients";
+    private static final String INGREDIENT_BY_ID_ENDPOINT = API_SERVLET_PATH + "/ingredients/{ingredientId}";
     private static final String GET_INGREDIENT_RESPONSE_RESOURCE = "controller/ingredient/get-ingredient-response.json";
+    private static final String GET_INGREDIENTS_RESPONSE_RESOURCE = "controller/ingredient/get-ingredients-response.json";
 
-    private final IngredientFacade ingredientFacade = mock(IngredientFacade.class);
-    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
-    private final MockMvc mockMvc = MockMvcBuilders
-            .standaloneSetup(new IngredientController(ingredientFacade))
-            .build();
+    @MockitoBean
+    private IngredientFacade ingredientFacade;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private MockMvcTester mockMvcTester;
 
     @Test
-    void shouldCreateIngredient() throws Exception {
+    void shouldCreateIngredient() {
         // given
         var createIngredientRequest = IngredientMother.createIngredientRequestBuilder().build();
         var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
         given(ingredientFacade.createIngredient(createIngredientRequest)).willReturn(expectedIngredient);
 
-        // when
-        var result = mockMvc.perform(post(INGREDIENTS_ENDPOINT)
+        // when & then
+        assertThat(post()
+                .uri(INGREDIENTS_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createIngredientRequest)));
-
-        // then
-        result.andExpectAll(
-                status().isCreated(),
-                content().json(readTestResource(GET_INGREDIENT_RESPONSE_RESOURCE), STRICT)
-        );
-        then(ingredientFacade).should().createIngredient(createIngredientRequest);
+                .content(objectMapper.writeValueAsString(createIngredientRequest)))
+                .hasStatus(HttpStatus.CREATED)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_INGREDIENT_RESPONSE_RESOURCE));
     }
 
     @Test
-    void shouldReturnIngredientById() throws Exception {
+    void shouldReturnIngredientById() {
         // given
         var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
         given(ingredientFacade.findById(IngredientTestConstants.INGREDIENT_ID)).willReturn(expectedIngredient);
 
-        // when
-        var result = mockMvc.perform(get(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID));
+        // when & then
+        assertThat(get()
+                .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_INGREDIENT_RESPONSE_RESOURCE));
+    }
 
-        // then
-        result.andExpectAll(
-                status().isOk(),
-                content().json(readTestResource(GET_INGREDIENT_RESPONSE_RESOURCE), STRICT)
-        );
-        then(ingredientFacade).should().findById(IngredientTestConstants.INGREDIENT_ID);
+    @Test
+    void shouldReturnIngredients() {
+        // given
+        var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
+        given(ingredientFacade.getIngredients(DEFAULT_WEB_PAGE_REQUEST))
+                .willReturn(new PageImpl<>(List.of(expectedIngredient), DEFAULT_WEB_PAGE_REQUEST, 1));
+
+        // when & then
+        assertThat(get()
+                .uri(INGREDIENTS_ENDPOINT))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_INGREDIENTS_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldClampPageSizeToMaximum() {
+        // given
+        given(ingredientFacade.getIngredients(MAX_WEB_PAGE_REQUEST))
+                .willReturn(new PageImpl<>(List.of(), MAX_WEB_PAGE_REQUEST, 0));
+
+        // when & then
+        assertThat(get()
+                .uri(INGREDIENTS_ENDPOINT)
+                .param("size", OVERSIZED_WEB_PAGE_SIZE))
+                .hasStatusOk();
+        then(ingredientFacade).should().getIngredients(MAX_WEB_PAGE_REQUEST);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder get() {
+        return mockMvcTester.get().servletPath(API_SERVLET_PATH);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder post() {
+        return mockMvcTester.post().servletPath(API_SERVLET_PATH);
     }
 }

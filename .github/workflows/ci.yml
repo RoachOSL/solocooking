@@ -18,17 +18,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v7
 
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
-
-      - name: Set up JDK
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '25'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6
+      - name: Set up Java and Gradle
+        uses: ./.github/actions/setup-java-gradle
 
       - name: Check formatting
         run: ./gradlew spotlessCheck --no-daemon
@@ -42,41 +33,61 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v7
 
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
-
-      - name: Set up JDK
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '25'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6
+      - name: Set up Java and Gradle
+        uses: ./.github/actions/setup-java-gradle
 
       - name: Build application
         run: ./gradlew assemble --no-daemon
 
-  test:
-    name: Tests
+  unit-tests:
+    name: Unit tests
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
+      actions: read
+      checks: write
 
     steps:
       - name: Checkout sources
         uses: actions/checkout@v7
 
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
+      - name: Set up Java and Gradle
+        uses: ./.github/actions/setup-java-gradle
 
-      - name: Set up JDK
-        uses: actions/setup-java@v5
+      - name: Run unit tests
+        run: ./gradlew test -x jacocoTestReport --no-daemon
+
+      - name: Publish unit test report
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/publish-test-report
         with:
-          distribution: temurin
-          java-version: '25'
+          name: Unit tests
+          path: build/test-results/test/*.xml
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6
+  integration-tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    # Keep integration tests after unit tests to fail fast before starting Testcontainers.
+    needs: unit-tests
+    permissions:
+      contents: read
+      actions: read
+      checks: write
 
-      - name: Run tests
-        run: ./gradlew test --no-daemon
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v7
+
+      - name: Set up Java and Gradle
+        uses: ./.github/actions/setup-java-gradle
+
+      - name: Run integration tests
+        run: ./gradlew integrationTest -x jacocoTestReport --no-daemon
+
+      - name: Publish integration test report
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/publish-test-report
+        with:
+          name: Integration tests
+          path: build/test-results/integrationTest/*.xml

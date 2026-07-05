@@ -3,6 +3,12 @@ spring:
     servlet:
       path: /api
 
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+        max-page-size: 100
+
   datasource:
     url: jdbc:postgresql://localhost:5432/solocookingtest-db
     driver-class-name: org.postgresql.Driver
@@ -13,10 +19,11 @@ spring:
     hibernate:
       ddl-auto: update
 
-  logging:
-    level:
-      org.hibernate.SQL: DEBUG
-      org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 management:
   endpoints:
