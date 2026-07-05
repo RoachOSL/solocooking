@@ -104,11 +104,15 @@ but does not run `git commit` or `git push`.
   fluent throwable assertions with `isInstanceOfSatisfying(...)` and assert the
   status code plus response body detail inside the assertion lambda. Do not
   duplicate the status assertion by also checking `exception.getBody().getStatus()`.
-- In MockMvc tests, prefer `andExpectAll(...)` when asserting status and body
-  for the same response.
+- Controller slice tests use `@WebMvcTest` with `MockMvcTester` and AssertJ
+  assertions. Legacy raw `MockMvc` tests may use `andExpectAll(...)` when
+  asserting status and body for the same response.
 - Controller tests compare response bodies against expected JSON files stored in
   `src/test/resources`, so endpoint contracts stay visible outside Java object
   serialization code.
+- Paged controller responses use `PageResponse.from(...)` instead of returning
+  Spring Data `Page` directly, so the API response shape stays explicit and
+  stable.
 - Name controller expected JSON files after the controller method or endpoint
   scenario that uses them, for example `get-recipe-response.json`, so multiple
   response contracts in one resource directory stay easy to distinguish.

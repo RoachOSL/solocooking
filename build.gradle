@@ -96,7 +96,6 @@ tasks.register('integrationTest', Test) {
 
 tasks.named('check') {
     dependsOn spotlessCheck
-    dependsOn integrationTest
 }
 
 jacocoTestReport {

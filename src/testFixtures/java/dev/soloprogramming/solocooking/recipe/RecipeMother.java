@@ -47,22 +47,22 @@ class RecipeMother {
     }
 
     static RecipeDTO.RecipeDTOBuilder recipeDtoBuilder() {
-        return RecipeDTO.builder()
+        return recipeDtoBuilder(List.of(recipeSectionDto()))
                 .id(RecipeTestConstants.RECIPE_ID)
-                .name(RecipeTestConstants.RECIPE_NAME)
-                .imageUrl(RecipeTestConstants.RECIPE_IMAGE_URL)
-                .description(RecipeTestConstants.RECIPE_DESCRIPTION)
-                .sections(List.of(recipeSectionDto()))
                 .createdAt(RecipeTestConstants.RECIPE_CREATED_AT)
                 .updatedAt(RecipeTestConstants.RECIPE_UPDATED_AT);
     }
 
     static RecipeDTO.RecipeDTOBuilder recipeDtoBuilder(UUID ingredientId) {
+        return recipeDtoBuilder(List.of(recipeSectionDto(ingredientId).build()));
+    }
+
+    private static RecipeDTO.RecipeDTOBuilder recipeDtoBuilder(List<RecipeSectionDTO> sections) {
         return RecipeDTO.builder()
                 .name(RecipeTestConstants.RECIPE_NAME)
                 .imageUrl(RecipeTestConstants.RECIPE_IMAGE_URL)
                 .description(RecipeTestConstants.RECIPE_DESCRIPTION)
-                .sections(List.of(recipeSectionDto(ingredientId)));
+                .sections(sections);
     }
 
     static RecipeSummaryDTO.RecipeSummaryDTOBuilder recipeSummaryDtoBuilder() {
@@ -84,41 +84,30 @@ class RecipeMother {
                 .build();
     }
 
-    private static RecipeSectionDTO recipeSectionDto(UUID ingredientId) {
+    private static RecipeSectionDTO.RecipeSectionDTOBuilder recipeSectionDto(UUID ingredientId) {
         return RecipeSectionDTO.builder()
                 .name(RecipeTestConstants.RECIPE_SECTION_NAME)
                 .position(RecipeTestConstants.RECIPE_SECTION_POSITION)
-                .ingredients(List.of(recipeIngredientDto(ingredientId)))
-                .build();
+                .ingredients(List.of(recipeIngredientDto(ingredientId).build()));
     }
 
     private static RecipeIngredientDTO recipeIngredientDto() {
-        return RecipeIngredientDTO.builder()
+        return recipeIngredientDto(RecipeTestConstants.INGREDIENT_ID)
                 .id(RecipeTestConstants.RECIPE_INGREDIENT_ID)
-                .ingredientId(RecipeTestConstants.INGREDIENT_ID)
-                .amount(RecipeTestConstants.RECIPE_INGREDIENT_AMOUNT)
-                .unit(RecipeTestConstants.RECIPE_INGREDIENT_UNIT)
-                .note(RecipeTestConstants.RECIPE_INGREDIENT_NOTE)
-                .position(RecipeTestConstants.RECIPE_INGREDIENT_POSITION)
                 .build();
     }
 
-    private static RecipeIngredientDTO recipeIngredientDto(UUID ingredientId) {
+    private static RecipeIngredientDTO.RecipeIngredientDTOBuilder recipeIngredientDto(UUID ingredientId) {
         return RecipeIngredientDTO.builder()
                 .ingredientId(ingredientId)
                 .amount(RecipeTestConstants.RECIPE_INGREDIENT_AMOUNT)
                 .unit(RecipeTestConstants.RECIPE_INGREDIENT_UNIT)
                 .note(RecipeTestConstants.RECIPE_INGREDIENT_NOTE)
-                .position(RecipeTestConstants.RECIPE_INGREDIENT_POSITION)
-                .build();
+                .position(RecipeTestConstants.RECIPE_INGREDIENT_POSITION);
     }
 
     static CreateRecipeRequest.CreateRecipeRequestBuilder createRecipeRequestBuilder() {
-        return CreateRecipeRequest.builder()
-                .name(RecipeTestConstants.RECIPE_NAME)
-                .imageUrl(RecipeTestConstants.RECIPE_IMAGE_URL)
-                .description(RecipeTestConstants.RECIPE_DESCRIPTION)
-                .sections(List.of(createRecipeSectionRequestBuilder().build()));
+        return createRecipeRequestBuilder(RecipeTestConstants.INGREDIENT_ID);
     }
 
     static CreateRecipeRequest.CreateRecipeRequestBuilder createRecipeRequestBuilder(UUID ingredientId) {
@@ -130,9 +119,7 @@ class RecipeMother {
     }
 
     static CreateRecipeSectionRequest.CreateRecipeSectionRequestBuilder createRecipeSectionRequestBuilder() {
-        return CreateRecipeSectionRequest.builder()
-                .name(RecipeTestConstants.RECIPE_SECTION_NAME)
-                .ingredients(List.of(createRecipeIngredientRequestBuilder().build()));
+        return createRecipeSectionRequestBuilder(RecipeTestConstants.INGREDIENT_ID);
     }
 
     static CreateRecipeSectionRequest.CreateRecipeSectionRequestBuilder createRecipeSectionRequestBuilder(UUID ingredientId) {
@@ -142,11 +129,7 @@ class RecipeMother {
     }
 
     static CreateRecipeIngredientRequest.CreateRecipeIngredientRequestBuilder createRecipeIngredientRequestBuilder() {
-        return CreateRecipeIngredientRequest.builder()
-                .ingredientId(RecipeTestConstants.INGREDIENT_ID)
-                .amount(RecipeTestConstants.RECIPE_INGREDIENT_AMOUNT)
-                .unit(RecipeTestConstants.RECIPE_INGREDIENT_UNIT)
-                .note(RecipeTestConstants.RECIPE_INGREDIENT_NOTE);
+        return createRecipeIngredientRequestBuilder(RecipeTestConstants.INGREDIENT_ID);
     }
 
     static CreateRecipeIngredientRequest.CreateRecipeIngredientRequestBuilder createRecipeIngredientRequestBuilder(UUID ingredientId) {
