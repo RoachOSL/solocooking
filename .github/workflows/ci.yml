@@ -20,8 +20,6 @@ jobs:
 
       - name: Set up Java and Gradle
         uses: ./.github/actions/setup-java-gradle
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Check formatting
         run: ./gradlew spotlessCheck --no-daemon
@@ -37,8 +35,6 @@ jobs:
 
       - name: Set up Java and Gradle
         uses: ./.github/actions/setup-java-gradle
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Build application
         run: ./gradlew assemble --no-daemon
@@ -58,23 +54,16 @@ jobs:
 
       - name: Set up Java and Gradle
         uses: ./.github/actions/setup-java-gradle
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Run unit tests
-        run: ./gradlew test --no-daemon
+        run: ./gradlew test -x jacocoTestReport --no-daemon
 
       - name: Publish unit test report
         if: ${{ !cancelled() }}
-        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        uses: ./.github/actions/publish-test-report
         with:
           name: Unit tests
           path: build/test-results/test/*.xml
-          reporter: java-junit
-          list-suites: failed
-          list-tests: failed
-          list-files: failed
-          max-annotations: '10'
 
   integration-tests:
     name: Integration tests
@@ -92,20 +81,13 @@ jobs:
 
       - name: Set up Java and Gradle
         uses: ./.github/actions/setup-java-gradle
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Run integration tests
-        run: ./gradlew integrationTest --no-daemon
+        run: ./gradlew integrationTest -x jacocoTestReport --no-daemon
 
       - name: Publish integration test report
         if: ${{ !cancelled() }}
-        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        uses: ./.github/actions/publish-test-report
         with:
           name: Integration tests
           path: build/test-results/integrationTest/*.xml
-          reporter: java-junit
-          list-suites: failed
-          list-tests: failed
-          list-files: failed
-          max-annotations: '10'

@@ -50,9 +50,8 @@ class RecipeControllerTest {
         given(recipeFacade.createRecipe(createRecipeRequest)).willReturn(expectedRecipe);
 
         // when & then
-        assertThat(mockMvcTester.post()
+        assertThat(post()
                 .uri(RECIPES_ENDPOINT)
-                .servletPath(API_SERVLET_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createRecipeRequest)))
                 .hasStatus(HttpStatus.CREATED)
@@ -67,9 +66,8 @@ class RecipeControllerTest {
         given(recipeFacade.findById(RecipeTestConstants.RECIPE_ID)).willReturn(expectedRecipe);
 
         // when & then
-        assertThat(mockMvcTester.get()
-                .uri(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID)
-                .servletPath(API_SERVLET_PATH))
+        assertThat(get()
+                .uri(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID))
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_RECIPE_RESPONSE_RESOURCE));
@@ -83,9 +81,8 @@ class RecipeControllerTest {
                 .willReturn(new PageImpl<>(List.of(expectedRecipe), DEFAULT_WEB_PAGE_REQUEST, 1));
 
         // when & then
-        assertThat(mockMvcTester.get()
-                .uri(RECIPES_ENDPOINT)
-                .servletPath(API_SERVLET_PATH))
+        assertThat(get()
+                .uri(RECIPES_ENDPOINT))
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_RECIPES_RESPONSE_RESOURCE));
@@ -98,9 +95,8 @@ class RecipeControllerTest {
                 .willReturn(new PageImpl<>(List.of(), MAX_WEB_PAGE_REQUEST, 0));
 
         // when & then
-        assertThat(mockMvcTester.get()
+        assertThat(get()
                 .uri(RECIPES_ENDPOINT)
-                .servletPath(API_SERVLET_PATH)
                 .param("size", OVERSIZED_WEB_PAGE_SIZE))
                 .hasStatusOk();
         then(recipeFacade).should().getRecipes(MAX_WEB_PAGE_REQUEST);
@@ -109,11 +105,22 @@ class RecipeControllerTest {
     @Test
     void shouldDeleteRecipeById() {
         // when & then
-        assertThat(mockMvcTester.delete()
-                .uri(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID)
-                .servletPath(API_SERVLET_PATH))
+        assertThat(delete()
+                .uri(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID))
                 .hasStatus(HttpStatus.NO_CONTENT)
                 .hasBodyTextEqualTo(EMPTY_RESPONSE_BODY);
         then(recipeFacade).should().deleteById(RecipeTestConstants.RECIPE_ID);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder get() {
+        return mockMvcTester.get().servletPath(API_SERVLET_PATH);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder post() {
+        return mockMvcTester.post().servletPath(API_SERVLET_PATH);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder delete() {
+        return mockMvcTester.delete().servletPath(API_SERVLET_PATH);
     }
 }

@@ -89,7 +89,6 @@ tasks.register('integrationTest', Test) {
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
-    shouldRunAfter test
     useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
@@ -125,7 +124,7 @@ spotless {
     }
 
     format 'misc', {
-        target '*.gradle', '*.md', '.github/**/*.yml', '.gitignore', '.gitattributes'
+        target '*.gradle', '*.md', '**/*.yaml', '**/*.yml', '.gitignore', '.gitattributes'
         trimTrailingWhitespace()
         endWithNewline()
     }

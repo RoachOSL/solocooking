@@ -3,8 +3,6 @@
  */
 package dev.soloprogramming.solocooking.common;
 
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,28 +27,19 @@ public abstract class BaseIntegrationTest {
     @ServiceConnection
     private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(POSTGRES_IMAGE);
 
-    private static List<String> quotedTableNames;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void cleanDatabase() {
-        var tables = quotedTableNames();
+        var tables = jdbcTemplate.queryForList(TABLE_NAMES_SQL, String.class).stream()
+                .map(BaseIntegrationTest::quoteIdentifier)
+                .toList();
         if (tables.isEmpty()) {
             return;
         }
 
         jdbcTemplate.execute("TRUNCATE TABLE " + String.join(", ", tables) + " RESTART IDENTITY CASCADE");
-    }
-
-    private List<String> quotedTableNames() {
-        if (quotedTableNames == null) {
-            quotedTableNames = jdbcTemplate.queryForList(TABLE_NAMES_SQL, String.class).stream()
-                    .map(BaseIntegrationTest::quoteIdentifier)
-                    .toList();
-        }
-        return quotedTableNames;
     }
 
     private static String quoteIdentifier(String identifier) {

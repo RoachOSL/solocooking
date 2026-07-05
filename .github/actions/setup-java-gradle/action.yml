@@ -1,11 +1,6 @@
 name: Set up Java and Gradle
 description: Set up JDK, Gradle wrapper permissions, and Gradle cache
 
-inputs:
-  cache-read-only:
-    description: Whether Gradle cache should be read-only
-    required: true
-
 runs:
   using: composite
   steps:
@@ -22,4 +17,4 @@ runs:
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v6
       with:
-        cache-read-only: ${{ inputs.cache-read-only }}
+        cache-read-only: ${{ github.ref != 'refs/heads/main' }}

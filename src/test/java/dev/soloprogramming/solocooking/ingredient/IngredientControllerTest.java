@@ -49,9 +49,8 @@ class IngredientControllerTest {
         given(ingredientFacade.createIngredient(createIngredientRequest)).willReturn(expectedIngredient);
 
         // when & then
-        assertThat(mockMvcTester.post()
+        assertThat(post()
                 .uri(INGREDIENTS_ENDPOINT)
-                .servletPath(API_SERVLET_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createIngredientRequest)))
                 .hasStatus(HttpStatus.CREATED)
@@ -66,9 +65,8 @@ class IngredientControllerTest {
         given(ingredientFacade.findById(IngredientTestConstants.INGREDIENT_ID)).willReturn(expectedIngredient);
 
         // when & then
-        assertThat(mockMvcTester.get()
-                .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID)
-                .servletPath(API_SERVLET_PATH))
+        assertThat(get()
+                .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID))
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_INGREDIENT_RESPONSE_RESOURCE));
@@ -82,9 +80,8 @@ class IngredientControllerTest {
                 .willReturn(new PageImpl<>(List.of(expectedIngredient), DEFAULT_WEB_PAGE_REQUEST, 1));
 
         // when & then
-        assertThat(mockMvcTester.get()
-                .uri(INGREDIENTS_ENDPOINT)
-                .servletPath(API_SERVLET_PATH))
+        assertThat(get()
+                .uri(INGREDIENTS_ENDPOINT))
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_INGREDIENTS_RESPONSE_RESOURCE));
@@ -97,11 +94,18 @@ class IngredientControllerTest {
                 .willReturn(new PageImpl<>(List.of(), MAX_WEB_PAGE_REQUEST, 0));
 
         // when & then
-        assertThat(mockMvcTester.get()
+        assertThat(get()
                 .uri(INGREDIENTS_ENDPOINT)
-                .servletPath(API_SERVLET_PATH)
                 .param("size", OVERSIZED_WEB_PAGE_SIZE))
                 .hasStatusOk();
         then(ingredientFacade).should().getIngredients(MAX_WEB_PAGE_REQUEST);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder get() {
+        return mockMvcTester.get().servletPath(API_SERVLET_PATH);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder post() {
+        return mockMvcTester.post().servletPath(API_SERVLET_PATH);
     }
 }

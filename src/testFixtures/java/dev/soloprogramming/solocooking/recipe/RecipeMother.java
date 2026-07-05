@@ -47,14 +47,14 @@ class RecipeMother {
     }
 
     static RecipeDTO.RecipeDTOBuilder recipeDtoBuilder() {
-        return recipeDtoBuilder(List.of(recipeSectionDto()))
+        return recipeDtoBuilder(List.of(persistedRecipeSectionDto()))
                 .id(RecipeTestConstants.RECIPE_ID)
                 .createdAt(RecipeTestConstants.RECIPE_CREATED_AT)
                 .updatedAt(RecipeTestConstants.RECIPE_UPDATED_AT);
     }
 
     static RecipeDTO.RecipeDTOBuilder recipeDtoBuilder(UUID ingredientId) {
-        return recipeDtoBuilder(List.of(recipeSectionDto(ingredientId).build()));
+        return recipeDtoBuilder(List.of(newRecipeSectionDtoBuilder(ingredientId).build()));
     }
 
     private static RecipeDTO.RecipeDTOBuilder recipeDtoBuilder(List<RecipeSectionDTO> sections) {
@@ -75,29 +75,27 @@ class RecipeMother {
                 .updatedAt(RecipeTestConstants.RECIPE_UPDATED_AT);
     }
 
-    private static RecipeSectionDTO recipeSectionDto() {
-        return RecipeSectionDTO.builder()
+    private static RecipeSectionDTO persistedRecipeSectionDto() {
+        return newRecipeSectionDtoBuilder(RecipeTestConstants.INGREDIENT_ID)
                 .id(RecipeTestConstants.RECIPE_SECTION_ID)
-                .name(RecipeTestConstants.RECIPE_SECTION_NAME)
-                .position(RecipeTestConstants.RECIPE_SECTION_POSITION)
-                .ingredients(List.of(recipeIngredientDto()))
+                .ingredients(List.of(persistedRecipeIngredientDto()))
                 .build();
     }
 
-    private static RecipeSectionDTO.RecipeSectionDTOBuilder recipeSectionDto(UUID ingredientId) {
+    private static RecipeSectionDTO.RecipeSectionDTOBuilder newRecipeSectionDtoBuilder(UUID ingredientId) {
         return RecipeSectionDTO.builder()
                 .name(RecipeTestConstants.RECIPE_SECTION_NAME)
                 .position(RecipeTestConstants.RECIPE_SECTION_POSITION)
-                .ingredients(List.of(recipeIngredientDto(ingredientId).build()));
+                .ingredients(List.of(newRecipeIngredientDtoBuilder(ingredientId).build()));
     }
 
-    private static RecipeIngredientDTO recipeIngredientDto() {
-        return recipeIngredientDto(RecipeTestConstants.INGREDIENT_ID)
+    private static RecipeIngredientDTO persistedRecipeIngredientDto() {
+        return newRecipeIngredientDtoBuilder(RecipeTestConstants.INGREDIENT_ID)
                 .id(RecipeTestConstants.RECIPE_INGREDIENT_ID)
                 .build();
     }
 
-    private static RecipeIngredientDTO.RecipeIngredientDTOBuilder recipeIngredientDto(UUID ingredientId) {
+    private static RecipeIngredientDTO.RecipeIngredientDTOBuilder newRecipeIngredientDtoBuilder(UUID ingredientId) {
         return RecipeIngredientDTO.builder()
                 .ingredientId(ingredientId)
                 .amount(RecipeTestConstants.RECIPE_INGREDIENT_AMOUNT)
