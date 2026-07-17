@@ -68,7 +68,7 @@ dependencies {
     testFixturesCompileOnly libs.lombok
     testFixturesAnnotationProcessor libs.lombok
 
-    integrationTestImplementation testFixtures(project)
+    integrationTestImplementation testFixtures(project(":"))
     integrationTestImplementation libs.spring.boot.testcontainers
     integrationTestImplementation libs.testcontainers.postgresql
     integrationTestImplementation libs.testcontainers.junit.jupiter
@@ -90,11 +90,20 @@ tasks.register('integrationTest', Test) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
     finalizedBy jacocoTestReport
 }
 
 tasks.named('check') {
     dependsOn spotlessCheck
+}
+
+tasks.register('fullCheck') {
+    description = 'Runs all verification checks, including integration tests.'
+    group = 'verification'
+
+    dependsOn tasks.named('check')
+    dependsOn tasks.named('integrationTest')
 }
 
 jacocoTestReport {
