@@ -29,20 +29,6 @@ configurations {
     }
 }
 
-sourceSets {
-    integrationTest {
-        compileClasspath += sourceSets.main.output
-        runtimeClasspath += sourceSets.main.output
-    }
-}
-
-configurations.named('integrationTestImplementation') {
-    extendsFrom configurations.testImplementation
-}
-
-configurations.named('integrationTestRuntimeOnly') {
-    extendsFrom configurations.testRuntimeOnly
-}
 repositories {
     mavenCentral()
 }
@@ -68,31 +54,43 @@ dependencies {
     testFixturesCompileOnly libs.lombok
     testFixturesAnnotationProcessor libs.lombok
 
-    integrationTestImplementation testFixtures(project(":"))
-    integrationTestImplementation libs.spring.boot.testcontainers
-    integrationTestImplementation libs.testcontainers.postgresql
-    integrationTestImplementation libs.testcontainers.junit.jupiter
 
     testRuntimeOnly libs.junit.platform.launcher
 
     annotationProcessor libs.mapstruct.processor
 }
 
+testing {
+    suites {
+        integrationTest(JvmTestSuite) {
+            dependencies {
+                implementation project()
+                implementation testFixtures(project())
+                implementation libs.spring.boot.starter.test
+                implementation libs.spring.boot.starter.data.jpa
+                implementation libs.spring.boot.starter.web
+                implementation libs.spring.boot.testcontainers
+                implementation libs.testcontainers.postgresql
+                implementation libs.testcontainers.junit.jupiter
+                runtimeOnly libs.junit.platform.launcher
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter tasks.named('test')
+                        finalizedBy tasks.named('jacocoTestReport')
+                    }
+                }
+            }
+        }
+    }
+}
 tasks.named('test') {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
 
-tasks.register('integrationTest', Test) {
-    description = 'Runs integration tests.'
-    group = 'verification'
-
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    useJUnitPlatform()
-    shouldRunAfter tasks.named('test')
-    finalizedBy jacocoTestReport
-}
 
 tasks.named('check') {
     dependsOn spotlessCheck

@@ -126,9 +126,11 @@ section.
 - Name controller expected JSON files after the controller method or endpoint
   scenario that uses them, for example `get-recipe-response.json`, so multiple
   response contracts in one resource directory stay easy to distinguish.
-- Integration tests use a separate Gradle `integrationTest` source set and task.
-  Keep integration test class names ending with `IT`, and keep unit, service,
-  and controller tests under the regular `test` task.
+- Integration tests use a separate Gradle JVM test suite named
+  `integrationTest`, with sources under `src/integrationTest`. Keep integration
+  test class names ending with `IT`, and keep unit, service, and controller tests
+  under the regular `test` suite. Shared Mothers, constants, and fixture helpers
+  used by both suites stay under `src/testFixtures`.
 - Integration tests exercise public facades through a real Spring context and
   PostgreSQL Testcontainers. The shared `BaseIntegrationTest` should use
   `@ServiceConnection` for Spring Boot Testcontainers wiring.
