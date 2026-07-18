@@ -1,7 +1,8 @@
-# Project guidelines
+# Project notes
 
-SoloCooking-specific guidance. Keep reusable engineering rules in
-`AI_GUIDELINES.md`; keep domain and product decisions for this repository here.
+SoloCooking-specific facts and decisions. Keep reusable engineering and
+architecture rules in `ARCHITECTURE.md`; keep domain and product decisions for
+this repository here.
 
 ## Domain model
 

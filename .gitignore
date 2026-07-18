@@ -40,6 +40,4 @@ out/
 .claude/
 .agents/
 skills-lock.json
-AGENTS.md
-CLAUDE.md
 ai-notes/
