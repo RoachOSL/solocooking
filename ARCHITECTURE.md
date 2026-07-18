@@ -1,20 +1,13 @@
-# AI guidelines
+# Architecture guidelines
 
-Before presenting or running any executable command, Codex first explains to the
-user what the command does and what effects it may have.
-
-Commits and pushes are done only by the user. Codex prepares and tests changes,
-but does not run `git commit` or `git push`.
+Reusable engineering and architecture backend rules for this repository.
+Project-specific facts and decisions belong in `PROJECT_NOTES.md`. Agent
+workflow rules live in `CLAUDE.md` / `AGENTS.md`. When a reusable
+architectural or engineering decision is agreed, add it here in the relevant
+section.
 
 ## Architecture
 
-- When Codex and the user agree on a reusable architectural or engineering
-  decision, add it to this file in the relevant section. Project-specific domain
-  and product decisions belong in `PROJECT_GUIDELINES.md`.
-- When the user adds GitHub code review comments, Codex reads and discusses
-  them with the user in the local console first. Agreed changes are then applied
-  locally, tested, and summarized for the user. Codex does not publish GitHub
-  comments unless explicitly asked.
 - Keep module boundaries explicit and independent. Internal implementation
   details, such as entities, repositories, mappers, and services, should stay
   package-private whenever possible.
