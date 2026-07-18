@@ -56,6 +56,16 @@ this repository here.
 - Use the latest stable PostgreSQL minor version for local development and
   Testcontainers. Pin the exact Docker image tag instead of using `latest`, and
   update `docker-compose.yml` and integration test containers together.
-- CI publishes JUnit XML results through the local `publish-test-report` composite
-  action, which wraps `dorny/test-reporter`. Keep third-party GitHub Actions
-  pinned to a full commit SHA with a version comment, not a mutable tag.
+
+## Continuous integration and delivery
+
+- GitHub Actions `.github/workflows/ci.yml` runs for pull requests and pushes
+  to `main`.
+- CI runs `code-quality`, `build`, `unit-tests`, and `integration-tests` in
+  that order. Integration tests run last to fail fast before starting
+  Testcontainers.
+- CI publishes JUnit XML results through the local `publish-test-report`
+  composite action, which wraps `dorny/test-reporter`.
+- A newer run of the same workflow for the same Git ref cancels the older run.
+- Continuous delivery is not configured. Add it only after choosing the
+  deployment environment and release strategy.
