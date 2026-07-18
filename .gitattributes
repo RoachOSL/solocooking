@@ -1,3 +1,9 @@
+# Force LF for text files on every clone, regardless of core.autocrlf,
+# so Windows checkouts, Linux CI and tooling agree on line endings.
+* text=auto eol=lf
+
 /gradlew text eol=lf
+# Windows batch scripts require CRLF.
 *.bat text eol=crlf
 *.jar binary
+*.png binary

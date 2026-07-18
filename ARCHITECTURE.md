@@ -6,6 +6,12 @@ workflow rules live in `CLAUDE.md` / `AGENTS.md`. When a reusable
 architectural or engineering decision is agreed, add it here in the relevant
 section.
 
+## Repository hygiene
+
+- Do not add AI attribution anywhere in the repository or its Git history.
+  Do not add AI co-author trailers, generation footers, or similar attribution
+  to commits, pull requests, source files, or documentation.
+
 ## Architecture
 
 - Keep module boundaries explicit and independent. Internal implementation
@@ -28,6 +34,14 @@ section.
 - Use `var` for local variables when the type is obvious from the right-hand side
   and readability does not suffer.
 - Use descriptive variable names that clearly communicate meaning and purpose.
+- Comments are the exception, not the norm. Write one only when it states a
+  non-obvious constraint or reason the code itself cannot show, for example why
+  a no-op interceptor exists, that a type mirrors a backend DTO, or why a lint
+  rule is disabled for a path. Never narrate what the next line does, restate a
+  rule already documented in these Markdown files, or leave tool or template
+  boilerplate links. Short section labels in configuration files, such as
+  `# Test output` in `.gitignore`, are fine. Test `given`, `when`, and `then`
+  markers follow the test structure rules below.
 - Prefer detailed `debug` logs for normal application flow, validation
   decisions, and useful identifiers. Use `info` logs sparingly for genuinely
   high-level lifecycle or operational events, not routine CRUD flow.
@@ -124,7 +138,18 @@ section.
 - In facade integration tests, compare returned DTOs recursively with the shared
   comparison configuration whenever generated fields such as IDs or audit
   timestamps are not the behavior under test.
-- CI should run unit tests and integration tests as separate steps. On GitHub
-  Actions, prefer `gradle/actions/setup-gradle` for Gradle dependency/wrapper
-  caching and do not add overlapping `actions/cache` or `setup-java` Gradle
-  cache configuration.
+
+## Continuous integration
+
+- Run unit tests and integration tests as separate CI steps.
+- Use `gradle/actions/setup-gradle` for Gradle dependency and wrapper caching.
+  Do not add overlapping `actions/cache` or `setup-java` Gradle cache
+  configuration.
+- Pin every external GitHub Action to a full commit SHA with a version comment,
+  including official `actions/*` Actions. A mutable tag can be retargeted to
+  silently run different external code with access to the workflow token and
+  granted permissions. Upgrade an Action only through an intentional SHA change
+  visible in the repository diff. Local `./.github/actions/*` Actions are
+  versioned with this repository and do not use external SHAs.
+- Cancel an in-progress CI run when a newer commit starts the same workflow for
+  the same Git ref.
