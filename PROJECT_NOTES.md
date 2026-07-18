@@ -56,6 +56,9 @@ this repository here.
 - Use the latest stable PostgreSQL minor version for local development and
   Testcontainers. Pin the exact Docker image tag instead of using `latest`, and
   update `docker-compose.yml` and integration test containers together.
+- For PostgreSQL 18 and newer, mount the persistent volume at
+  `/var/lib/postgresql`; the image stores database files in a version-specific
+  subdirectory such as `/var/lib/postgresql/18/docker`.
 
 ## Continuous integration and delivery
 
