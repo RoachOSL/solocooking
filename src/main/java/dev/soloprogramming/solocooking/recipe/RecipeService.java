@@ -68,13 +68,10 @@ class RecipeService implements RecipeFacade {
     @Transactional
     public void deleteById(UUID recipeId) {
         log.debug("Deleting recipe by id [{}]", recipeId);
-        var recipe = recipeRepository.findByIdWithoutDetails(recipeId)
-                .orElseThrow(() -> {
-                    log.debug("Recipe with id [{}] was not found for deletion", recipeId);
-                    return RecipeNotFoundException.byRecipeId(recipeId);
-                });
-
-        recipeRepository.delete(recipe);
-        log.debug("Deleted recipe with id [{}]", recipeId);
+        recipeRepository.findByIdWithoutDetails(recipeId)
+                .ifPresentOrElse(recipe -> {
+                    recipeRepository.delete(recipe);
+                    log.debug("Deleted recipe with id [{}]", recipeId);
+                }, () -> log.debug("Recipe with id [{}] was already absent", recipeId));
     }
 }

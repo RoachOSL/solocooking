@@ -7,8 +7,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+@Schema(requiredProperties = {"id", "name", "imageUrl", "description", "sections", "updatedAt", "createdAt"})
 @Builder
 public record RecipeDTO(
         UUID id,

@@ -5,12 +5,11 @@ package dev.soloprogramming.solocooking.common.dto;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.Page;
 
-public record PageResponse<T>(
-        List<T> content,
-        PageMetadata page
-) {
+@Schema(requiredProperties = {"content", "page"})
+public record PageResponse<T>(List<T> content, PageMetadata page) {
 
     public static <T> PageResponse<T> from(Page<T> page) {
         return new PageResponse<>(
@@ -24,11 +23,7 @@ public record PageResponse<T>(
         );
     }
 
-    public record PageMetadata(
-            int number,
-            int size,
-            long totalElements,
-            int totalPages
-    ) {
+    @Schema(requiredProperties = {"number", "size", "totalElements", "totalPages"})
+    public record PageMetadata(int number, int size, long totalElements, int totalPages) {
     }
 }

@@ -30,7 +30,9 @@ class RecipeControllerTest {
     private static final String RECIPES_ENDPOINT = API_SERVLET_PATH + "/recipes";
     private static final String RECIPE_BY_ID_ENDPOINT = API_SERVLET_PATH + "/recipes/{recipeId}";
     private static final String GET_RECIPE_RESPONSE_RESOURCE = "controller/recipe/get-recipe-response.json";
+    private static final String GET_RECIPE_WITH_NULL_NOTE_RESPONSE_RESOURCE = "controller/recipe/get-recipe-with-null-note-response.json";
     private static final String GET_RECIPES_RESPONSE_RESOURCE = "controller/recipe/get-recipes-response.json";
+    private static final String GET_EMPTY_RECIPES_RESPONSE_RESOURCE = "controller/recipe/get-empty-recipes-response.json";
     private static final String EMPTY_RESPONSE_BODY = "";
 
     @MockitoBean
@@ -74,6 +76,20 @@ class RecipeControllerTest {
     }
 
     @Test
+    void shouldReturnNullableFields() {
+        // given
+        var expectedRecipe = RecipeMother.recipeDtoWithNullNoteBuilder().build();
+        given(recipeFacade.findById(RecipeTestConstants.RECIPE_ID)).willReturn(expectedRecipe);
+
+        // when & then
+        assertThat(get()
+                .uri(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_RECIPE_WITH_NULL_NOTE_RESPONSE_RESOURCE));
+    }
+
+    @Test
     void shouldReturnRecipes() {
         // given
         var expectedRecipe = RecipeMother.recipeSummaryDtoBuilder().build();
@@ -86,6 +102,20 @@ class RecipeControllerTest {
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_RECIPES_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldReturnEmptyCollections() {
+        // given
+        given(recipeFacade.getRecipes(DEFAULT_WEB_PAGE_REQUEST))
+                .willReturn(new PageImpl<>(List.of(), DEFAULT_WEB_PAGE_REQUEST, 0));
+
+        // when & then
+        assertThat(get()
+                .uri(RECIPES_ENDPOINT))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_EMPTY_RECIPES_RESPONSE_RESOURCE));
     }
 
     @Test

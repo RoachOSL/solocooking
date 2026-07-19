@@ -28,6 +28,10 @@ section.
 - Prefer simple, maintainable designs guided by SOLID, DRY, KISS, and YAGNI.
   Favor composition over inheritance when it keeps responsibilities clearer and
   avoids unnecessary coupling.
+- Keep API validation and persistence constraints aligned. Explicitly map String
+  lengths, numeric precision and scale, nullability, and database checks when
+  relying on generated schemas. Cover accepted boundary values with integration
+  tests so a valid request cannot fail at persistence time.
 
 ## Code style
 
@@ -55,6 +59,18 @@ section.
   `deleteById` when the controller class already names the resource. Keep read
   methods explicit, for example `getRecipe` and `getRecipes`, because the
   singular/plural distinction improves scanability.
+- Keep generated OpenAPI clients stable by assigning every endpoint an explicit,
+  resource-qualified `operationId`. Java controller method renames must not
+  change the published operation name.
+- For a JSON-only API, configure `application/json` as the global springdoc
+  default response media type. Declare `produces` on an endpoint only when it
+  differs from that default.
+- Keep response JSON shapes stable: every property declared by a response DTO is
+  always present and required in the OpenAPI schema. Represent a missing scalar
+  or object value as `null`, an empty collection as `[]`, and an empty map as
+  `{}`. Mark nullable properties explicitly and declare required response
+  properties once at the DTO type level with
+  `@Schema(requiredProperties = {...})` instead of annotating every field.
 
 ## Test style
 

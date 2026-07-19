@@ -34,6 +34,7 @@ final class RecipeController {
     private final RecipeFacade recipeFacade;
 
     @Operation(
+            operationId = "createRecipe",
             summary = "Creates new recipe"
     )
     @PostMapping
@@ -43,6 +44,7 @@ final class RecipeController {
     }
 
     @Operation(
+            operationId = "getRecipes",
             summary = "Get all recipes",
             description = "Returns a paginated list of all available recipes"
     )
@@ -52,6 +54,7 @@ final class RecipeController {
     }
 
     @Operation(
+            operationId = "getRecipe",
             summary = "Get recipe by id",
             description = "Returns a recipe for given id"
     )
@@ -60,7 +63,11 @@ final class RecipeController {
         return recipeFacade.findById(recipeId);
     }
 
-    @Operation(summary = "Delete recipe by id")
+    @Operation(
+            operationId = "deleteRecipe",
+            summary = "Delete recipe by id",
+            description = "Deletes the recipe when it exists. Repeated requests return no content."
+    )
     @DeleteMapping("/{recipeId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteById(@PathVariable UUID recipeId) {

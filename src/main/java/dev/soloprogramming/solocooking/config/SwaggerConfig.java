@@ -5,6 +5,7 @@ package dev.soloprogramming.solocooking.config;
 
 import java.util.List;
 
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,9 @@ class SwaggerConfig {
                 .displayName("SoloCooking")
                 .pathsToMatch("/recipes/**", "/ingredients/**")
                 .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("SoloCooking API")
+                                .version("v1"))
                         .servers(List.of(server)))
                 .build();
     }

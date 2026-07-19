@@ -11,6 +11,7 @@ import java.util.UUID;
 import dev.soloprogramming.solocooking.common.persistence.BaseEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -36,13 +37,17 @@ class RecipeEntity extends BaseEntity {
 
     @Setter
     @Basic(optional = false)
+    @Column(nullable = false)
     private String name;
 
     @Setter
     @Basic(optional = false)
+    @Column(nullable = false, length = 2048)
     private String imageUrl;
 
     @Setter
+    @Basic(optional = false)
+    @Column(nullable = false, length = 5000)
     private String description;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)

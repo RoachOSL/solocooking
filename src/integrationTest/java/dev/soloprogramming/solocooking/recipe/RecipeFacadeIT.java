@@ -3,6 +3,8 @@
  */
 package dev.soloprogramming.solocooking.recipe;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.common.BaseIntegrationTest;
@@ -12,9 +14,15 @@ import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundEx
 import dev.soloprogramming.solocooking.recipe.exception.RecipeNotFoundException;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSummaryDTO;
+import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,11 +30,21 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RecipeFacadeIT extends BaseIntegrationTest {
 
+    private static final String MAX_RECIPE_NAME = "r".repeat(255);
+    private static final String MAX_RECIPE_IMAGE_URL = "https://" + "i".repeat(2040);
+    private static final String MAX_RECIPE_DESCRIPTION = "d".repeat(5000);
+    private static final String MAX_RECIPE_SECTION_NAME = "s".repeat(255);
+    private static final String MAX_RECIPE_INGREDIENT_UNIT = "u".repeat(64);
+    private static final String MAX_RECIPE_INGREDIENT_NOTE = "n".repeat(500);
+
     @Autowired
     private RecipeFacade recipeFacade;
 
     @Autowired
     private IngredientFacade ingredientFacade;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void shouldCreateRecipe() {
@@ -44,6 +62,78 @@ class RecipeFacadeIT extends BaseIntegrationTest {
         assertThat(result)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedRecipe);
+    }
+
+    @Test
+    void shouldPersistMaximumRecipeFieldLengths() {
+        // given
+        var ingredientId = givenExistingIngredientId();
+        var ingredientRequest = RecipeMother.createRecipeIngredientRequestBuilder(ingredientId)
+                .unit(MAX_RECIPE_INGREDIENT_UNIT)
+                .note(MAX_RECIPE_INGREDIENT_NOTE)
+                .build();
+        var sectionRequest = RecipeMother.createRecipeSectionRequestBuilder(ingredientId)
+                .name(MAX_RECIPE_SECTION_NAME)
+                .ingredients(List.of(ingredientRequest))
+                .build();
+        var request = RecipeMother.createRecipeRequestBuilder(ingredientId)
+                .name(MAX_RECIPE_NAME)
+                .imageUrl(MAX_RECIPE_IMAGE_URL)
+                .description(MAX_RECIPE_DESCRIPTION)
+                .sections(List.of(sectionRequest))
+                .build();
+
+        // when
+        var createdRecipe = recipeFacade.createRecipe(request);
+        var persistedRecipe = recipeFacade.findById(createdRecipe.id());
+
+        // then
+        assertThat(persistedRecipe)
+                .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
+                .isEqualTo(createdRecipe);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0.001", "999999999.999"})
+    void shouldPersistSupportedIngredientAmount(String amountValue) {
+        // given
+        var amount = new BigDecimal(amountValue);
+        var request = createRecipeRequestWithAmount(givenExistingIngredientId(), amount);
+
+        // when
+        var createdRecipe = recipeFacade.createRecipe(request);
+        var persistedRecipe = recipeFacade.findById(createdRecipe.id());
+
+        // then
+        assertThat(persistedRecipe.sections().getFirst().ingredients().getFirst().amount())
+                .isEqualByComparingTo(amount);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0.0001", "1000000000"})
+    void shouldRejectUnsupportedIngredientAmount(String amountValue) {
+        // given
+        var request = createRecipeRequestWithAmount(
+                givenExistingIngredientId(),
+                new BigDecimal(amountValue)
+        );
+
+        // when & then
+        assertThatThrownBy(() -> recipeFacade.createRecipe(request))
+                .isInstanceOf(ConstraintViolationException.class);
+    }
+
+    @Test
+    void shouldRejectNonPositiveIngredientAmountAtDatabaseBoundary() {
+        // given
+        var recipe = givenExistingRecipe();
+        var recipeIngredientId = recipe.sections().getFirst().ingredients().getFirst().id();
+
+        // when & then
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                "UPDATE recipe_ingredient SET amount = 0 WHERE id = ?",
+                recipeIngredientId
+        )).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -83,11 +173,12 @@ class RecipeFacadeIT extends BaseIntegrationTest {
     }
 
     @Test
-    void shouldDeleteRecipeById() {
+    void shouldDeleteRecipeByIdempotently() {
         // given
         var recipe = givenExistingRecipe();
 
         // when
+        recipeFacade.deleteById(recipe.id());
         recipeFacade.deleteById(recipe.id());
 
         // then
@@ -116,6 +207,18 @@ class RecipeFacadeIT extends BaseIntegrationTest {
                 .isInstanceOfSatisfying(RecipeNotFoundException.class, exception ->
                         assertThat(exception.getReason()).isEqualTo(RecipeTestConstants.RECIPE_NOT_FOUND_MESSAGE)
                 );
+    }
+
+    private CreateRecipeRequest createRecipeRequestWithAmount(UUID ingredientId, BigDecimal amount) {
+        var ingredientRequest = RecipeMother.createRecipeIngredientRequestBuilder(ingredientId)
+                .amount(amount)
+                .build();
+        var sectionRequest = RecipeMother.createRecipeSectionRequestBuilder(ingredientId)
+                .ingredients(List.of(ingredientRequest))
+                .build();
+        return RecipeMother.createRecipeRequestBuilder(ingredientId)
+                .sections(List.of(sectionRequest))
+                .build();
     }
 
     private UUID givenExistingIngredientId() {

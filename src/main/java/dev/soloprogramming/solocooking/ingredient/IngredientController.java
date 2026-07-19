@@ -31,20 +31,20 @@ final class IngredientController {
 
     private final IngredientFacade ingredientFacade;
 
-    @Operation(summary = "Creates new ingredient")
+    @Operation(operationId = "createIngredient", summary = "Creates new ingredient")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     IngredientDTO create(@Valid @RequestBody CreateIngredientRequest createIngredientRequest) {
         return ingredientFacade.createIngredient(createIngredientRequest);
     }
 
-    @Operation(summary = "Get all ingredients")
+    @Operation(operationId = "getIngredients", summary = "Get all ingredients")
     @GetMapping
     PageResponse<IngredientDTO> getIngredients(@ParameterObject Pageable pageable) {
         return PageResponse.from(ingredientFacade.getIngredients(pageable));
     }
 
-    @Operation(summary = "Get ingredient by id")
+    @Operation(operationId = "getIngredient", summary = "Get ingredient by id")
     @GetMapping("/{ingredientId}")
     IngredientDTO getIngredient(@PathVariable UUID ingredientId) {
         return ingredientFacade.findById(ingredientId);

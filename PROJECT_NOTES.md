@@ -22,8 +22,13 @@ this repository here.
   RecipeIngredientEntity`.
 - `RecipeIngredientEntity` stores an `ingredientId` instead of referencing
   `IngredientEntity` directly.
+- Recipe ingredient amounts are positive decimals with up to nine integer digits
+  and three fractional digits. Persist them as `numeric(12,3)` and enforce
+  positivity in both request validation and the database schema.
 - Recipe creation validates referenced ingredient IDs through
   `IngredientFacade`.
+- Deleting a recipe is idempotent. `DELETE /recipes/{recipeId}` returns no
+  content when the recipe is deleted or was already absent.
 - Recipe sections and recipe ingredients store a persisted `position` field.
   Create requests do not accept `position`; the backend assigns positions from
   the order of the submitted lists.
@@ -53,12 +58,23 @@ this repository here.
 
 ## Infrastructure
 
+- The grouped OpenAPI document is published as `SoloCooking API`, version `v1`,
+  and defaults response media types to `application/json`.
 - Use the latest stable PostgreSQL minor version for local development and
   Testcontainers. Pin the exact Docker image tag instead of using `latest`, and
   update `docker-compose.yml` and integration test containers together.
 - For PostgreSQL 18 and newer, mount the persistent volume at
   `/var/lib/postgresql`; the image stores database files in a version-specific
   subdirectory such as `/var/lib/postgresql/18/docker`.
+- The public API currently allows CORS requests from any origin without
+  credentials. Revisit allowed origins, credentials, and CSRF together when
+  introducing cookie or session authentication.
+- Database migrations are not configured while the project has no persistent
+  deployment environment. Introduce a migration tool and replace Hibernate
+  schema updates with validation before creating the first persistent
+  environment. Move database check constraints into migrations and remove the
+  corresponding Hibernate `@CheckConstraint` annotations so migrations remain
+  the single source of truth for the schema.
 
 ## Continuous integration and delivery
 

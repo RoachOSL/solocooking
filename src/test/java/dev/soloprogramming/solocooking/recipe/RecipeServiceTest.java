@@ -105,27 +105,25 @@ class RecipeServiceTest {
     }
 
     @Test
-    void shouldDeleteRecipeById() {
+    void shouldDeleteRecipeByIdempotently() {
         // given
         recipeRepository.save(RecipeMother.recipeEntity());
 
         // when & then
-        assertThatCode(() -> recipeService.deleteById(RecipeTestConstants.RECIPE_ID))
+        assertThatCode(() -> {
+            recipeService.deleteById(RecipeTestConstants.RECIPE_ID);
+            recipeService.deleteById(RecipeTestConstants.RECIPE_ID);
+        })
                 .doesNotThrowAnyException();
         assertThat(recipeRepository.findAll()).isEmpty();
     }
 
     @Test
-    void shouldThrowWhenDeletingNonExistentRecipe() {
-        // given
-        var expectedMessage = RecipeTestConstants.RECIPE_NOT_FOUND_MESSAGE;
-
+    void shouldIgnoreDeletingNonExistentRecipe() {
         // when & then
-        assertThatThrownBy(() -> recipeService.deleteById(RecipeTestConstants.MISSING_RECIPE_ID))
-                .isInstanceOfSatisfying(RecipeNotFoundException.class, exception -> {
-                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-                    assertThat(exception.getBody().getDetail()).isEqualTo(expectedMessage);
-                });
+        assertThatCode(() -> recipeService.deleteById(RecipeTestConstants.MISSING_RECIPE_ID))
+                .doesNotThrowAnyException();
+        assertThat(recipeRepository.findAll()).isEmpty();
     }
 
     @Test
