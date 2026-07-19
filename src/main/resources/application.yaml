@@ -3,6 +3,9 @@ spring:
     servlet:
       path: /api
 
+  jackson:
+    default-property-inclusion: always
+
   data:
     web:
       pageable:
@@ -32,3 +35,6 @@ management:
         include: "*"
   security:
     enabled: false
+
+springdoc:
+  default-produces-media-type: application/json

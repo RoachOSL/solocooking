@@ -1,0 +1,25 @@
+{
+  "id": "2b1c02d4-dc91-4f78-a4b3-e342b492bc25",
+  "name": "Pasta carbonara",
+  "imageUrl": "https://example.com/carbonara.jpg",
+  "description": "Classic pasta carbonara",
+  "sections": [
+    {
+      "id": "bbf025ab-fcf7-466a-b939-d924831f3487",
+      "name": "Main",
+      "position": 0,
+      "ingredients": [
+        {
+          "id": "4fbd5a73-8f33-4ac7-8a75-9f78d78b3594",
+          "ingredientId": "39f9be9f-88f2-4a50-bc83-97af6016c509",
+          "amount": 2,
+          "unit": "pcs",
+          "note": null,
+          "position": 0
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-01-11T12:30:00Z",
+  "createdAt": "2026-01-10T10:15:30Z"
+}

@@ -47,10 +47,12 @@ dependencies {
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.spring.boot.starter.jackson.test
     testImplementation libs.spring.boot.starter.webmvc.test
+    testCompileOnly libs.swagger.annotations
 
     testFixturesImplementation libs.assertj.core
     testFixturesImplementation libs.spring.boot.starter.data.jpa
     testFixturesImplementation libs.spring.data.commons
+    testFixturesCompileOnly libs.swagger.annotations
     testFixturesCompileOnly libs.lombok
     testFixturesAnnotationProcessor libs.lombok
 
@@ -69,6 +71,9 @@ testing {
                 implementation libs.spring.boot.starter.test
                 implementation libs.spring.boot.starter.data.jpa
                 implementation libs.spring.boot.starter.web
+                implementation libs.spring.boot.starter.webmvc.test
+                implementation libs.spring.boot.starter.validation
+                compileOnly libs.swagger.annotations
                 implementation libs.spring.boot.testcontainers
                 implementation libs.testcontainers.postgresql
                 implementation libs.testcontainers.junit.jupiter

@@ -11,6 +11,7 @@ import java.util.UUID;
 import dev.soloprogramming.solocooking.common.persistence.BaseEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -42,9 +43,11 @@ class RecipeSectionEntity extends BaseEntity {
 
     @Setter
     @Basic(optional = false)
+    @Column(nullable = false, length = 255)
     private String name;
 
     @Basic(optional = false)
+    @Column(nullable = false)
     private Integer position;
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -6,6 +6,7 @@ package dev.soloprogramming.solocooking.recipe.model.request;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -20,6 +21,7 @@ public record CreateRecipeIngredientRequest(
 
         @NotNull
         @Positive
+        @Digits(integer = 9, fraction = 3)
         BigDecimal amount,
 
         @NotBlank

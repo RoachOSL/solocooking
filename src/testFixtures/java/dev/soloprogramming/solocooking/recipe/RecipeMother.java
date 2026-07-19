@@ -57,6 +57,21 @@ class RecipeMother {
         return recipeDtoBuilder(List.of(newRecipeSectionDtoBuilder(ingredientId).build()));
     }
 
+    static RecipeDTO.RecipeDTOBuilder recipeDtoWithNullNoteBuilder() {
+        var ingredient = newRecipeIngredientDtoBuilder(RecipeTestConstants.INGREDIENT_ID)
+                .id(RecipeTestConstants.RECIPE_INGREDIENT_ID)
+                .note(null)
+                .build();
+        var section = newRecipeSectionDtoBuilder(RecipeTestConstants.INGREDIENT_ID)
+                .id(RecipeTestConstants.RECIPE_SECTION_ID)
+                .ingredients(List.of(ingredient))
+                .build();
+        return recipeDtoBuilder(List.of(section))
+                .id(RecipeTestConstants.RECIPE_ID)
+                .createdAt(RecipeTestConstants.RECIPE_CREATED_AT)
+                .updatedAt(RecipeTestConstants.RECIPE_UPDATED_AT);
+    }
+
     private static RecipeDTO.RecipeDTOBuilder recipeDtoBuilder(List<RecipeSectionDTO> sections) {
         return RecipeDTO.builder()
                 .name(RecipeTestConstants.RECIPE_NAME)
