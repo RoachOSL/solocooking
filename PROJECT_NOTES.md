@@ -72,7 +72,9 @@ this repository here.
 - Database migrations are not configured while the project has no persistent
   deployment environment. Introduce a migration tool and replace Hibernate
   schema updates with validation before creating the first persistent
-  environment.
+  environment. Move database check constraints into migrations and remove the
+  corresponding Hibernate `@CheckConstraint` annotations so migrations remain
+  the single source of truth for the schema.
 
 ## Continuous integration and delivery
 
