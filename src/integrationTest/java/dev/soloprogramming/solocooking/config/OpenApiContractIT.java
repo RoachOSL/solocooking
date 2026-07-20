@@ -51,7 +51,8 @@ class OpenApiContractIT extends BaseIntegrationTest {
                 .isEqualTo("deleteRecipe");
         assertOperation(openApi, "/paths/~1ingredients/post", "createIngredient", "201");
         assertOperation(openApi, "/paths/~1ingredients/get", "getIngredients", "200");
-        assertQueryParameter(openApi, "/paths/~1ingredients/get", "name");
+        assertOperation(openApi, "/paths/~1ingredients~1search/get", "searchIngredients", "200");
+        assertQueryParameter(openApi, "/paths/~1ingredients~1search/get", "name");
         assertOperation(openApi, "/paths/~1ingredients~1{ingredientId}/get", "getIngredient", "200");
 
         var schemas = openApi.at("/components/schemas");

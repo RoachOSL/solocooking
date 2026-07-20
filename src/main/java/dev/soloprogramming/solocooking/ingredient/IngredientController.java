@@ -42,12 +42,18 @@ final class IngredientController {
         return ingredientFacade.createIngredient(createIngredientRequest);
     }
 
-    @Operation(operationId = "getIngredients", summary = "Search ingredients")
+    @Operation(operationId = "getIngredients", summary = "Get all ingredients")
     @GetMapping
-    PageResponse<IngredientDTO> getIngredients(@Parameter(description = "Case-insensitive name fragment")
-                                               @RequestParam @NotBlank @Size(max = 255) String name,
-                                               @ParameterObject Pageable pageable) {
-        return PageResponse.from(ingredientFacade.getIngredients(name, pageable));
+    PageResponse<IngredientDTO> getIngredients(@ParameterObject Pageable pageable) {
+        return PageResponse.from(ingredientFacade.getIngredients(pageable));
+    }
+
+    @Operation(operationId = "searchIngredients", summary = "Search ingredients")
+    @GetMapping("/search")
+    PageResponse<IngredientDTO> searchIngredients(@Parameter(description = "Case-insensitive name fragment")
+                                                  @RequestParam @NotBlank @Size(max = 255) String name,
+                                                  @ParameterObject Pageable pageable) {
+        return PageResponse.from(ingredientFacade.searchIngredients(name, pageable));
     }
 
     @Operation(operationId = "getIngredient", summary = "Get ingredient by id")

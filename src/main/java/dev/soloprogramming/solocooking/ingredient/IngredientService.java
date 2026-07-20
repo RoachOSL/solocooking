@@ -43,12 +43,20 @@ class IngredientService implements IngredientFacade {
     }
 
     @Override
-    public Page<IngredientDTO> getIngredients(String name, Pageable pageable) {
+    public Page<IngredientDTO> getIngredients(Pageable pageable) {
+        log.debug("Getting ingredients page [{}]", pageable);
+        var ingredients = ingredientRepository.findAll(pageable).map(ingredientMapper::toDto);
+        log.debug("Returned ingredients page with [{}] elements", ingredients.getNumberOfElements());
+        return ingredients;
+    }
+
+    @Override
+    public Page<IngredientDTO> searchIngredients(String name, Pageable pageable) {
         var normalizedName = ingredientMapper.normalize(name);
-        log.debug("Getting ingredients page [{}] filtered by normalized name [{}]", pageable, normalizedName);
+        log.debug("Searching ingredients page [{}] by normalized name [{}]", pageable, normalizedName);
         var ingredients = ingredientRepository.findAllByNameContaining(normalizedName, pageable)
                 .map(ingredientMapper::toDto);
-        log.debug("Returned ingredients page with [{}] elements", ingredients.getNumberOfElements());
+        log.debug("Found ingredients page with [{}] elements", ingredients.getNumberOfElements());
         return ingredients;
     }
 

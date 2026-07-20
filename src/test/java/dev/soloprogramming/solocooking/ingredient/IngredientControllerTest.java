@@ -28,6 +28,7 @@ import static org.mockito.BDDMockito.then;
 class IngredientControllerTest {
 
     private static final String INGREDIENTS_ENDPOINT = API_SERVLET_PATH + "/ingredients";
+    private static final String INGREDIENT_SEARCH_ENDPOINT = INGREDIENTS_ENDPOINT + "/search";
     private static final String INGREDIENT_BY_ID_ENDPOINT = API_SERVLET_PATH + "/ingredients/{ingredientId}";
     private static final String GET_INGREDIENT_RESPONSE_RESOURCE = "controller/ingredient/get-ingredient-response.json";
     private static final String GET_INGREDIENTS_RESPONSE_RESOURCE = "controller/ingredient/get-ingredients-response.json";
@@ -76,7 +77,7 @@ class IngredientControllerTest {
     void shouldRejectMissingIngredientNameSearch() {
         // when
         assertThat(get()
-                .uri(INGREDIENTS_ENDPOINT))
+                .uri(INGREDIENT_SEARCH_ENDPOINT))
                 .hasStatus(HttpStatus.BAD_REQUEST);
 
         // then
@@ -87,7 +88,7 @@ class IngredientControllerTest {
     void shouldRejectBlankIngredientNameSearch() {
         // when
         assertThat(get()
-                .uri(INGREDIENTS_ENDPOINT)
+                .uri(INGREDIENT_SEARCH_ENDPOINT)
                 .param("name", " "))
                 .hasStatus(HttpStatus.BAD_REQUEST);
 
@@ -99,43 +100,51 @@ class IngredientControllerTest {
     void shouldSearchIngredientsByName() {
         // given
         var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
-        given(ingredientFacade.getIngredients(
+        given(ingredientFacade.searchIngredients(
                 IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
                 DEFAULT_WEB_PAGE_REQUEST
         )).willReturn(new PageImpl<>(List.of(expectedIngredient), DEFAULT_WEB_PAGE_REQUEST, 1));
 
         // when & then
         assertThat(get()
-                .uri(INGREDIENTS_ENDPOINT)
+                .uri(INGREDIENT_SEARCH_ENDPOINT)
                 .param("name", IngredientTestConstants.INGREDIENT_SEARCH_INPUT))
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_INGREDIENTS_RESPONSE_RESOURCE));
-        then(ingredientFacade).should().getIngredients(
+        then(ingredientFacade).should().searchIngredients(
                 IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
                 DEFAULT_WEB_PAGE_REQUEST
         );
     }
 
     @Test
+    void shouldReturnIngredients() {
+        // given
+        var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
+        given(ingredientFacade.getIngredients(DEFAULT_WEB_PAGE_REQUEST))
+                .willReturn(new PageImpl<>(List.of(expectedIngredient), DEFAULT_WEB_PAGE_REQUEST, 1));
+
+        // when & then
+        assertThat(get()
+                .uri(INGREDIENTS_ENDPOINT))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_INGREDIENTS_RESPONSE_RESOURCE));
+    }
+
+    @Test
     void shouldClampPageSizeToMaximum() {
         // given
-        given(ingredientFacade.getIngredients(
-                IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
-                MAX_WEB_PAGE_REQUEST
-        ))
+        given(ingredientFacade.getIngredients(MAX_WEB_PAGE_REQUEST))
                 .willReturn(new PageImpl<>(List.of(), MAX_WEB_PAGE_REQUEST, 0));
 
         // when & then
         assertThat(get()
                 .uri(INGREDIENTS_ENDPOINT)
-                .param("name", IngredientTestConstants.INGREDIENT_SEARCH_INPUT)
                 .param("size", OVERSIZED_WEB_PAGE_SIZE))
                 .hasStatusOk();
-        then(ingredientFacade).should().getIngredients(
-                IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
-                MAX_WEB_PAGE_REQUEST
-        );
+        then(ingredientFacade).should().getIngredients(MAX_WEB_PAGE_REQUEST);
     }
 
     private MockMvcTester.MockMvcRequestBuilder get() {

@@ -16,9 +16,9 @@ this repository here.
   by Flyway. Users can extend the catalog through the ingredient creation API.
   Add later seed data through new migrations instead of editing an applied seed
   migration.
-- Ingredient search requires a non-blank name fragment, normalizes it
-  case-insensitively, and preserves pagination. Missing or blank search input is
-  rejected instead of loading the full catalog.
+- Ingredient listing returns the full paginated catalog. Ingredient search uses
+  a separate `/ingredients/search` endpoint, requires a non-blank name
+  fragment, normalizes it case-insensitively, and preserves pagination.
 - Creating a duplicate ingredient returns a conflict instead of behaving as an
   idempotent create operation. If the product needs idempotent ingredient
   creation later, introduce that as an explicit endpoint or command.

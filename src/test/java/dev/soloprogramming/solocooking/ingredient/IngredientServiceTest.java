@@ -3,11 +3,14 @@
  */
 package dev.soloprogramming.solocooking.ingredient;
 
+import java.util.List;
 import java.util.Set;
 
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
+import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 
 import static dev.soloprogramming.solocooking.common.CommonTestConstants.DEFAULT_PAGEABLE;
@@ -120,7 +123,7 @@ class IngredientServiceTest {
         var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
 
         // when
-        var result = ingredientService.getIngredients(
+        var result = ingredientService.searchIngredients(
                 IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
                 DEFAULT_PAGEABLE
         );
@@ -129,6 +132,28 @@ class IngredientServiceTest {
         assertThat(result.getContent())
                 .usingRecursiveFieldByFieldElementComparator(defaultRecursiveComparisonConfiguration())
                 .containsExactly(expectedIngredient);
+    }
+
+    @Test
+    void shouldReturnIngredients() {
+        // given
+        ingredientRepository.save(IngredientMother.ingredientEntity());
+        var second = ingredientRepository.save(IngredientMother.ingredientEntityWithName(IngredientTestConstants.SECOND_INGREDIENT_NAME));
+        var third = ingredientRepository.save(IngredientMother.ingredientEntityWithName(IngredientTestConstants.THIRD_INGREDIENT_NAME));
+        var expectedIngredients = List.of(
+                IngredientMother.ingredientDtoBuilder().build(),
+                IngredientDTO.builder().id(second.getId()).name(IngredientTestConstants.SECOND_INGREDIENT_NAME).build(),
+                IngredientDTO.builder().id(third.getId()).name(IngredientTestConstants.THIRD_INGREDIENT_NAME).build()
+        );
+        var expectedPage = new PageImpl<>(expectedIngredients, DEFAULT_PAGEABLE, 3);
+
+        // when
+        var result = ingredientService.getIngredients(DEFAULT_PAGEABLE);
+
+        // then
+        assertThat(result)
+                .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
+                .isEqualTo(expectedPage);
     }
 
     @Test

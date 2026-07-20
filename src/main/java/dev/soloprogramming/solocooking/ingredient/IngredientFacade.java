@@ -21,7 +21,9 @@ public interface IngredientFacade {
 
     IngredientDTO createIngredient(@NotNull @Valid CreateIngredientRequest createIngredientRequest);
 
-    Page<IngredientDTO> getIngredients(@NotBlank @Size(max = 255) String name, Pageable pageable);
+    Page<IngredientDTO> getIngredients(Pageable pageable);
+
+    Page<IngredientDTO> searchIngredients(@NotBlank @Size(max = 255) String name, Pageable pageable);
 
     IngredientDTO findById(UUID ingredientId);
 
