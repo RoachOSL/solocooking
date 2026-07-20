@@ -22,6 +22,7 @@ public abstract class BaseIntegrationTest {
             FROM information_schema.tables
             WHERE table_schema = 'public'
               AND table_type = 'BASE TABLE'
+              AND table_name <> 'flyway_schema_history'
             """;
 
     @ServiceConnection

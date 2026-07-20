@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import dev.soloprogramming.solocooking.common.persistence.BaseEntity;
 import jakarta.persistence.Basic;
-import jakarta.persistence.CheckConstraint;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,13 +24,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(
-        name = "recipe_ingredient",
-        check = @CheckConstraint(
-                name = "ck_recipe_ingredient_amount_positive",
-                constraint = "amount > 0"
-        )
-)
+@Table(name = "recipe_ingredient")
 class RecipeIngredientEntity extends BaseEntity {
 
     @Id

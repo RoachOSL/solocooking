@@ -28,10 +28,19 @@ section.
 - Prefer simple, maintainable designs guided by SOLID, DRY, KISS, and YAGNI.
   Favor composition over inheritance when it keeps responsibilities clearer and
   avoids unnecessary coupling.
-- Keep API validation and persistence constraints aligned. Explicitly map String
-  lengths, numeric precision and scale, nullability, and database checks when
-  relying on generated schemas. Cover accepted boundary values with integration
-  tests so a valid request cannot fail at persistence time.
+- Keep API validation, JPA mappings, and the migration-owned database schema
+  aligned. Explicitly map String lengths, numeric precision and scale,
+  nullability, and database checks. Cover accepted boundary values with
+  integration tests so a valid request cannot fail at persistence time.
+- Treat Flyway migrations as the single source of truth for database constraints
+  and indexes. Do not duplicate schema-generating check constraints or indexes in
+  JPA annotations.
+- Review index needs whenever a database relationship, repository query, filter,
+  join, or sort changes. Index known access paths, especially foreign-key columns
+  used to load child collections, and use deterministic index names. Do not add
+  indexes already provided by primary-key or unique constraints. Validate
+  speculative indexes against representative `EXPLAIN ANALYZE` output or
+  production metrics before adding them.
 
 ## Code style
 
@@ -71,6 +80,10 @@ section.
   `{}`. Mark nullable properties explicitly and declare required response
   properties once at the DTO type level with
   `@Schema(requiredProperties = {...})` instead of annotating every field.
+- Update the OpenAPI contract in the same change as every public endpoint,
+  request or response DTO, and serialization-policy change. Keep annotations and
+  springdoc configuration current, and extend `OpenApiContractIT` with assertions
+  for the affected operations and schemas.
 
 ## Test style
 
