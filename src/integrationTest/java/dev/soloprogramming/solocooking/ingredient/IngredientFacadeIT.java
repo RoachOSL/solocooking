@@ -57,12 +57,18 @@ class IngredientFacadeIT extends BaseIntegrationTest {
     }
 
     @Test
-    void shouldReturnIngredientsPage() {
+    void shouldSearchIngredientsByNormalizedNameFragment() {
         // given
         var expectedIngredient = givenExistingIngredient(ingredientFacade);
+        ingredientFacade.createIngredient(CreateIngredientRequest.builder()
+                .name(IngredientTestConstants.SECOND_INGREDIENT_NAME)
+                .build());
 
         // when
-        var result = ingredientFacade.getIngredients(Pageable.unpaged());
+        var result = ingredientFacade.getIngredients(
+                IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
+                Pageable.unpaged()
+        );
 
         // then
         assertThat(result.getContent())

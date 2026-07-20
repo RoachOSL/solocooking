@@ -51,6 +51,7 @@ class OpenApiContractIT extends BaseIntegrationTest {
                 .isEqualTo("deleteRecipe");
         assertOperation(openApi, "/paths/~1ingredients/post", "createIngredient", "201");
         assertOperation(openApi, "/paths/~1ingredients/get", "getIngredients", "200");
+        assertQueryParameter(openApi, "/paths/~1ingredients/get", "name");
         assertOperation(openApi, "/paths/~1ingredients~1{ingredientId}/get", "getIngredient", "200");
 
         var schemas = openApi.at("/components/schemas");
@@ -76,6 +77,21 @@ class OpenApiContractIT extends BaseIntegrationTest {
     private String responseSchemaName(JsonNode openApi, String schemaPointer) {
         var schemaReference = openApi.at(schemaPointer + "/$ref").stringValue();
         return schemaReference.substring(schemaReference.lastIndexOf('/') + 1);
+    }
+
+    private void assertQueryParameter(JsonNode openApi, String operationPointer, String parameterName) {
+        var parameter = StreamSupport.stream(
+                        openApi.at(operationPointer + "/parameters").spliterator(),
+                        false
+                )
+                .filter(candidate -> candidate.path("name").stringValue().equals(parameterName))
+                .findFirst();
+
+        assertThat(parameter).isPresent().get()
+                .satisfies(value -> {
+                    assertThat(value.path("in").stringValue()).isEqualTo("query");
+                    assertThat(value.path("required").booleanValue()).isTrue();
+                });
     }
 
     private void assertRequired(JsonNode schemas, String schemaName, String... expectedRequiredFields) {

@@ -71,18 +71,24 @@ public abstract class InMemoryRepository<T, ID> implements JpaRepository<T, ID> 
 
     @Override
     public Page<T> findAll(Pageable pageable) {
+        return toPage(findAll(), pageable);
+    }
+
+    protected Page<T> toPage(List<T> content, Pageable pageable) {
         if (pageable.getSort().isSorted()) {
             throw unsupported("sorted pagination");
         }
-
-        var allEntities = findAll();
-        var startIndex = Math.toIntExact(pageable.getOffset());
-        if (startIndex >= allEntities.size()) {
-            return new PageImpl<>(List.of(), pageable, allEntities.size());
+        if (pageable.isUnpaged()) {
+            return new PageImpl<>(content);
         }
 
-        var endIndex = Math.min(startIndex + pageable.getPageSize(), allEntities.size());
-        return new PageImpl<>(allEntities.subList(startIndex, endIndex), pageable, allEntities.size());
+        var startIndex = Math.toIntExact(pageable.getOffset());
+        if (startIndex >= content.size()) {
+            return new PageImpl<>(List.of(), pageable, content.size());
+        }
+
+        var endIndex = Math.min(startIndex + pageable.getPageSize(), content.size());
+        return new PageImpl<>(content.subList(startIndex, endIndex), pageable, content.size());
     }
 
     @Override

@@ -17,6 +17,7 @@ class IngredientTestConstants {
     static final String INGREDIENT_STORED_NAME = "eggs";
     static final String NORMALIZED_INGREDIENT_INPUT = "  Extra\tVirgin   Olive\nOil  ";
     static final String NORMALIZED_INGREDIENT_NAME = "extra virgin olive oil";
+    static final String INGREDIENT_SEARCH_INPUT = "  EG  ";
     static final String SECOND_INGREDIENT_NAME = "milk";
     static final String THIRD_INGREDIENT_NAME = "flour";
     static final String DUPLICATED_INGREDIENT_INPUT = "  EGGS  ";
