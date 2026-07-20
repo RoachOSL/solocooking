@@ -47,6 +47,9 @@ class OpenApiContractIT extends BaseIntegrationTest {
         assertOperation(openApi, "/paths/~1recipes/post", "createRecipe", "201");
         assertOperation(openApi, "/paths/~1recipes/get", "getRecipes", "200");
         assertOperation(openApi, "/paths/~1recipes~1{recipeId}/get", "getRecipe", "200");
+        assertOperation(openApi, "/paths/~1recipes~1{recipeId}/put", "updateRecipe", "200");
+        assertThat(openApi.at("/paths/~1recipes~1{recipeId}/put/requestBody/content/application~1json").isMissingNode())
+                .isFalse();
         assertThat(openApi.at("/paths/~1recipes~1{recipeId}/delete/operationId").stringValue())
                 .isEqualTo("deleteRecipe");
         assertOperation(openApi, "/paths/~1ingredients/post", "createIngredient", "201");
@@ -60,6 +63,11 @@ class OpenApiContractIT extends BaseIntegrationTest {
         assertRequired(schemas, "RecipeSummaryDTO", "id", "name", "imageUrl", "description", "updatedAt", "createdAt");
         assertRequired(schemas, "RecipeSectionDTO", "id", "name", "position", "ingredients");
         assertRequired(schemas, "RecipeIngredientDTO", "id", "ingredientId", "amount", "unit", "note", "position");
+        assertRequired(schemas, "UpdateRecipeRequest", "name", "imageUrl", "description", "sections");
+        assertRequired(schemas, "UpdateRecipeSectionRequest", "name", "ingredients");
+        assertRequired(schemas, "UpdateRecipeIngredientRequest", "ingredientId", "amount", "unit");
+        assertOptional(schemas, "UpdateRecipeSectionRequest", "id");
+        assertOptional(schemas, "UpdateRecipeIngredientRequest", "id");
         assertNullable(schemas, "RecipeIngredientDTO", "note");
         assertRequired(schemas, "IngredientDTO", "id", "name");
         assertRequired(schemas, responseSchemaName(openApi, "/paths/~1recipes/get/responses/200/content/application~1json/schema"), "content", "page");
@@ -115,5 +123,12 @@ class OpenApiContractIT extends BaseIntegrationTest {
                 .toList();
 
         assertThat(propertyTypes).containsExactlyInAnyOrder("string", "null");
+    }
+
+    private void assertOptional(JsonNode schemas, String schemaName, String propertyName) {
+        assertThat(schemas.path(schemaName).path("properties").has(propertyName)).isTrue();
+        assertThat(StreamSupport.stream(schemas.path(schemaName).path("required").spliterator(), false)
+                .map(JsonNode::stringValue))
+                .doesNotContain(propertyName);
     }
 }

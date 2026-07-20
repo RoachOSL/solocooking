@@ -8,6 +8,7 @@ import java.util.UUID;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSummaryDTO;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
+import dev.soloprogramming.solocooking.recipe.model.request.UpdateRecipeRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,8 @@ import org.springframework.validation.annotation.Validated;
 public interface RecipeFacade {
 
     RecipeDTO createRecipe(@NotNull @Valid CreateRecipeRequest createRecipeRequest);
+
+    RecipeDTO updateRecipe(UUID recipeId, @NotNull @Valid UpdateRecipeRequest updateRecipeRequest);
 
     Page<RecipeSummaryDTO> getRecipes(Pageable pageable);
 

@@ -15,6 +15,9 @@ import dev.soloprogramming.solocooking.recipe.exception.RecipeNotFoundException;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeDTO;
 import dev.soloprogramming.solocooking.recipe.model.dto.RecipeSummaryDTO;
 import dev.soloprogramming.solocooking.recipe.model.request.CreateRecipeRequest;
+import dev.soloprogramming.solocooking.recipe.model.request.UpdateRecipeIngredientRequest;
+import dev.soloprogramming.solocooking.recipe.model.request.UpdateRecipeRequest;
+import dev.soloprogramming.solocooking.recipe.model.request.UpdateRecipeSectionRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -91,6 +94,121 @@ class RecipeFacadeIT extends BaseIntegrationTest {
         assertThat(persistedRecipe)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(createdRecipe);
+    }
+
+    @Test
+    void shouldUpdateAndPersistEntireRecipeAggregate() {
+        // given
+        var ingredientId = givenExistingIngredientId();
+        var initialSection = RecipeMother.createRecipeSectionRequestBuilder(ingredientId).build();
+        var createdRecipeId = recipeFacade.createRecipe(RecipeMother.createRecipeRequestBuilder(ingredientId)
+                .sections(List.of(initialSection, initialSection))
+                .build()).id();
+        var originalRecipe = recipeFacade.findById(createdRecipeId);
+        var removedSection = originalRecipe.sections().getFirst();
+        var retainedSection = originalRecipe.sections().get(1);
+        var retainedIngredient = retainedSection.ingredients().getFirst();
+        var newIngredient = UpdateRecipeIngredientRequest.builder()
+                .ingredientId(ingredientId)
+                .amount(BigDecimal.ONE)
+                .unit("piece")
+                .note(null)
+                .build();
+        var updatedIngredient = UpdateRecipeIngredientRequest.builder()
+                .id(retainedIngredient.id())
+                .ingredientId(ingredientId)
+                .amount(BigDecimal.TEN)
+                .unit("grams")
+                .note("updated")
+                .build();
+        var updatedSection = UpdateRecipeSectionRequest.builder()
+                .id(retainedSection.id())
+                .name("Retained section")
+                .ingredients(List.of(newIngredient, updatedIngredient))
+                .build();
+        var addedSection = UpdateRecipeSectionRequest.builder()
+                .name("Added section")
+                .ingredients(List.of(newIngredient))
+                .build();
+        var request = UpdateRecipeRequest.builder()
+                .name("Updated recipe")
+                .imageUrl("https://example.com/updated.jpg")
+                .description("Updated description")
+                .sections(List.of(updatedSection, addedSection))
+                .build();
+
+        // when
+        var updatedRecipe = recipeFacade.updateRecipe(originalRecipe.id(), request);
+        var persistedRecipe = recipeFacade.findById(originalRecipe.id());
+
+        // then
+        assertThat(persistedRecipe)
+                .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
+                .isEqualTo(updatedRecipe);
+        assertThat(updatedRecipe.createdAt()).isEqualTo(originalRecipe.createdAt());
+        assertThat(updatedRecipe.sections()).hasSize(2);
+        assertThat(updatedRecipe.sections().getFirst().id()).isEqualTo(retainedSection.id());
+        assertThat(updatedRecipe.sections().getFirst().position()).isZero();
+        assertThat(updatedRecipe.sections().get(1).id()).isNotNull();
+        assertThat(updatedRecipe.sections().get(1).position()).isEqualTo(1);
+        var newIngredientId = updatedRecipe.sections().getFirst().ingredients().getFirst().id();
+        var addedSectionIngredientId = updatedRecipe.sections().get(1).ingredients().getFirst().id();
+        assertThat(newIngredientId).isNotNull().isNotEqualTo(retainedIngredient.id());
+        assertThat(addedSectionIngredientId)
+                .isNotNull()
+                .isNotEqualTo(retainedIngredient.id())
+                .isNotEqualTo(newIngredientId);
+        assertThat(updatedRecipe.sections().getFirst().ingredients())
+                .extracting(ingredient -> ingredient.id(), ingredient -> ingredient.position())
+                .containsExactly(
+                        org.assertj.core.groups.Tuple.tuple(newIngredientId, 0),
+                        org.assertj.core.groups.Tuple.tuple(retainedIngredient.id(), 1)
+                );
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM recipe_section WHERE id = ?",
+                Integer.class,
+                removedSection.id()
+        )).isZero();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM recipe_ingredient WHERE id = ?",
+                Integer.class,
+                removedSection.ingredients().getFirst().id()
+        )).isZero();
+    }
+
+    @Test
+    void shouldRollbackUpdateWhenIngredientDoesNotExist() {
+        // given
+        var createdRecipe = givenExistingRecipe();
+        var section = createdRecipe.sections().getFirst();
+        var ingredient = section.ingredients().getFirst();
+        var request = RecipeMother.updateRecipeRequestBuilder(RecipeTestConstants.MISSING_INGREDIENT_ID)
+                .name("Should not persist")
+                .sections(List.of(RecipeMother.updateRecipeSectionRequestBuilder(RecipeTestConstants.MISSING_INGREDIENT_ID)
+                        .id(section.id())
+                        .ingredients(List.of(RecipeMother.updateRecipeIngredientRequestBuilder(
+                                        RecipeTestConstants.MISSING_INGREDIENT_ID)
+                                .id(ingredient.id())
+                                .build()))
+                        .build()))
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> recipeFacade.updateRecipe(createdRecipe.id(), request))
+                .isInstanceOf(IngredientNotFoundException.class);
+        assertThat(recipeFacade.findById(createdRecipe.id()))
+                .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
+                .isEqualTo(createdRecipe);
+    }
+
+    @Test
+    void shouldRejectUpdatingMissingRecipe() {
+        // given
+        var request = RecipeMother.updateRecipeRequestBuilder().build();
+
+        // when & then
+        assertThatThrownBy(() -> recipeFacade.updateRecipe(RecipeTestConstants.MISSING_RECIPE_ID, request))
+                .isInstanceOf(RecipeNotFoundException.class);
     }
 
     @ParameterizedTest
