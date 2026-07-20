@@ -69,12 +69,21 @@ this repository here.
 - The public API currently allows CORS requests from any origin without
   credentials. Revisit allowed origins, credentials, and CSRF together when
   introducing cookie or session authentication.
-- Database migrations are not configured while the project has no persistent
-  deployment environment. Introduce a migration tool and replace Hibernate
-  schema updates with validation before creating the first persistent
-  environment. Move database check constraints into migrations and remove the
-  corresponding Hibernate `@CheckConstraint` annotations so migrations remain
-  the single source of truth for the schema.
+- Flyway SQL migrations are the single source of truth for the PostgreSQL schema.
+  Hibernate validates the mappings against that schema and must not create or
+  update it. Use sequential versioned migrations such as `V1`, `V2`, and `V3`,
+  and fix an applied schema change by rolling forward with a new migration.
+- Before the first persistent deployment, development migrations may be rebuilt
+  or squashed into a new `V1__create_initial_schema.sql` only while every database
+  that used them is disposable and can be recreated. After the first persistent
+  deployment, never edit, delete, reorder, or squash applied versioned
+  migrations. If fresh installations later need a shorter entry point, add a
+  Flyway baseline migration while retaining the old versioned migrations for
+  existing databases.
+- Store database check constraints and indexes in Flyway migrations rather than
+  schema-generating Hibernate annotations. Local databases created before Flyway
+  was introduced must be recreated once instead of being adopted through
+  `baseline-on-migrate`.
 
 ## Continuous integration and delivery
 
