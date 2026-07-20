@@ -115,6 +115,26 @@ class IngredientServiceTest {
     }
 
     @Test
+    void shouldSearchIngredientsByNormalizedNameFragment() {
+        // given
+        ingredientRepository.save(IngredientMother.ingredientEntity());
+        ingredientRepository.save(IngredientMother.ingredientEntityWithName(IngredientTestConstants.SECOND_INGREDIENT_NAME));
+        ingredientRepository.save(IngredientMother.ingredientEntityWithName(IngredientTestConstants.THIRD_INGREDIENT_NAME));
+        var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
+
+        // when
+        var result = ingredientService.searchIngredients(
+                IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
+                DEFAULT_PAGEABLE
+        );
+
+        // then
+        assertThat(result.getContent())
+                .usingRecursiveFieldByFieldElementComparator(defaultRecursiveComparisonConfiguration())
+                .containsExactly(expectedIngredient);
+    }
+
+    @Test
     void shouldReturnIngredients() {
         // given
         ingredientRepository.save(IngredientMother.ingredientEntity());

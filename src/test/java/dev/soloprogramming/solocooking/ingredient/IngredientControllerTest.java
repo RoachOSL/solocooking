@@ -28,6 +28,7 @@ import static org.mockito.BDDMockito.then;
 class IngredientControllerTest {
 
     private static final String INGREDIENTS_ENDPOINT = API_SERVLET_PATH + "/ingredients";
+    private static final String INGREDIENT_SEARCH_ENDPOINT = INGREDIENTS_ENDPOINT + "/search";
     private static final String INGREDIENT_BY_ID_ENDPOINT = API_SERVLET_PATH + "/ingredients/{ingredientId}";
     private static final String GET_INGREDIENT_RESPONSE_RESOURCE = "controller/ingredient/get-ingredient-response.json";
     private static final String GET_INGREDIENTS_RESPONSE_RESOURCE = "controller/ingredient/get-ingredients-response.json";
@@ -70,6 +71,51 @@ class IngredientControllerTest {
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_INGREDIENT_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldRejectMissingIngredientNameSearch() {
+        // when
+        assertThat(get()
+                .uri(INGREDIENT_SEARCH_ENDPOINT))
+                .hasStatus(HttpStatus.BAD_REQUEST);
+
+        // then
+        then(ingredientFacade).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldRejectBlankIngredientNameSearch() {
+        // when
+        assertThat(get()
+                .uri(INGREDIENT_SEARCH_ENDPOINT)
+                .param("name", " "))
+                .hasStatus(HttpStatus.BAD_REQUEST);
+
+        // then
+        then(ingredientFacade).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldSearchIngredientsByName() {
+        // given
+        var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
+        given(ingredientFacade.searchIngredients(
+                IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
+                DEFAULT_WEB_PAGE_REQUEST
+        )).willReturn(new PageImpl<>(List.of(expectedIngredient), DEFAULT_WEB_PAGE_REQUEST, 1));
+
+        // when & then
+        assertThat(get()
+                .uri(INGREDIENT_SEARCH_ENDPOINT)
+                .param("name", IngredientTestConstants.INGREDIENT_SEARCH_INPUT))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_INGREDIENTS_RESPONSE_RESOURCE));
+        then(ingredientFacade).should().searchIngredients(
+                IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
+                DEFAULT_WEB_PAGE_REQUEST
+        );
     }
 
     @Test

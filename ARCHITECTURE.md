@@ -68,6 +68,11 @@ section.
   `deleteById` when the controller class already names the resource. Keep read
   methods explicit, for example `getRecipe` and `getRecipes`, because the
   singular/plural distinction improves scanability.
+- Keep controller endpoint declarations compact. Put short `@Operation`
+  annotations on one line. When an annotated method signature must wrap, keep
+  the first parameter on the declaration line and align continuation parameters
+  instead of placing every annotation and parameter on separate lines. Expand
+  declarations only when the compact form would be difficult to read.
 - Keep generated OpenAPI clients stable by assigning every endpoint an explicit,
   resource-qualified `operationId`. Java controller method renames must not
   change the published operation name.

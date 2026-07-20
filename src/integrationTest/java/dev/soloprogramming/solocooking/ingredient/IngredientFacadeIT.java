@@ -10,7 +10,9 @@ import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import dev.soloprogramming.solocooking.ingredient.model.request.CreateIngredientRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
 import static dev.soloprogramming.solocooking.ingredient.IngredientTestFixtures.givenExistingIngredient;
@@ -57,17 +59,47 @@ class IngredientFacadeIT extends BaseIntegrationTest {
     }
 
     @Test
-    void shouldReturnIngredientsPage() {
+    void shouldSearchIngredientsByNormalizedNameFragment() {
         // given
         var expectedIngredient = givenExistingIngredient(ingredientFacade);
+        ingredientFacade.createIngredient(CreateIngredientRequest.builder()
+                .name(IngredientTestConstants.SECOND_INGREDIENT_NAME)
+                .build());
 
         // when
-        var result = ingredientFacade.getIngredients(Pageable.unpaged());
+        var result = ingredientFacade.searchIngredients(
+                IngredientTestConstants.INGREDIENT_SEARCH_INPUT,
+                Pageable.unpaged()
+        );
 
         // then
         assertThat(result.getContent())
                 .usingRecursiveFieldByFieldElementComparator(defaultRecursiveComparisonConfiguration())
                 .containsExactly(expectedIngredient);
+    }
+
+    @Test
+    void shouldReturnIngredientsPage() {
+        // given
+        ingredientFacade.createIngredient(CreateIngredientRequest.builder()
+                .name(IngredientTestConstants.SECOND_INGREDIENT_NAME)
+                .build());
+        var expectedIngredient = ingredientFacade.createIngredient(CreateIngredientRequest.builder()
+                .name(IngredientTestConstants.THIRD_INGREDIENT_NAME)
+                .build());
+        var pageable = PageRequest.of(0, 1, Sort.by("name"));
+
+        // when
+        var result = ingredientFacade.getIngredients(pageable);
+
+        // then
+        assertThat(result.getContent())
+                .usingRecursiveFieldByFieldElementComparator(defaultRecursiveComparisonConfiguration())
+                .containsExactly(expectedIngredient);
+        assertThat(result.getNumber()).isZero();
+        assertThat(result.getSize()).isOne();
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getTotalPages()).isEqualTo(2);
     }
 
     @Test

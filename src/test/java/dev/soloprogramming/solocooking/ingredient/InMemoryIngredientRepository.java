@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import dev.soloprogramming.solocooking.common.InMemoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 final class InMemoryIngredientRepository extends InMemoryRepository<IngredientEntity, UUID>
         implements IngredientRepository {
@@ -16,6 +18,14 @@ final class InMemoryIngredientRepository extends InMemoryRepository<IngredientEn
     public boolean existsByName(String name) {
         return findAll().stream()
                 .anyMatch(ingredient -> ingredient.getName().equals(name));
+    }
+
+    @Override
+    public Page<IngredientEntity> findAllByNameContaining(String name, Pageable pageable) {
+        var matchingIngredients = findAll().stream()
+                .filter(ingredient -> ingredient.getName().contains(name))
+                .toList();
+        return toPage(matchingIngredients, pageable);
     }
 
     @Override

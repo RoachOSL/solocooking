@@ -12,6 +12,13 @@ this repository here.
   display name distinct from the searchable unique name.
 - Ingredient name normalization trims surrounding whitespace, lowercases with
   `Locale.ROOT`, and collapses internal whitespace sequences to a single space.
+- The shared ingredient catalog starts with 30 common English ingredients seeded
+  by Flyway. Users can extend the catalog through the ingredient creation API.
+  Add later seed data through new migrations instead of editing an applied seed
+  migration.
+- Ingredient listing returns the full paginated catalog. Ingredient search uses
+  a separate `/ingredients/search` endpoint, requires a non-blank name
+  fragment, normalizes it case-insensitively, and preserves pagination.
 - Creating a duplicate ingredient returns a conflict instead of behaving as an
   idempotent create operation. If the product needs idempotent ingredient
   creation later, introduce that as an explicit endpoint or command.

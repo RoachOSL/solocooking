@@ -33,41 +33,29 @@ final class RecipeController {
 
     private final RecipeFacade recipeFacade;
 
-    @Operation(
-            operationId = "createRecipe",
-            summary = "Creates new recipe"
-    )
+    @Operation(operationId = "createRecipe", summary = "Creates new recipe")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     RecipeDTO create(@Valid @RequestBody CreateRecipeRequest createRecipeRequest) {
         return recipeFacade.createRecipe(createRecipeRequest);
     }
 
-    @Operation(
-            operationId = "getRecipes",
-            summary = "Get all recipes",
-            description = "Returns a paginated list of all available recipes"
-    )
+    @Operation(operationId = "getRecipes", summary = "Get all recipes",
+               description = "Returns a paginated list of all available recipes")
     @GetMapping
     PageResponse<RecipeSummaryDTO> getRecipes(@ParameterObject Pageable pageable) {
         return PageResponse.from(recipeFacade.getRecipes(pageable));
     }
 
-    @Operation(
-            operationId = "getRecipe",
-            summary = "Get recipe by id",
-            description = "Returns a recipe for given id"
-    )
+    @Operation(operationId = "getRecipe", summary = "Get recipe by id",
+               description = "Returns a recipe for given id")
     @GetMapping("/{recipeId}")
     RecipeDTO getRecipe(@PathVariable UUID recipeId) {
         return recipeFacade.findById(recipeId);
     }
 
-    @Operation(
-            operationId = "deleteRecipe",
-            summary = "Delete recipe by id",
-            description = "Deletes the recipe when it exists. Repeated requests return no content."
-    )
+    @Operation(operationId = "deleteRecipe", summary = "Delete recipe by id",
+               description = "Deletes the recipe when it exists. Repeated requests return no content.")
     @DeleteMapping("/{recipeId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteById(@PathVariable UUID recipeId) {
