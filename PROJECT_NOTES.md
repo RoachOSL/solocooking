@@ -41,6 +41,19 @@ this repository here.
   the order of the submitted lists.
 - Recipe create requests require at least one section, and each section requires
   at least one ingredient.
+- Recipe updates replace the full aggregate through `PUT /recipes/{recipeId}`.
+  Existing sections and recipe ingredients retain identity when their IDs are
+  supplied. Missing IDs create children, omitted children are removed, and list
+  order defines positions. Existing recipe ingredients cannot move between
+  sections; clients remove and recreate them without an ID. Updates use
+  last-write-wins without optimistic locking.
+- Recipe updates containing new sections or recipe ingredients without IDs are
+  idempotent only at the logical aggregate-content level. Repeating such a
+  request can replace those children with newly generated backend IDs. This is
+  an accepted v1 tradeoff. After an ambiguous update failure, clients should
+  fetch the recipe, compare its logical content with the intended state, and use
+  the server-returned child IDs as authoritative instead of automatically
+  retrying the update.
 - Do not use JPA `@OrderBy` on recipe collections. Sort by `position`
   explicitly at the use-case or API boundary when ordered output is needed.
 - Create recipe aggregates through `RecipeFactory`. The factory translates

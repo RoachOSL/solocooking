@@ -28,6 +28,11 @@ section.
 - Prefer simple, maintainable designs guided by SOLID, DRY, KISS, and YAGNI.
   Favor composition over inheritance when it keeps responsibilities clearer and
   avoids unnecessary coupling.
+- Prefer idempotent operations whenever practical, especially at external API
+  and retry boundaries. Repeating the same command should have the same intended
+  domain effect as executing it once. When strict idempotency would add
+  disproportionate complexity, document the tradeoff and define a safe recovery
+  path.
 - Keep API validation, JPA mappings, and the migration-owned database schema
   aligned. Explicitly map String lengths, numeric precision and scale,
   nullability, and database checks. Cover accepted boundary values with
@@ -44,6 +49,12 @@ section.
 
 ## Code style
 
+- Order constructors before methods. Order methods by decreasing visibility:
+  `public`, `protected`, package-private, then `private`. Within each visibility
+  group, keep a logical functional order and keep overloads contiguous. Order
+  non-public helpers by the entry point they support, following call flow from
+  higher-level orchestration to lower-level details. Place helpers shared by
+  multiple entry points with the first natural group or in a final shared group.
 - Use `var` for local variables when the type is obvious from the right-hand side
   and readability does not suffer.
 - Use descriptive variable names that clearly communicate meaning and purpose.

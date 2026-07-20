@@ -62,6 +62,25 @@ class RecipeControllerTest {
     }
 
     @Test
+    void shouldUpdateRecipe() {
+        // given
+        var updateRecipeRequest = RecipeMother.updateRecipeRequestBuilder().build();
+        var expectedRecipe = RecipeMother.recipeDtoBuilder().build();
+        given(recipeFacade.updateRecipe(RecipeTestConstants.RECIPE_ID, updateRecipeRequest))
+                .willReturn(expectedRecipe);
+
+        // when & then
+        assertThat(put()
+                .uri(RECIPE_BY_ID_ENDPOINT, RecipeTestConstants.RECIPE_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRecipeRequest)))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_RECIPE_RESPONSE_RESOURCE));
+        then(recipeFacade).should().updateRecipe(RecipeTestConstants.RECIPE_ID, updateRecipeRequest);
+    }
+
+    @Test
     void shouldReturnRecipeById() {
         // given
         var expectedRecipe = RecipeMother.recipeDtoBuilder().build();
@@ -148,6 +167,10 @@ class RecipeControllerTest {
 
     private MockMvcTester.MockMvcRequestBuilder post() {
         return mockMvcTester.post().servletPath(API_SERVLET_PATH);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder put() {
+        return mockMvcTester.put().servletPath(API_SERVLET_PATH);
     }
 
     private MockMvcTester.MockMvcRequestBuilder delete() {
