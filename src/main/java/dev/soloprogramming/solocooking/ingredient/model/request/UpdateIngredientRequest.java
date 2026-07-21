@@ -11,9 +11,9 @@ import lombok.Builder;
 @Builder
 public record UpdateIngredientRequest(
 
-        @Schema(nullable = true)
-        @Pattern(regexp = "(?s).*\\S.*")
-        @Size(max = 255)
+        @Schema(nullable = true, minLength = 1, maxLength = 255)
+        @Pattern(regexp = "(?s).*\\S.*", message = "must not be blank")
+        @Size(min = 1, max = 255)
         String name
 ) {
 }

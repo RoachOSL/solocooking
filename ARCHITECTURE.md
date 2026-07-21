@@ -100,6 +100,17 @@ section.
 - Keep generated OpenAPI clients stable by assigning every endpoint an explicit,
   resource-qualified `operationId`. Java controller method renames must not
   change the published operation name.
+- Define every HTTP resource through a hand-written, code-first `*Api` interface.
+  Keep Spring MVC mappings, request validation, OpenAPI operations, and documented
+  responses on that interface. The `@RestController` implements the interface and
+  contains only request delegation and implementation logic.
+- Document domain error responses explicitly because springdoc cannot infer
+  statuses thrown from service code. Reuse shared OpenAPI `ProblemDetail`
+  response components instead of duplicating complete error schemas on each
+  operation.
+- Keep runtime error bodies and their OpenAPI schemas sourced from the same typed
+  model when an error extends standard `ProblemDetail`. Protect both the generated
+  schema and an actual serialized HTTP response with contract tests.
 - For a JSON-only API, configure `application/json` as the global springdoc
   default response media type. Declare `produces` on an endpoint only when it
   differs from that default.

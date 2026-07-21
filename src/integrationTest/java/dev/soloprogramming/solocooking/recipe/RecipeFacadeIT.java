@@ -29,6 +29,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RecipeFacadeIT extends BaseIntegrationTest {
@@ -295,11 +296,12 @@ class RecipeFacadeIT extends BaseIntegrationTest {
         // given
         var recipe = givenExistingRecipe();
 
-        // when
-        recipeFacade.deleteById(recipe.id());
-        recipeFacade.deleteById(recipe.id());
+        // when & then
+        assertThatCode(() -> {
+            recipeFacade.deleteById(recipe.id());
+            recipeFacade.deleteById(recipe.id());
+        }).doesNotThrowAnyException();
 
-        // then
         assertThatThrownBy(() -> recipeFacade.findById(recipe.id()))
                 .isInstanceOf(RecipeNotFoundException.class);
     }

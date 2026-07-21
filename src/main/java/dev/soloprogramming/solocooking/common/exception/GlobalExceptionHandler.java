@@ -27,14 +27,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request) {
 
-        var body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Request validation failed.");
-        body.setTitle("Validation failed");
-
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage())
         );
-        body.setProperty("errors", errors);
+        var body = BadRequestProblemDetail.forValidation(errors);
 
         return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
     }
