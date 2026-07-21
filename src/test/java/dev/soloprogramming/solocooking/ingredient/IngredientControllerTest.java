@@ -5,6 +5,7 @@ package dev.soloprogramming.solocooking.ingredient;
 
 import java.util.List;
 
+import dev.soloprogramming.solocooking.ingredient.model.request.UpdateIngredientRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -57,6 +58,85 @@ class IngredientControllerTest {
                 .hasStatus(HttpStatus.CREATED)
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_INGREDIENT_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldUpdateIngredient() {
+        // given
+        var updateRequest = IngredientMother.updateIngredientRequestBuilder().build();
+        var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
+        given(ingredientFacade.updateIngredient(IngredientTestConstants.INGREDIENT_ID, updateRequest))
+                .willReturn(expectedIngredient);
+
+        // when & then
+        assertThat(patch()
+                .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_INGREDIENT_RESPONSE_RESOURCE));
+        then(ingredientFacade).should().updateIngredient(IngredientTestConstants.INGREDIENT_ID, updateRequest);
+    }
+
+    @Test
+    void shouldDelegateNullIngredientNameUpdate() {
+        // given
+        var updateRequest = UpdateIngredientRequest.builder().name(null).build();
+        var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
+        given(ingredientFacade.updateIngredient(IngredientTestConstants.INGREDIENT_ID, updateRequest))
+                .willReturn(expectedIngredient);
+
+        // when & then
+        assertThat(patch()
+                .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+                .hasStatusOk();
+        then(ingredientFacade).should().updateIngredient(IngredientTestConstants.INGREDIENT_ID, updateRequest);
+    }
+
+    @Test
+    void shouldRejectBlankIngredientNameUpdate() {
+        // given
+        var updateRequest = UpdateIngredientRequest.builder().name(" ").build();
+
+        // when
+        assertThat(patch()
+                .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+                .hasStatus(HttpStatus.BAD_REQUEST);
+
+        // then
+        then(ingredientFacade).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldRejectOversizedIngredientNameUpdate() {
+        // given
+        var updateRequest = UpdateIngredientRequest.builder().name("i".repeat(256)).build();
+
+        // when
+        assertThat(patch()
+                .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+                .hasStatus(HttpStatus.BAD_REQUEST);
+
+        // then
+        then(ingredientFacade).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldDeleteIngredient() {
+        // when
+        assertThat(delete()
+                .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID))
+                .hasStatus(HttpStatus.NO_CONTENT);
+
+        // then
+        then(ingredientFacade).should().deleteById(IngredientTestConstants.INGREDIENT_ID);
     }
 
     @Test
@@ -153,5 +233,13 @@ class IngredientControllerTest {
 
     private MockMvcTester.MockMvcRequestBuilder post() {
         return mockMvcTester.post().servletPath(API_SERVLET_PATH);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder patch() {
+        return mockMvcTester.patch().servletPath(API_SERVLET_PATH);
+    }
+
+    private MockMvcTester.MockMvcRequestBuilder delete() {
+        return mockMvcTester.delete().servletPath(API_SERVLET_PATH);
     }
 }

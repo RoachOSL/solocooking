@@ -34,6 +34,10 @@ final class InMemoryIngredientRepository extends InMemoryRepository<IngredientEn
     }
 
     @Override
+    public void flush() {
+    }
+
+    @Override
     protected UUID getId(IngredientEntity ingredientEntity) {
         return ingredientEntity.getId();
     }
