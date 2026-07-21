@@ -3,15 +3,19 @@
  */
 package dev.soloprogramming.solocooking.ingredient.exception;
 
+import java.net.URI;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 public class IngredientAlreadyExistsException extends ResponseStatusException {
 
+    private static final URI TYPE = URI.create("urn:solocooking:error:ingredient-already-exists");
     private static final String INGREDIENT_ALREADY_EXISTS_MESSAGE = "Ingredient [%s] already exists.";
 
     private IngredientAlreadyExistsException(String message) {
         super(HttpStatus.CONFLICT, message);
+        getBody().setType(TYPE);
     }
 
     public static IngredientAlreadyExistsException byName(String name) {

@@ -1,0 +1,7 @@
+{
+  "type": "urn:solocooking:error:ingredient-in-use",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "Ingredient cannot be deleted because it is used by a recipe.",
+  "instance": "/api/ingredients/39f9be9f-88f2-4a50-bc83-97af6016c509"
+}

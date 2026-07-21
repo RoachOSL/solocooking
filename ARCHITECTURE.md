@@ -111,6 +111,9 @@ section.
 - Keep runtime error bodies and their OpenAPI schemas sourced from the same typed
   model when an error extends standard `ProblemDetail`. Protect both the generated
   schema and an actual serialized HTTP response with contract tests.
+- Give domain errors a stable `ProblemDetail.type` URI and let clients branch on
+  that value instead of parsing `title` or `detail`. Keep `detail` human-readable
+  and safe to display; do not expose internal identifiers unless users need them.
 - For a JSON-only API, configure `application/json` as the global springdoc
   default response media type. Declare `produces` on an endpoint only when it
   differs from that default.
