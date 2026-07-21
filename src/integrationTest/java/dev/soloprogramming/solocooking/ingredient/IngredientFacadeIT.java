@@ -5,9 +5,13 @@ package dev.soloprogramming.solocooking.ingredient;
 
 import dev.soloprogramming.solocooking.common.BaseIntegrationTest;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
+import dev.soloprogramming.solocooking.ingredient.exception.IngredientInUseException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
 import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import dev.soloprogramming.solocooking.ingredient.model.request.CreateIngredientRequest;
+import dev.soloprogramming.solocooking.ingredient.model.request.UpdateIngredientRequest;
+import dev.soloprogramming.solocooking.recipe.RecipeFacade;
+import dev.soloprogramming.solocooking.recipe.RecipeTestFixtures;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +27,9 @@ class IngredientFacadeIT extends BaseIntegrationTest {
 
     @Autowired
     private IngredientFacade ingredientFacade;
+
+    @Autowired
+    private RecipeFacade recipeFacade;
 
     @Test
     void shouldCreateIngredient() {
@@ -56,6 +63,49 @@ class IngredientFacadeIT extends BaseIntegrationTest {
                 .isInstanceOfSatisfying(IngredientAlreadyExistsException.class, exception ->
                         assertThat(exception.getReason()).isEqualTo(IngredientTestConstants.DUPLICATED_INGREDIENT_MESSAGE)
                 );
+    }
+
+    @Test
+    void shouldPersistIngredientUpdate() {
+        // given
+        var ingredient = givenExistingIngredient(ingredientFacade);
+        var request = UpdateIngredientRequest.builder()
+                .name(IngredientTestConstants.NORMALIZED_INGREDIENT_INPUT)
+                .build();
+
+        // when
+        var updatedIngredient = ingredientFacade.updateIngredient(ingredient.id(), request);
+        var persistedIngredient = ingredientFacade.findById(ingredient.id());
+
+        // then
+        assertThat(updatedIngredient.name()).isEqualTo(IngredientTestConstants.NORMALIZED_INGREDIENT_NAME);
+        assertThat(persistedIngredient).isEqualTo(updatedIngredient);
+    }
+
+    @Test
+    void shouldDeleteIngredientIdempotently() {
+        // given
+        var ingredient = givenExistingIngredient(ingredientFacade);
+
+        // when
+        ingredientFacade.deleteById(ingredient.id());
+        ingredientFacade.deleteById(ingredient.id());
+
+        // then
+        assertThatThrownBy(() -> ingredientFacade.findById(ingredient.id()))
+                .isInstanceOf(IngredientNotFoundException.class);
+    }
+
+    @Test
+    void shouldRejectDeletingIngredientUsedByRecipe() {
+        // given
+        var ingredient = givenExistingIngredient(ingredientFacade);
+        RecipeTestFixtures.givenExistingRecipe(recipeFacade, ingredient.id());
+
+        // when & then
+        assertThatThrownBy(() -> ingredientFacade.deleteById(ingredient.id()))
+                .isInstanceOf(IngredientInUseException.class);
+        assertThat(ingredientFacade.findById(ingredient.id())).isEqualTo(ingredient);
     }
 
     @Test

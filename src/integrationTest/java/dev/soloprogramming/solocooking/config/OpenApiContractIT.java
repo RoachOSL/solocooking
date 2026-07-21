@@ -53,10 +53,20 @@ class OpenApiContractIT extends BaseIntegrationTest {
         assertThat(openApi.at("/paths/~1recipes~1{recipeId}/delete/operationId").stringValue())
                 .isEqualTo("deleteRecipe");
         assertOperation(openApi, "/paths/~1ingredients/post", "createIngredient", "201");
+        assertProblemDetailResponse(openApi, "/paths/~1ingredients/post", "409");
         assertOperation(openApi, "/paths/~1ingredients/get", "getIngredients", "200");
         assertOperation(openApi, "/paths/~1ingredients~1search/get", "searchIngredients", "200");
         assertQueryParameter(openApi, "/paths/~1ingredients~1search/get", "name");
         assertOperation(openApi, "/paths/~1ingredients~1{ingredientId}/get", "getIngredient", "200");
+        assertOperation(openApi, "/paths/~1ingredients~1{ingredientId}/patch", "updateIngredient", "200");
+        assertProblemDetailResponse(openApi, "/paths/~1ingredients~1{ingredientId}/patch", "400");
+        assertProblemDetailResponse(openApi, "/paths/~1ingredients~1{ingredientId}/patch", "404");
+        assertProblemDetailResponse(openApi, "/paths/~1ingredients~1{ingredientId}/patch", "409");
+        assertThat(openApi.at("/paths/~1ingredients~1{ingredientId}/delete/operationId").stringValue())
+                .isEqualTo("deleteIngredient");
+        assertThat(openApi.at("/paths/~1ingredients~1{ingredientId}/delete/responses/204").isMissingNode())
+                .isFalse();
+        assertProblemDetailResponse(openApi, "/paths/~1ingredients~1{ingredientId}/delete", "409");
 
         var schemas = openApi.at("/components/schemas");
         assertRequired(schemas, "RecipeDTO", "id", "name", "imageUrl", "description", "sections", "updatedAt", "createdAt");
@@ -70,6 +80,8 @@ class OpenApiContractIT extends BaseIntegrationTest {
         assertOptional(schemas, "UpdateRecipeIngredientRequest", "id");
         assertNullable(schemas, "RecipeIngredientDTO", "note");
         assertRequired(schemas, "IngredientDTO", "id", "name");
+        assertOptional(schemas, "UpdateIngredientRequest", "name");
+        assertNullable(schemas, "UpdateIngredientRequest", "name");
         assertRequired(schemas, responseSchemaName(openApi, "/paths/~1recipes/get/responses/200/content/application~1json/schema"), "content", "page");
         assertRequired(schemas, responseSchemaName(openApi, "/paths/~1ingredients/get/responses/200/content/application~1json/schema"), "content", "page");
         assertRequired(schemas, "PageMetadata", "number", "size", "totalElements", "totalPages");
@@ -86,6 +98,15 @@ class OpenApiContractIT extends BaseIntegrationTest {
     private String responseSchemaName(JsonNode openApi, String schemaPointer) {
         var schemaReference = openApi.at(schemaPointer + "/$ref").stringValue();
         return schemaReference.substring(schemaReference.lastIndexOf('/') + 1);
+    }
+
+    private void assertProblemDetailResponse(JsonNode openApi, String operationPointer, String responseStatus) {
+        var schemaReference = openApi.at(operationPointer
+                + "/responses/"
+                + responseStatus
+                + "/content/application~1json/schema/$ref");
+
+        assertThat(schemaReference.stringValue()).endsWith("/ProblemDetail");
     }
 
     private void assertQueryParameter(JsonNode openApi, String operationPointer, String parameterName) {

@@ -12,6 +12,19 @@ section.
   Do not add AI co-author trailers, generation footers, or similar attribution
   to commits, pull requests, source files, or documentation.
 
+## Security
+
+- Never add secrets to source code, configuration committed to the repository,
+  tests, fixtures, documentation, logs, or Git history. This includes API keys,
+  access tokens, passwords, private keys, private certificates, and connection
+  strings containing credentials.
+- Supply secrets through environment variables or an approved secret manager.
+  Keep local secret files outside version control and provide only sanitized
+  templates with placeholder values.
+- Use clearly fictitious values in examples and test data. If a secret is
+  exposed, revoke or rotate it immediately; removing it from the latest revision
+  is not sufficient because it remains in Git history.
+
 ## Architecture
 
 - Keep module boundaries explicit and independent. Internal implementation

@@ -5,6 +5,7 @@ package dev.soloprogramming.solocooking.ingredient;
 
 import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import dev.soloprogramming.solocooking.ingredient.model.request.CreateIngredientRequest;
+import dev.soloprogramming.solocooking.ingredient.model.request.UpdateIngredientRequest;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -31,6 +32,11 @@ class IngredientMother {
 
     static CreateIngredientRequest.CreateIngredientRequestBuilder createIngredientRequestBuilder() {
         return CreateIngredientRequest.builder()
+                .name(IngredientTestConstants.INGREDIENT_NAME);
+    }
+
+    static UpdateIngredientRequest.UpdateIngredientRequestBuilder updateIngredientRequestBuilder() {
+        return UpdateIngredientRequest.builder()
                 .name(IngredientTestConstants.INGREDIENT_NAME);
     }
 }

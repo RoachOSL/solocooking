@@ -22,6 +22,11 @@ this repository here.
 - Creating a duplicate ingredient returns a conflict instead of behaving as an
   idempotent create operation. If the product needs idempotent ingredient
   creation later, introduce that as an explicit endpoint or command.
+- Ingredient updates are partial. An omitted or null name leaves the stored name
+  unchanged; a supplied name uses the same normalization and uniqueness rules as
+  creation.
+- Ingredient deletion is idempotent. Deleting an absent ingredient succeeds,
+  while deleting an ingredient referenced by a recipe returns a conflict.
 - Ingredient creation checks duplicates before saving. Do not catch broad
   database integrity exceptions in the service just to map rare concurrent
   duplicate creates; solve that deliberately later if the product needs it.
@@ -29,6 +34,10 @@ this repository here.
   RecipeIngredientEntity`.
 - `RecipeIngredientEntity` stores an `ingredientId` instead of referencing
   `IngredientEntity` directly.
+- The database enforces recipe ingredient references through
+  `fk_recipe_ingredient_ingredient`. Ingredient deletion maps only violations of
+  this constraint to the domain conflict; unrelated database integrity failures
+  remain visible.
 - Recipe ingredient amounts are positive decimals with up to nine integer digits
   and three fractional digits. Persist them as `numeric(12,3)` and enforce
   positivity in both request validation and the database schema.

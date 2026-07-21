@@ -9,6 +9,7 @@ import java.util.Set;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
 import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
+import dev.soloprogramming.solocooking.ingredient.model.request.UpdateIngredientRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
@@ -112,6 +113,101 @@ class IngredientServiceTest {
                     assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
                     assertThat(exception.getBody().getDetail()).isEqualTo(expectedMessage);
                 });
+    }
+
+    @Test
+    void shouldUpdateAndNormalizeIngredientName() {
+        // given
+        ingredientRepository.save(IngredientMother.ingredientEntity());
+        var updateRequest = IngredientMother.updateIngredientRequestBuilder()
+                .name(IngredientTestConstants.NORMALIZED_INGREDIENT_INPUT)
+                .build();
+
+        // when
+        var result = ingredientService.updateIngredient(IngredientTestConstants.INGREDIENT_ID, updateRequest);
+
+        // then
+        assertThat(result.name()).isEqualTo(IngredientTestConstants.NORMALIZED_INGREDIENT_NAME);
+        assertThat(ingredientRepository.findById(IngredientTestConstants.INGREDIENT_ID))
+                .get()
+                .extracting(IngredientEntity::getName)
+                .isEqualTo(IngredientTestConstants.NORMALIZED_INGREDIENT_NAME);
+    }
+
+    @Test
+    void shouldIgnoreNullIngredientNameWhenUpdating() {
+        // given
+        ingredientRepository.save(IngredientMother.ingredientEntity());
+        var updateRequest = UpdateIngredientRequest.builder().name(null).build();
+        var expectedIngredient = IngredientMother.ingredientDtoBuilder().build();
+
+        // when
+        var result = ingredientService.updateIngredient(IngredientTestConstants.INGREDIENT_ID, updateRequest);
+
+        // then
+        assertThat(result).isEqualTo(expectedIngredient);
+    }
+
+    @Test
+    void shouldAllowUpdatingIngredientWithItsOwnNormalizedName() {
+        // given
+        ingredientRepository.save(IngredientMother.ingredientEntity());
+        var updateRequest = IngredientMother.updateIngredientRequestBuilder()
+                .name(IngredientTestConstants.DUPLICATED_INGREDIENT_INPUT)
+                .build();
+
+        // when & then
+        assertThatCode(() -> ingredientService.updateIngredient(
+                        IngredientTestConstants.INGREDIENT_ID,
+                        updateRequest
+                ))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldRejectDuplicatedIngredientWhenUpdating() {
+        // given
+        ingredientRepository.save(IngredientMother.ingredientEntity());
+        var updatedIngredient = ingredientRepository.save(
+                IngredientMother.ingredientEntityWithName(IngredientTestConstants.SECOND_INGREDIENT_NAME)
+        );
+        var updateRequest = IngredientMother.updateIngredientRequestBuilder()
+                .name(IngredientTestConstants.DUPLICATED_INGREDIENT_INPUT)
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> ingredientService.updateIngredient(updatedIngredient.getId(), updateRequest))
+                .isInstanceOfSatisfying(IngredientAlreadyExistsException.class, exception -> {
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(exception.getBody().getDetail())
+                            .isEqualTo(IngredientTestConstants.DUPLICATED_INGREDIENT_MESSAGE);
+                });
+    }
+
+    @Test
+    void shouldRejectUpdatingMissingIngredient() {
+        // given
+        var updateRequest = IngredientMother.updateIngredientRequestBuilder().build();
+
+        // when & then
+        assertThatThrownBy(() -> ingredientService.updateIngredient(
+                        IngredientTestConstants.MISSING_INGREDIENT_ID,
+                        updateRequest
+                ))
+                .isInstanceOf(IngredientNotFoundException.class);
+    }
+
+    @Test
+    void shouldDeleteIngredientIdempotently() {
+        // given
+        ingredientRepository.save(IngredientMother.ingredientEntity());
+
+        // when
+        ingredientService.deleteById(IngredientTestConstants.INGREDIENT_ID);
+        ingredientService.deleteById(IngredientTestConstants.INGREDIENT_ID);
+
+        // then
+        assertThat(ingredientRepository.findAll()).isEmpty();
     }
 
     @Test
