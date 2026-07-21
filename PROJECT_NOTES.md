@@ -89,6 +89,13 @@ this repository here.
 
 - The grouped OpenAPI document is published as `SoloCooking API`, version `v1`,
   and defaults response media types to `application/json`.
+- SoloCooking intentionally follows code-first OpenAPI. Hand-written Java API
+  interfaces define the HTTP contract, springdoc generates the specification for
+  Swagger UI, and Hey API generates the frontend client from that specification.
+  Contract-first backend generation is not planned.
+- Runtime error bodies and generated OpenAPI error schemas must stay synchronized.
+  Validation failures use `BadRequestProblemDetail`, whose optional `errors` map
+  exposes field-level messages to generated frontend clients.
 - Use the latest stable PostgreSQL minor version for local development and
   Testcontainers. Pin the exact Docker image tag instead of using `latest`, and
   update `docker-compose.yml` and integration test containers together.

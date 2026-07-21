@@ -21,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
 import static dev.soloprogramming.solocooking.ingredient.IngredientTestFixtures.givenExistingIngredient;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class IngredientFacadeIT extends BaseIntegrationTest {
@@ -87,11 +88,12 @@ class IngredientFacadeIT extends BaseIntegrationTest {
         // given
         var ingredient = givenExistingIngredient(ingredientFacade);
 
-        // when
-        ingredientFacade.deleteById(ingredient.id());
-        ingredientFacade.deleteById(ingredient.id());
+        // when & then
+        assertThatCode(() -> {
+            ingredientFacade.deleteById(ingredient.id());
+            ingredientFacade.deleteById(ingredient.id());
+        }).doesNotThrowAnyException();
 
-        // then
         assertThatThrownBy(() -> ingredientFacade.findById(ingredient.id()))
                 .isInstanceOf(IngredientNotFoundException.class);
     }

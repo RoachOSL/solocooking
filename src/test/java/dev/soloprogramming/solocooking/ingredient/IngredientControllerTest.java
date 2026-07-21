@@ -33,6 +33,8 @@ class IngredientControllerTest {
     private static final String INGREDIENT_BY_ID_ENDPOINT = API_SERVLET_PATH + "/ingredients/{ingredientId}";
     private static final String GET_INGREDIENT_RESPONSE_RESOURCE = "controller/ingredient/get-ingredient-response.json";
     private static final String GET_INGREDIENTS_RESPONSE_RESOURCE = "controller/ingredient/get-ingredients-response.json";
+    private static final String UPDATE_INGREDIENT_VALIDATION_ERROR_RESPONSE_RESOURCE =
+            "controller/ingredient/update-ingredient-validation-error-response.json";
 
     @MockitoBean
     private IngredientFacade ingredientFacade;
@@ -106,7 +108,9 @@ class IngredientControllerTest {
                 .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
-                .hasStatus(HttpStatus.BAD_REQUEST);
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(UPDATE_INGREDIENT_VALIDATION_ERROR_RESPONSE_RESOURCE));
 
         // then
         then(ingredientFacade).shouldHaveNoInteractions();

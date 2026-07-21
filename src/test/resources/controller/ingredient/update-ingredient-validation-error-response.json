@@ -1,0 +1,9 @@
+{
+  "title": "Validation failed",
+  "status": 400,
+  "detail": "Request validation failed.",
+  "instance": "/api/ingredients/39f9be9f-88f2-4a50-bc83-97af6016c509",
+  "errors": {
+    "name": "must not be blank"
+  }
+}
