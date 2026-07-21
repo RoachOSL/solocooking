@@ -5,6 +5,8 @@ package dev.soloprogramming.solocooking.ingredient;
 
 import java.util.List;
 
+import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
+import dev.soloprogramming.solocooking.ingredient.exception.IngredientInUseException;
 import dev.soloprogramming.solocooking.ingredient.model.request.UpdateIngredientRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import static dev.soloprogramming.solocooking.common.TestResourceReader.readTest
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
 
 @WebMvcTest(IngredientController.class)
 class IngredientControllerTest {
@@ -33,6 +36,10 @@ class IngredientControllerTest {
     private static final String INGREDIENT_BY_ID_ENDPOINT = API_SERVLET_PATH + "/ingredients/{ingredientId}";
     private static final String GET_INGREDIENT_RESPONSE_RESOURCE = "controller/ingredient/get-ingredient-response.json";
     private static final String GET_INGREDIENTS_RESPONSE_RESOURCE = "controller/ingredient/get-ingredients-response.json";
+    private static final String CREATE_INGREDIENT_CONFLICT_RESPONSE_RESOURCE =
+            "controller/ingredient/create-ingredient-conflict-response.json";
+    private static final String DELETE_INGREDIENT_CONFLICT_RESPONSE_RESOURCE =
+            "controller/ingredient/delete-ingredient-conflict-response.json";
     private static final String UPDATE_INGREDIENT_VALIDATION_ERROR_RESPONSE_RESOURCE =
             "controller/ingredient/update-ingredient-validation-error-response.json";
 
@@ -60,6 +67,23 @@ class IngredientControllerTest {
                 .hasStatus(HttpStatus.CREATED)
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_INGREDIENT_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldReturnTypedConflictWhenIngredientAlreadyExists() {
+        // given
+        var createIngredientRequest = IngredientMother.createIngredientRequestBuilder().build();
+        given(ingredientFacade.createIngredient(createIngredientRequest))
+                .willThrow(IngredientAlreadyExistsException.byName(IngredientTestConstants.INGREDIENT_STORED_NAME));
+
+        // when & then
+        assertThat(post()
+                .uri(INGREDIENTS_ENDPOINT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createIngredientRequest)))
+                .hasStatus(HttpStatus.CONFLICT)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(CREATE_INGREDIENT_CONFLICT_RESPONSE_RESOURCE));
     }
 
     @Test
@@ -141,6 +165,21 @@ class IngredientControllerTest {
 
         // then
         then(ingredientFacade).should().deleteById(IngredientTestConstants.INGREDIENT_ID);
+    }
+
+    @Test
+    void shouldReturnTypedConflictWhenIngredientIsInUse() {
+        // given
+        willThrow(IngredientInUseException.forDeletion())
+                .given(ingredientFacade)
+                .deleteById(IngredientTestConstants.INGREDIENT_ID);
+
+        // when & then
+        assertThat(delete()
+                .uri(INGREDIENT_BY_ID_ENDPOINT, IngredientTestConstants.INGREDIENT_ID))
+                .hasStatus(HttpStatus.CONFLICT)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(DELETE_INGREDIENT_CONFLICT_RESPONSE_RESOURCE));
     }
 
     @Test

@@ -96,6 +96,10 @@ this repository here.
 - Runtime error bodies and generated OpenAPI error schemas must stay synchronized.
   Validation failures use `BadRequestProblemDetail`, whose optional `errors` map
   exposes field-level messages to generated frontend clients.
+- Ingredient conflicts expose stable problem types:
+  `urn:solocooking:error:ingredient-already-exists` and
+  `urn:solocooking:error:ingredient-in-use`. Frontend code maps these types to its
+  own localized messages and never parses `detail`.
 - Use the latest stable PostgreSQL minor version for local development and
   Testcontainers. Pin the exact Docker image tag instead of using `latest`, and
   update `docker-compose.yml` and integration test containers together.

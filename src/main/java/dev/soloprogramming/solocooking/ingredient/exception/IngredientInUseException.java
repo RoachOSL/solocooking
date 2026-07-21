@@ -3,21 +3,23 @@
  */
 package dev.soloprogramming.solocooking.ingredient.exception;
 
-import java.util.UUID;
+import java.net.URI;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 public class IngredientInUseException extends ResponseStatusException {
 
+    private static final URI TYPE = URI.create("urn:solocooking:error:ingredient-in-use");
     private static final String INGREDIENT_IN_USE_MESSAGE =
-            "Ingredient with id [%s] is used by a recipe and cannot be deleted.";
+            "Ingredient cannot be deleted because it is used by a recipe.";
 
-    private IngredientInUseException(String message) {
-        super(HttpStatus.CONFLICT, message);
+    private IngredientInUseException() {
+        super(HttpStatus.CONFLICT, INGREDIENT_IN_USE_MESSAGE);
+        getBody().setType(TYPE);
     }
 
-    public static IngredientInUseException byIngredientId(UUID ingredientId) {
-        return new IngredientInUseException(INGREDIENT_IN_USE_MESSAGE.formatted(ingredientId));
+    public static IngredientInUseException forDeletion() {
+        return new IngredientInUseException();
     }
 }

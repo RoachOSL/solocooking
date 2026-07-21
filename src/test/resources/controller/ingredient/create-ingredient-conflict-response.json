@@ -1,0 +1,7 @@
+{
+  "type": "urn:solocooking:error:ingredient-already-exists",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "Ingredient [eggs] already exists.",
+  "instance": "/api/ingredients"
+}

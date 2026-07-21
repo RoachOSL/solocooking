@@ -86,7 +86,8 @@ class IngredientService implements IngredientFacade {
             ingredientRepository.flush();
         } catch (DataIntegrityViolationException exception) {
             if (hasConstraint(exception, RECIPE_INGREDIENT_INGREDIENT_FK)) {
-                throw IngredientInUseException.byIngredientId(ingredientId);
+                log.debug("Ingredient with id [{}] is used by a recipe", ingredientId);
+                throw IngredientInUseException.forDeletion();
             }
             throw exception;
         }
