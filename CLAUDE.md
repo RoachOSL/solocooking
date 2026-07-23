@@ -20,9 +20,12 @@ and product decisions belong in `PROJECT_NOTES.md`.
   The user reviews the staged diff and commits/pushes themselves.
 - Naming convention: branch `<type>/<short-desc>`, all lowercase,
   hyphen-separated; allowed types: `chore`, `feature`, `bugfix`, `hotfix`.
-  Commit subject is the description without the type segment (branch
-  `chore/refactor-sth` -> commit `refactor sth`); body only when the why is
-  not obvious from the diff. Work never lands directly on `main`.
+  Local commit subjects use classic Git style: imperative wording, first word
+  capitalized, and no type prefix (branch `chore/refactor-sth` -> commit
+  `Refactor sth`). Squash/merge subjects use a lowercase Conventional Commit
+  type and lowercase summary, for example `chore: refactor sth`,
+  `feat: add sth`, or `fix: correct sth`. Add a body only when the why is not
+  obvious from the diff. Work never lands directly on `main`.
 - When the user adds GitHub code review comments, read and discuss them with
   the user in the local console first. Apply agreed changes locally, test,
   and summarize. Do not publish GitHub comments unless explicitly asked.
@@ -46,8 +49,13 @@ and product decisions belong in `PROJECT_NOTES.md`.
   way; never commit it.
 - When the user floats a future plan, an idea, or something they would like to
   add to the project (not to build right now), record it in
-  `ai-notes/FUTURE_IDEAS.md` and tell the user. Keep it a parked idea, not
+  `ai-notes/BACKLOG.md` and tell the user. Keep it a parked idea, not
   scheduled work — do not start on it unless asked.
+- When the user asks for a plan — to design or think work through before
+  building it — write the plan to `ai-notes/plans/<short-kebab-topic>.md` and
+  tell the user. One file per plan; when the same work is re-planned, update
+  that file rather than adding a second. `ai-notes/` is gitignored local notes —
+  keep it that way; never commit it.
 
 ## Code Review
 

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import dev.soloprogramming.solocooking.common.pagination.PageablePolicy;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientInUseException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
@@ -19,6 +20,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 class IngredientService implements IngredientFacade {
 
     private static final String RECIPE_INGREDIENT_INGREDIENT_FK = "fk_recipe_ingredient_ingredient";
+    private static final PageablePolicy PAGEABLE_POLICY = PageablePolicy.of(
+            Set.of("id", "name"),
+            Sort.by(Sort.Order.asc("name"), Sort.Order.asc("id"))
+    );
 
     private final IngredientRepository ingredientRepository;
     private final IngredientMapper ingredientMapper;
@@ -97,7 +103,8 @@ class IngredientService implements IngredientFacade {
     @Override
     public Page<IngredientDTO> getIngredients(Pageable pageable) {
         log.debug("Getting ingredients page [{}]", pageable);
-        var ingredients = ingredientRepository.findAll(pageable).map(ingredientMapper::toDto);
+        var effectivePageable = PAGEABLE_POLICY.apply(pageable);
+        var ingredients = ingredientRepository.findAll(effectivePageable).map(ingredientMapper::toDto);
         log.debug("Returned ingredients page with [{}] elements", ingredients.getNumberOfElements());
         return ingredients;
     }
@@ -106,7 +113,8 @@ class IngredientService implements IngredientFacade {
     public Page<IngredientDTO> searchIngredients(String name, Pageable pageable) {
         var normalizedName = ingredientMapper.normalize(name);
         log.debug("Searching ingredients page [{}] by normalized name [{}]", pageable, normalizedName);
-        var ingredients = ingredientRepository.findAllByNameContaining(normalizedName, pageable)
+        var effectivePageable = PAGEABLE_POLICY.apply(pageable);
+        var ingredients = ingredientRepository.findAllByNameContaining(normalizedName, effectivePageable)
                 .map(ingredientMapper::toDto);
         log.debug("Found ingredients page with [{}] elements", ingredients.getNumberOfElements());
         return ingredients;

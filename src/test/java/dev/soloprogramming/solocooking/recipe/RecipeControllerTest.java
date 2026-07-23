@@ -4,11 +4,15 @@
 package dev.soloprogramming.solocooking.recipe;
 
 import java.util.List;
+import java.util.Set;
 
+import dev.soloprogramming.solocooking.common.exception.InvalidSortPropertyException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -33,6 +37,8 @@ class RecipeControllerTest {
     private static final String GET_RECIPE_WITH_NULL_NOTE_RESPONSE_RESOURCE = "controller/recipe/get-recipe-with-null-note-response.json";
     private static final String GET_RECIPES_RESPONSE_RESOURCE = "controller/recipe/get-recipes-response.json";
     private static final String GET_EMPTY_RECIPES_RESPONSE_RESOURCE = "controller/recipe/get-empty-recipes-response.json";
+    private static final String GET_RECIPES_INVALID_SORT_RESPONSE_RESOURCE =
+            "controller/recipe/get-recipes-invalid-sort-response.json";
     private static final String EMPTY_RESPONSE_BODY = "";
 
     @MockitoBean
@@ -121,6 +127,24 @@ class RecipeControllerTest {
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_RECIPES_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldRejectUnsupportedRecipeSortProperty() {
+        // given
+        var pageable = PageRequest.of(0, 20, Sort.by("description"));
+        given(recipeFacade.getRecipes(pageable)).willThrow(InvalidSortPropertyException.forProperty(
+                "description",
+                Set.of("id", "name", "createdAt", "updatedAt")
+        ));
+
+        // when & then
+        assertThat(get()
+                .uri(RECIPES_ENDPOINT)
+                .param("sort", "description"))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_RECIPES_INVALID_SORT_RESPONSE_RESOURCE));
     }
 
     @Test

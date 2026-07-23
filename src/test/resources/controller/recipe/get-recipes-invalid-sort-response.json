@@ -1,0 +1,9 @@
+{
+  "title": "Validation failed",
+  "status": 400,
+  "detail": "Request validation failed.",
+  "instance": "/api/recipes",
+  "errors": {
+    "sort": "unsupported sort property 'description'; allowed: createdAt, id, name, updatedAt"
+  }
+}

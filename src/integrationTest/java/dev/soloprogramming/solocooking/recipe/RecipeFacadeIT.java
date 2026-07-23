@@ -5,6 +5,7 @@ package dev.soloprogramming.solocooking.recipe;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -28,6 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -364,6 +366,35 @@ class RecipeFacadeIT extends BaseIntegrationTest {
         assertThat(result.getContent())
                 .usingRecursiveFieldByFieldElementComparator(defaultRecursiveComparisonConfiguration())
                 .containsExactly(expectedRecipe);
+    }
+
+    @Test
+    void shouldReturnStablePagesForRecipesWithSameName() {
+        // given
+        var ingredientId = givenExistingIngredientId();
+        var request = RecipeMother.createRecipeRequestBuilder(ingredientId)
+                .name("Same recipe name")
+                .build();
+        var firstRecipe = recipeFacade.createRecipe(request);
+        var secondRecipe = recipeFacade.createRecipe(request);
+        var expectedIds = Set.of(firstRecipe.id(), secondRecipe.id());
+
+        // when
+        var firstPage = recipeFacade.getRecipes(PageRequest.of(0, 1));
+        var secondPage = recipeFacade.getRecipes(PageRequest.of(1, 1));
+        var repeatedFirstPage = recipeFacade.getRecipes(PageRequest.of(0, 1));
+        var repeatedSecondPage = recipeFacade.getRecipes(PageRequest.of(1, 1));
+
+        // then
+        var returnedIds = List.of(
+                firstPage.getContent().getFirst().id(),
+                secondPage.getContent().getFirst().id()
+        );
+        assertThat(returnedIds).containsExactlyInAnyOrderElementsOf(expectedIds);
+        assertThat(List.of(
+                repeatedFirstPage.getContent().getFirst().id(),
+                repeatedSecondPage.getContent().getFirst().id()
+        )).containsExactlyElementsOf(returnedIds);
     }
 
     @Test

@@ -147,6 +147,12 @@ section.
   request or response DTO, and serialization-policy change. Keep annotations and
   springdoc configuration current, and extend `OpenApiContractIT` with assertions
   for the affected operations and schemas.
+- Treat client-controlled sorting as an API contract instead of passing arbitrary
+  property names directly to JPA. Define an allowlist per resource, apply a stable
+  default sort, and append a unique, stable tie-breaker, usually `id`, when the
+  requested sort does not already contain one. Map unsupported sort properties
+  to the shared typed bad-request response and document the allowed properties
+  in OpenAPI.
 
 ## Test style
 
