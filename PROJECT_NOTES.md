@@ -14,6 +14,12 @@ this repository here.
   `Locale.ROOT`, and collapses all Unicode whitespace sequences to a single
   ASCII space. Create and update validate both the submitted and normalized
   names against the 255-character database limit before persistence.
+- Keep ingredient name normalization and validation inside the `ingredient`
+  module until another module has the same concrete need. If a second use case
+  appears, extract only neutral Unicode primitives, such as whitespace
+  collapsing or code-point length, into `common`; do not reuse ingredient
+  lowercasing for display names such as recipe names without a separate product
+  decision.
 - The shared ingredient catalog starts with 30 common English ingredients seeded
   by Flyway. Users can extend the catalog through the ingredient creation API.
   Add later seed data through new migrations instead of editing an applied seed
@@ -74,6 +80,9 @@ this repository here.
   and `RecipeSectionEntity` own the invariants for child links and positions
   through domain methods such as `replaceSections` and `replaceIngredients`; do
   not hide that logic in MapStruct `@AfterMapping` hooks.
+- Aggregate replacement methods accept their own unmodifiable live collection
+  views. Copy an incoming child list before clearing the managed collection so
+  self-replacement preserves children and reapplies links and positions.
 - The `recipe` module intentionally uses a DDD-lite aggregate style because the
   module will support structural operations such as add, remove, reorder, move,
   and duplicate. This is not a hard safety boundary against all bad code inside
