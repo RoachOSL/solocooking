@@ -59,10 +59,11 @@ class RecipeSectionEntity extends BaseEntity {
     }
 
     void replaceIngredients(List<RecipeIngredientEntity> newIngredients) {
+        var ingredientsToAdd = List.copyOf(newIngredients);
         ingredients.clear();
 
-        for (var position = 0; position < newIngredients.size(); position++) {
-            var ingredient = newIngredients.get(position);
+        for (var position = 0; position < ingredientsToAdd.size(); position++) {
+            var ingredient = ingredientsToAdd.get(position);
             ingredient.placeInSection(this, position);
             ingredients.add(ingredient);
         }

@@ -12,6 +12,7 @@ import dev.soloprogramming.solocooking.ingredient.model.request.CreateIngredient
 import dev.soloprogramming.solocooking.ingredient.model.request.UpdateIngredientRequest;
 import dev.soloprogramming.solocooking.recipe.RecipeFacade;
 import dev.soloprogramming.solocooking.recipe.RecipeTestFixtures;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,9 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class IngredientFacadeIT extends BaseIntegrationTest {
+
+    private static final String MAX_INGREDIENT_NAME = "a".repeat(255);
+    private static final String MAX_EXPANDING_INGREDIENT_NAME = "\u0130".repeat(255);
 
     @Autowired
     private IngredientFacade ingredientFacade;
@@ -52,6 +56,70 @@ class IngredientFacadeIT extends BaseIntegrationTest {
     }
 
     @Test
+    void shouldAcceptMaximumNormalizedNameWhenCreatingAndUpdating() {
+        // given
+        var ingredient = ingredientFacade.createIngredient(CreateIngredientRequest.builder()
+                .name(MAX_INGREDIENT_NAME)
+                .build());
+        var maximumUpdatedName = "b".repeat(255);
+
+        // when
+        var updatedIngredient = ingredientFacade.updateIngredient(
+                ingredient.id(),
+                UpdateIngredientRequest.builder().name(maximumUpdatedName).build()
+        );
+
+        // then
+        assertThat(ingredient.name()).isEqualTo(MAX_INGREDIENT_NAME);
+        assertThat(updatedIngredient.name()).isEqualTo(maximumUpdatedName);
+    }
+
+    @Test
+    void shouldRejectCreateWhenNormalizedNameExceedsMaximumLength() {
+        // given
+        var request = CreateIngredientRequest.builder()
+                .name(MAX_EXPANDING_INGREDIENT_NAME)
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> ingredientFacade.createIngredient(request))
+                .isInstanceOf(ConstraintViolationException.class);
+    }
+
+    @Test
+    void shouldRejectUpdateWhenNormalizedNameExceedsMaximumLength() {
+        // given
+        var ingredient = givenExistingIngredient(ingredientFacade);
+        var request = UpdateIngredientRequest.builder()
+                .name(MAX_EXPANDING_INGREDIENT_NAME)
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> ingredientFacade.updateIngredient(ingredient.id(), request))
+                .isInstanceOf(ConstraintViolationException.class);
+        assertThat(ingredientFacade.findById(ingredient.id())).isEqualTo(ingredient);
+    }
+
+    @Test
+    void shouldNormalizeUnicodeWhitespaceWhenCreatingAndUpdating() {
+        // given
+        var createRequest = CreateIngredientRequest.builder()
+                .name("\u00a0Extra\u2003Virgin\u00a0")
+                .build();
+
+        // when
+        var ingredient = ingredientFacade.createIngredient(createRequest);
+        var updatedIngredient = ingredientFacade.updateIngredient(
+                ingredient.id(),
+                UpdateIngredientRequest.builder().name("\u00a0Rice\u2003Flour\u00a0").build()
+        );
+
+        // then
+        assertThat(ingredient.name()).isEqualTo("extra virgin");
+        assertThat(updatedIngredient.name()).isEqualTo("rice flour");
+    }
+
+    @Test
     void shouldRejectDuplicatedIngredientNameAfterNormalization() {
         // given
         givenExistingIngredient(ingredientFacade);
@@ -64,6 +132,39 @@ class IngredientFacadeIT extends BaseIntegrationTest {
                 .isInstanceOfSatisfying(IngredientAlreadyExistsException.class, exception ->
                         assertThat(exception.getReason()).isEqualTo(IngredientTestConstants.DUPLICATED_INGREDIENT_MESSAGE)
                 );
+    }
+
+    @Test
+    void shouldRejectDuplicatedIngredientNameWithUnicodeWhitespaceWhenCreating() {
+        // given
+        ingredientFacade.createIngredient(CreateIngredientRequest.builder()
+                .name("olive oil")
+                .build());
+        var duplicatedRequest = CreateIngredientRequest.builder()
+                .name("olive\u2003oil")
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> ingredientFacade.createIngredient(duplicatedRequest))
+                .isInstanceOf(IngredientAlreadyExistsException.class);
+    }
+
+    @Test
+    void shouldRejectDuplicatedIngredientNameWithUnicodeWhitespaceWhenUpdating() {
+        // given
+        ingredientFacade.createIngredient(CreateIngredientRequest.builder()
+                .name("olive oil")
+                .build());
+        var ingredient = ingredientFacade.createIngredient(CreateIngredientRequest.builder()
+                .name("milk")
+                .build());
+        var duplicatedRequest = UpdateIngredientRequest.builder()
+                .name("olive\u2003oil")
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> ingredientFacade.updateIngredient(ingredient.id(), duplicatedRequest))
+                .isInstanceOf(IngredientAlreadyExistsException.class);
     }
 
     @Test

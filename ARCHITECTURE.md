@@ -6,6 +6,14 @@ workflow rules live in `CLAUDE.md` / `AGENTS.md`. When a reusable
 architectural or engineering decision is agreed, add it here in the relevant
 section.
 
+## Engineering principles
+
+- Favor the cleanest, most idiomatic solution the language and stack allow.
+  Reach for the best-practice approach by default — clear names, small focused
+  units, standard patterns over clever ones, no dead or duplicated code — and
+  step down from it only for a concrete, stated reason (a real constraint or a
+  measured cost). "It works" is the floor, not the goal.
+
 ## Repository hygiene
 
 - Do not add AI attribution anywhere in the repository or its Git history.
@@ -50,6 +58,14 @@ section.
   aligned. Explicitly map String lengths, numeric precision and scale,
   nullability, and database checks. Cover accepted boundary values with
   integration tests so a valid request cannot fail at persistence time.
+- Do not treat `@Basic(optional = false)` and `@Column(nullable = false)` as
+  interchangeable. The first expresses ORM optionality and the second column
+  nullability; when a field deliberately uses both, keep both unless its mapping
+  decision changes.
+- When input is normalized or otherwise transformed before persistence,
+  validate the transformed value against database limits before calling the
+  repository. Use one normalization implementation across validation, writes,
+  and queries so Unicode case mapping and whitespace handling cannot diverge.
 - Treat Flyway migrations as the single source of truth for database constraints
   and indexes. Do not duplicate schema-generating check constraints or indexes in
   JPA annotations.
@@ -71,6 +87,10 @@ section.
 - Use `var` for local variables when the type is obvious from the right-hand side
   and readability does not suffer.
 - Use descriptive variable names that clearly communicate meaning and purpose.
+- For Spring Data queries with named parameters, rely on retained Java
+  parameter names when they match the query placeholders. Avoid redundant
+  `@Param` annotations; use them only when names intentionally differ or the
+  build cannot retain parameter metadata.
 - Comments are the exception, not the norm. Write one only when it states a
   non-obvious constraint or reason the code itself cannot show, for example why
   a no-op interceptor exists, that a type mirrors a backend DTO, or why a lint
@@ -130,6 +150,12 @@ section.
 
 ## Test style
 
+- Every bug fix includes an automated regression test that reproduces the
+  defect and fails without the fix. Use the lowest test layer that faithfully
+  covers the behavior; transaction, concurrency, and database defects require
+  an integration test. If automated coverage is not feasible, document the
+  reason and agree on an alternative before merging instead of silently
+  omitting the test.
 - Shared immutable test data is exposed directly as clearly named constants,
   without unnecessary getters.
 - Keep test data close to the module that owns it. Domain-specific constants and
@@ -169,6 +195,10 @@ section.
 - Shared test repository operations live in generic `InMemoryRepository<T, ID>`.
   Entity-specific repositories contain only behavior specific to that entity and
   custom repository methods.
+- Keep production repositories on `JpaRepository` when their services use the
+  standard CRUD contract. Do not narrow production repository interfaces only
+  to avoid inherited or deprecated methods in an in-memory test double; keep
+  unused inherited methods unsupported until the dependency contract changes.
 - In-memory repositories simulate only behavior needed by the tested case. Do
   not add empty hooks or set audit fields when the test ignores those fields.
 - Each test gets a fresh in-memory repository instance so data cannot leak

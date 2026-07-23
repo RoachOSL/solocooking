@@ -3,17 +3,15 @@
  */
 package dev.soloprogramming.solocooking.ingredient.model.request;
 
+import dev.soloprogramming.solocooking.ingredient.ValidIngredientName;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
 public record UpdateIngredientRequest(
 
         @Schema(nullable = true, minLength = 1, maxLength = 255)
-        @Pattern(regexp = "(?s).*\\S.*", message = "must not be blank")
-        @Size(min = 1, max = 255)
+        @ValidIngredientName(required = false)
         String name
 ) {
 }
