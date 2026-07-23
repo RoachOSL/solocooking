@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import dev.soloprogramming.solocooking.common.pagination.PageablePolicy;
 import dev.soloprogramming.solocooking.ingredient.IngredientFacade;
 import dev.soloprogramming.solocooking.recipe.exception.InvalidRecipeChildIdException;
 import dev.soloprogramming.solocooking.recipe.exception.RecipeNotFoundException;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 class RecipeService implements RecipeFacade {
+
+    private static final PageablePolicy PAGEABLE_POLICY = PageablePolicy.of(
+            Set.of("id", "name", "createdAt", "updatedAt"),
+            Sort.by(Sort.Order.asc("name"), Sort.Order.asc("id"))
+    );
 
     private final RecipeRepository recipeRepository;
     private final RecipeMapper recipeMapper;
@@ -69,7 +76,8 @@ class RecipeService implements RecipeFacade {
     @Override
     public Page<RecipeSummaryDTO> getRecipes(Pageable pageable) {
         log.debug("Getting recipes page [{}]", pageable);
-        var recipes = recipeRepository.findAll(pageable).map(recipeMapper::toSummaryDto);
+        var effectivePageable = PAGEABLE_POLICY.apply(pageable);
+        var recipes = recipeRepository.findAll(effectivePageable).map(recipeMapper::toSummaryDto);
         log.debug("Returned recipes page with [{}] elements", recipes.getNumberOfElements());
         return recipes;
     }

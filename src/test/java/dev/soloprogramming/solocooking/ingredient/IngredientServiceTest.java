@@ -6,12 +6,15 @@ package dev.soloprogramming.solocooking.ingredient;
 import java.util.List;
 import java.util.Set;
 
+import dev.soloprogramming.solocooking.common.exception.InvalidSortPropertyException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
 import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import dev.soloprogramming.solocooking.ingredient.model.request.UpdateIngredientRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
 import static dev.soloprogramming.solocooking.common.CommonTestConstants.DEFAULT_PAGEABLE;
@@ -228,6 +231,10 @@ class IngredientServiceTest {
         assertThat(result.getContent())
                 .usingRecursiveFieldByFieldElementComparator(defaultRecursiveComparisonConfiguration())
                 .containsExactly(expectedIngredient);
+        assertThat(result.getSort()).containsExactly(
+                Sort.Order.asc("name"),
+                Sort.Order.asc("id")
+        );
     }
 
     @Test
@@ -250,6 +257,20 @@ class IngredientServiceTest {
         assertThat(result)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedPage);
+        assertThat(result.getSort()).containsExactly(
+                Sort.Order.asc("name"),
+                Sort.Order.asc("id")
+        );
+    }
+
+    @Test
+    void shouldRejectUnsupportedIngredientSortProperty() {
+        // given
+        var pageable = PageRequest.of(0, 10, Sort.by("description"));
+
+        // when & then
+        assertThatThrownBy(() -> ingredientService.getIngredients(pageable))
+                .isInstanceOf(InvalidSortPropertyException.class);
     }
 
     @Test

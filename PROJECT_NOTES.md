@@ -27,6 +27,8 @@ this repository here.
 - Ingredient listing returns the full paginated catalog. Ingredient search uses
   a separate `/ingredients/search` endpoint, requires a non-blank name
   fragment, normalizes it case-insensitively, and preserves pagination.
+- Ingredient listing and search allow sorting by `id` and `name`. Without an
+  explicit sort they use `name ASC, id ASC`.
 - Creating a duplicate ingredient returns a conflict instead of behaving as an
   idempotent create operation. If the product needs idempotent ingredient
   creation later, introduce that as an explicit endpoint or command.
@@ -73,6 +75,8 @@ this repository here.
   fetch the recipe, compare its logical content with the intended state, and use
   the server-returned child IDs as authoritative instead of automatically
   retrying the update.
+- Recipe listing allows sorting by `id`, `name`, `createdAt`, and `updatedAt`.
+  Without an explicit sort it uses `name ASC, id ASC`.
 - Do not use JPA `@OrderBy` on recipe collections. Sort by `position`
   explicitly at the use-case or API boundary when ordered output is needed.
 - Create recipe aggregates through `RecipeFactory`. The factory translates

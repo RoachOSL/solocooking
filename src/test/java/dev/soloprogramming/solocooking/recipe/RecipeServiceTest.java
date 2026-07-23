@@ -7,12 +7,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
+import dev.soloprogramming.solocooking.common.exception.InvalidSortPropertyException;
 import dev.soloprogramming.solocooking.ingredient.IngredientFacade;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientNotFoundException;
 import dev.soloprogramming.solocooking.recipe.exception.InvalidRecipeChildIdException;
 import dev.soloprogramming.solocooking.recipe.exception.RecipeNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
 import static dev.soloprogramming.solocooking.common.CommonTestConstants.DEFAULT_PAGEABLE;
@@ -316,5 +319,19 @@ class RecipeServiceTest {
         assertThat(result)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(expectedPage);
+        assertThat(result.getSort()).containsExactly(
+                Sort.Order.asc("name"),
+                Sort.Order.asc("id")
+        );
+    }
+
+    @Test
+    void shouldRejectUnsupportedRecipeSortProperty() {
+        // given
+        var pageable = PageRequest.of(0, 10, Sort.by("description"));
+
+        // when & then
+        assertThatThrownBy(() -> recipeService.getRecipes(pageable))
+                .isInstanceOf(InvalidSortPropertyException.class);
     }
 }

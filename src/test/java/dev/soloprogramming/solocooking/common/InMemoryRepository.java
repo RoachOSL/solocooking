@@ -4,12 +4,14 @@
 package dev.soloprogramming.solocooking.common;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -75,20 +77,47 @@ public abstract class InMemoryRepository<T, ID> implements JpaRepository<T, ID> 
     }
 
     protected Page<T> toPage(List<T> content, Pageable pageable) {
-        if (pageable.getSort().isSorted()) {
-            throw unsupported("sorted pagination");
-        }
+        var sortedContent = sort(content, pageable.getSort());
         if (pageable.isUnpaged()) {
-            return new PageImpl<>(content);
+            return new PageImpl<>(sortedContent);
         }
 
         var startIndex = Math.toIntExact(pageable.getOffset());
-        if (startIndex >= content.size()) {
-            return new PageImpl<>(List.of(), pageable, content.size());
+        if (startIndex >= sortedContent.size()) {
+            return new PageImpl<>(List.of(), pageable, sortedContent.size());
         }
 
-        var endIndex = Math.min(startIndex + pageable.getPageSize(), content.size());
-        return new PageImpl<>(content.subList(startIndex, endIndex), pageable, content.size());
+        var endIndex = Math.min(startIndex + pageable.getPageSize(), sortedContent.size());
+        return new PageImpl<>(sortedContent.subList(startIndex, endIndex), pageable, sortedContent.size());
+    }
+
+    private List<T> sort(List<T> content, Sort sort) {
+        if (sort.isUnsorted()) {
+            return content;
+        }
+
+        var comparator = sort.stream()
+                .map(this::propertyComparator)
+                .reduce(Comparator::thenComparing)
+                .orElseThrow();
+        return content.stream().sorted(comparator).toList();
+    }
+
+    private Comparator<T> propertyComparator(Sort.Order order) {
+        Comparator<T> comparator = Comparator.comparing(
+                entity -> propertyValue(entity, order.getProperty()),
+                Comparator.nullsLast(Comparator.naturalOrder())
+        );
+        if (order.isDescending()) {
+            return comparator.reversed();
+        } else {
+            return comparator;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Comparable<Object> propertyValue(T entity, String property) {
+        return (Comparable<Object>) new BeanWrapperImpl(entity).getPropertyValue(property);
     }
 
     @Override

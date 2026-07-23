@@ -65,12 +65,17 @@ interface IngredientApi {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteById(@PathVariable UUID ingredientId);
 
-    @Operation(operationId = "getIngredients", summary = "Get all ingredients")
-    @ApiResponse(responseCode = "200", description = "Ingredients returned")
+    @Operation(operationId = "getIngredients", summary = "Get all ingredients",
+               description = "Default sort: name,id ascending. Supported sort properties: id, name.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Ingredients returned"),
+        @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest")
+    })
     @GetMapping
     PageResponse<IngredientDTO> getIngredients(@ParameterObject Pageable pageable);
 
-    @Operation(operationId = "searchIngredients", summary = "Search ingredients")
+    @Operation(operationId = "searchIngredients", summary = "Search ingredients",
+               description = "Default sort: name,id ascending. Supported sort properties: id, name.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Matching ingredients returned"),
         @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest")

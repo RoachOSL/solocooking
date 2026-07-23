@@ -51,8 +51,12 @@ interface RecipeApi {
     RecipeDTO update(@PathVariable UUID recipeId, @Valid @RequestBody UpdateRecipeRequest updateRecipeRequest);
 
     @Operation(operationId = "getRecipes", summary = "Get all recipes",
-               description = "Returns a paginated list of all available recipes")
-    @ApiResponse(responseCode = "200", description = "Recipes returned")
+               description = "Returns a paginated list of all available recipes. Default sort: name,id ascending. "
+                       + "Supported sort properties: id, name, createdAt, updatedAt.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Recipes returned"),
+        @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest")
+    })
     @GetMapping
     PageResponse<RecipeSummaryDTO> getRecipes(@ParameterObject Pageable pageable);
 

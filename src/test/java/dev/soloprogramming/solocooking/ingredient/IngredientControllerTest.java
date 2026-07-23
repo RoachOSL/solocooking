@@ -4,7 +4,9 @@
 package dev.soloprogramming.solocooking.ingredient;
 
 import java.util.List;
+import java.util.Set;
 
+import dev.soloprogramming.solocooking.common.exception.InvalidSortPropertyException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientAlreadyExistsException;
 import dev.soloprogramming.solocooking.ingredient.exception.IngredientInUseException;
 import dev.soloprogramming.solocooking.ingredient.model.request.UpdateIngredientRequest;
@@ -12,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -42,6 +46,12 @@ class IngredientControllerTest {
             "controller/ingredient/delete-ingredient-conflict-response.json";
     private static final String UPDATE_INGREDIENT_VALIDATION_ERROR_RESPONSE_RESOURCE =
             "controller/ingredient/update-ingredient-validation-error-response.json";
+    private static final String SEARCH_INGREDIENT_MISSING_NAME_VALIDATION_ERROR_RESPONSE_RESOURCE =
+            "controller/ingredient/search-ingredient-missing-name-validation-error-response.json";
+    private static final String SEARCH_INGREDIENT_BLANK_NAME_VALIDATION_ERROR_RESPONSE_RESOURCE =
+            "controller/ingredient/search-ingredient-blank-name-validation-error-response.json";
+    private static final String GET_INGREDIENTS_INVALID_SORT_RESPONSE_RESOURCE =
+            "controller/ingredient/get-ingredients-invalid-sort-response.json";
 
     @MockitoBean
     private IngredientFacade ingredientFacade;
@@ -201,7 +211,11 @@ class IngredientControllerTest {
         // when
         assertThat(get()
                 .uri(INGREDIENT_SEARCH_ENDPOINT))
-                .hasStatus(HttpStatus.BAD_REQUEST);
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(
+                        SEARCH_INGREDIENT_MISSING_NAME_VALIDATION_ERROR_RESPONSE_RESOURCE
+                ));
 
         // then
         then(ingredientFacade).shouldHaveNoInteractions();
@@ -213,7 +227,11 @@ class IngredientControllerTest {
         assertThat(get()
                 .uri(INGREDIENT_SEARCH_ENDPOINT)
                 .param("name", " "))
-                .hasStatus(HttpStatus.BAD_REQUEST);
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(
+                        SEARCH_INGREDIENT_BLANK_NAME_VALIDATION_ERROR_RESPONSE_RESOURCE
+                ));
 
         // then
         then(ingredientFacade).shouldHaveNoInteractions();
@@ -254,6 +272,22 @@ class IngredientControllerTest {
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_INGREDIENTS_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldRejectUnsupportedIngredientSortProperty() {
+        // given
+        var pageable = PageRequest.of(0, 20, Sort.by("description"));
+        given(ingredientFacade.getIngredients(pageable))
+                .willThrow(InvalidSortPropertyException.forProperty("description", Set.of("id", "name")));
+
+        // when & then
+        assertThat(get()
+                .uri(INGREDIENTS_ENDPOINT)
+                .param("sort", "description"))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_INGREDIENTS_INVALID_SORT_RESPONSE_RESOURCE));
     }
 
     @Test

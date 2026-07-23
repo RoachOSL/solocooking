@@ -48,6 +48,7 @@ class OpenApiContractIT extends BaseIntegrationTest {
         assertProblemDetailResponse(openApi, "/paths/~1recipes/post", "400", "BadRequest");
         assertProblemDetailResponse(openApi, "/paths/~1recipes/post", "404", "NotFound");
         assertOperation(openApi, "/paths/~1recipes/get", "getRecipes", "200");
+        assertProblemDetailResponse(openApi, "/paths/~1recipes/get", "400", "BadRequest");
         assertOperation(openApi, "/paths/~1recipes~1{recipeId}/get", "getRecipe", "200");
         assertProblemDetailResponse(openApi, "/paths/~1recipes~1{recipeId}/get", "404", "NotFound");
         assertOperation(openApi, "/paths/~1recipes~1{recipeId}/put", "updateRecipe", "200");
@@ -61,6 +62,7 @@ class OpenApiContractIT extends BaseIntegrationTest {
         assertProblemDetailResponse(openApi, "/paths/~1ingredients/post", "400", "BadRequest");
         assertProblemDetailResponse(openApi, "/paths/~1ingredients/post", "409", "Conflict");
         assertOperation(openApi, "/paths/~1ingredients/get", "getIngredients", "200");
+        assertProblemDetailResponse(openApi, "/paths/~1ingredients/get", "400", "BadRequest");
         assertOperation(openApi, "/paths/~1ingredients~1search/get", "searchIngredients", "200");
         assertProblemDetailResponse(openApi, "/paths/~1ingredients~1search/get", "400", "BadRequest");
         assertQueryParameter(openApi, "/paths/~1ingredients~1search/get", "name");
