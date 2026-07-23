@@ -6,6 +6,10 @@ package dev.soloprogramming.solocooking.recipe;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import dev.soloprogramming.solocooking.common.BaseIntegrationTest;
 import dev.soloprogramming.solocooking.ingredient.IngredientFacade;
@@ -26,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static dev.soloprogramming.solocooking.common.TestComparisonConfig.defaultRecursiveComparisonConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,6 +54,9 @@ class RecipeFacadeIT extends BaseIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Test
     void shouldCreateRecipe() {
@@ -175,6 +183,73 @@ class RecipeFacadeIT extends BaseIntegrationTest {
                 Integer.class,
                 removedSection.ingredients().getFirst().id()
         )).isZero();
+    }
+
+    @Test
+    void shouldSerializeConcurrentFullRecipeUpdates() throws Exception {
+        // given
+        var ingredientId = givenExistingIngredientId();
+        var originalRecipe = recipeFacade.createRecipe(
+                RecipeMother.createRecipeRequestBuilder(ingredientId).build()
+        );
+        var originalSection = originalRecipe.sections().getFirst();
+        var originalIngredient = originalSection.ingredients().getFirst();
+        var retainedIngredient = RecipeMother.updateRecipeIngredientRequestBuilder(ingredientId)
+                .id(originalIngredient.id())
+                .build();
+        var firstAddedIngredient = RecipeMother.updateRecipeIngredientRequestBuilder(ingredientId)
+                .id(null)
+                .unit("first concurrent unit")
+                .build();
+        var secondAddedIngredient = RecipeMother.updateRecipeIngredientRequestBuilder(ingredientId)
+                .id(null)
+                .unit("second concurrent unit")
+                .build();
+        var firstRequest = concurrentUpdateRequest(
+                originalSection.id(),
+                retainedIngredient,
+                firstAddedIngredient
+        );
+        var secondRequest = concurrentUpdateRequest(
+                originalSection.id(),
+                retainedIngredient,
+                secondAddedIngredient
+        );
+        var firstUpdateFlushed = new CountDownLatch(1);
+        var allowFirstCommit = new CountDownLatch(1);
+        var executor = Executors.newFixedThreadPool(2);
+
+        // when
+        try {
+            var firstUpdate = executor.submit(() -> transactionTemplate.execute(status -> {
+                var result = recipeFacade.updateRecipe(originalRecipe.id(), firstRequest);
+                firstUpdateFlushed.countDown();
+                await(allowFirstCommit);
+                return result;
+            }));
+            assertThat(firstUpdateFlushed.await(10, TimeUnit.SECONDS)).isTrue();
+
+            var secondUpdate = executor.submit(() -> recipeFacade.updateRecipe(originalRecipe.id(), secondRequest));
+            assertThatThrownBy(() -> secondUpdate.get(1, TimeUnit.SECONDS))
+                    .isInstanceOf(TimeoutException.class);
+
+            allowFirstCommit.countDown();
+            firstUpdate.get(10, TimeUnit.SECONDS);
+            secondUpdate.get(10, TimeUnit.SECONDS);
+        } finally {
+            allowFirstCommit.countDown();
+            executor.shutdownNow();
+        }
+
+        // then
+        var persistedRecipe = recipeFacade.findById(originalRecipe.id());
+        assertThat(persistedRecipe.sections()).singleElement();
+        assertThat(persistedRecipe.sections().getFirst().ingredients())
+                .extracting(ingredient -> ingredient.unit(), ingredient -> ingredient.position())
+                .containsExactly(
+                        org.assertj.core.groups.Tuple.tuple(RecipeTestConstants.RECIPE_INGREDIENT_UNIT, 0),
+                        org.assertj.core.groups.Tuple.tuple("second concurrent unit", 1)
+                );
     }
 
     @Test
@@ -339,6 +414,30 @@ class RecipeFacadeIT extends BaseIntegrationTest {
         return RecipeMother.createRecipeRequestBuilder(ingredientId)
                 .sections(List.of(sectionRequest))
                 .build();
+    }
+
+    private UpdateRecipeRequest concurrentUpdateRequest(
+            UUID sectionId,
+            UpdateRecipeIngredientRequest retainedIngredient,
+            UpdateRecipeIngredientRequest addedIngredient
+    ) {
+        return RecipeMother.updateRecipeRequestBuilder()
+                .sections(List.of(RecipeMother.updateRecipeSectionRequestBuilder()
+                        .id(sectionId)
+                        .ingredients(List.of(retainedIngredient, addedIngredient))
+                        .build()))
+                .build();
+    }
+
+    private void await(CountDownLatch latch) {
+        try {
+            if (!latch.await(10, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("Timed out while coordinating concurrent recipe updates");
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while coordinating concurrent recipe updates", exception);
+        }
     }
 
     private UUID givenExistingIngredientId() {

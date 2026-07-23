@@ -50,6 +50,10 @@ section.
   aligned. Explicitly map String lengths, numeric precision and scale,
   nullability, and database checks. Cover accepted boundary values with
   integration tests so a valid request cannot fail at persistence time.
+- When input is normalized or otherwise transformed before persistence,
+  validate the transformed value against database limits before calling the
+  repository. Use one normalization implementation across validation, writes,
+  and queries so Unicode case mapping and whitespace handling cannot diverge.
 - Treat Flyway migrations as the single source of truth for database constraints
   and indexes. Do not duplicate schema-generating check constraints or indexes in
   JPA annotations.
@@ -130,6 +134,12 @@ section.
 
 ## Test style
 
+- Every bug fix includes an automated regression test that reproduces the
+  defect and fails without the fix. Use the lowest test layer that faithfully
+  covers the behavior; transaction, concurrency, and database defects require
+  an integration test. If automated coverage is not feasible, document the
+  reason and agree on an alternative before merging instead of silently
+  omitting the test.
 - Shared immutable test data is exposed directly as clearly named constants,
   without unnecessary getters.
 - Keep test data close to the module that owns it. Domain-specific constants and

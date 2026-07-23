@@ -54,7 +54,7 @@ class RecipeService implements RecipeFacade {
     @Transactional
     public RecipeDTO updateRecipe(UUID recipeId, UpdateRecipeRequest updateRecipeRequest) {
         log.debug("Updating recipe with id [{}]", recipeId);
-        var recipe = recipeRepository.findById(recipeId)
+        var recipe = recipeRepository.findByIdForUpdate(recipeId)
                 .orElseThrow(() -> RecipeNotFoundException.byRecipeId(recipeId));
         var ingredientIds = updateRecipeRequest.ingredientIds();
         log.debug("Validating updated recipe ingredient ids [{}]", ingredientIds);

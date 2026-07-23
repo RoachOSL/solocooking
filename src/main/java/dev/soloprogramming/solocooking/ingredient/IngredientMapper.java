@@ -3,8 +3,6 @@
  */
 package dev.soloprogramming.solocooking.ingredient;
 
-import java.util.Locale;
-
 import dev.soloprogramming.solocooking.ingredient.model.dto.IngredientDTO;
 import dev.soloprogramming.solocooking.ingredient.model.request.CreateIngredientRequest;
 import org.mapstruct.Mapper;
@@ -24,8 +22,6 @@ interface IngredientMapper {
 
     @Named("normalize")
     default String normalize(String value) {
-        return value.strip()
-                .toLowerCase(Locale.ROOT)
-                .replaceAll("\\s+", " ");
+        return IngredientNameNormalizer.normalize(value);
     }
 }

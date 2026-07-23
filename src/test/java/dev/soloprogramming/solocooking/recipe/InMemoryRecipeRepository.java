@@ -18,6 +18,11 @@ final class InMemoryRecipeRepository extends InMemoryRepository<RecipeEntity, UU
     }
 
     @Override
+    public Optional<RecipeEntity> findByIdForUpdate(UUID recipeId) {
+        return findById(recipeId);
+    }
+
+    @Override
     public Optional<RecipeEntity> findByIdWithoutDetails(UUID recipeId) {
         return findById(recipeId);
     }

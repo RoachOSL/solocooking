@@ -11,7 +11,9 @@ this repository here.
   separate `normalizedName` field unless the product later needs to preserve a
   display name distinct from the searchable unique name.
 - Ingredient name normalization trims surrounding whitespace, lowercases with
-  `Locale.ROOT`, and collapses internal whitespace sequences to a single space.
+  `Locale.ROOT`, and collapses all Unicode whitespace sequences to a single
+  ASCII space. Create and update validate both the submitted and normalized
+  names against the 255-character database limit before persistence.
 - The shared ingredient catalog starts with 30 common English ingredients seeded
   by Flyway. Users can extend the catalog through the ingredient creation API.
   Add later seed data through new migrations instead of editing an applied seed
@@ -55,7 +57,9 @@ this repository here.
   supplied. Missing IDs create children, omitted children are removed, and list
   order defines positions. Existing recipe ingredients cannot move between
   sections; clients remove and recreate them without an ID. Updates use
-  last-write-wins without optimistic locking.
+  last-write-wins without optimistic locking. Each update acquires a pessimistic
+  write lock on the recipe root before loading mutable children, serializing
+  concurrent full replacements without locking join-fetched child rows.
 - Recipe updates containing new sections or recipe ingredients without IDs are
   idempotent only at the logical aggregate-content level. Repeating such a
   request can replace those children with newly generated backend IDs. This is
