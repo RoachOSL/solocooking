@@ -143,6 +143,11 @@ section.
   `{}`. Mark nullable properties explicitly and declare required response
   properties once at the DTO type level with
   `@Schema(requiredProperties = {...})` instead of annotating every field.
+- Prefer standard Bean Validation annotations on request properties so springdoc
+  derives `required` and length constraints from them. Only when a property's
+  presence rule lives in a custom constraint, declare it explicitly with
+  `@Schema(requiredMode = RequiredMode.REQUIRED)` and pin it with an
+  `assertRequired` assertion in `OpenApiContractIT`.
 - Update the OpenAPI contract in the same change as every public endpoint,
   request or response DTO, and serialization-policy change. Keep annotations and
   springdoc configuration current, and extend `OpenApiContractIT` with assertions
