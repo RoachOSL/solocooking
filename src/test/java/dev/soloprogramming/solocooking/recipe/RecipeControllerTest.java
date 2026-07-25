@@ -34,8 +34,12 @@ class RecipeControllerTest {
     private static final String RECIPES_ENDPOINT = API_SERVLET_PATH + "/recipes";
     private static final String RECIPE_BY_ID_ENDPOINT = API_SERVLET_PATH + "/recipes/{recipeId}";
     private static final String GET_RECIPE_RESPONSE_RESOURCE = "controller/recipe/get-recipe-response.json";
+    private static final String CREATE_RECIPE_WITHOUT_IMAGE_RESPONSE_RESOURCE =
+            "controller/recipe/create-recipe-without-image-response.json";
     private static final String GET_RECIPE_WITH_NULL_NOTE_RESPONSE_RESOURCE = "controller/recipe/get-recipe-with-null-note-response.json";
     private static final String GET_RECIPES_RESPONSE_RESOURCE = "controller/recipe/get-recipes-response.json";
+    private static final String GET_RECIPES_WITHOUT_IMAGE_RESPONSE_RESOURCE =
+            "controller/recipe/get-recipes-without-image-response.json";
     private static final String GET_EMPTY_RECIPES_RESPONSE_RESOURCE = "controller/recipe/get-empty-recipes-response.json";
     private static final String GET_RECIPES_INVALID_SORT_RESPONSE_RESOURCE =
             "controller/recipe/get-recipes-invalid-sort-response.json";
@@ -65,6 +69,27 @@ class RecipeControllerTest {
                 .hasStatus(HttpStatus.CREATED)
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_RECIPE_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldCreateRecipeWithoutImage() {
+        // given
+        var createRecipeRequest = RecipeMother.createRecipeRequestBuilder()
+                .imageUrl(null)
+                .build();
+        var expectedRecipe = RecipeMother.recipeDtoBuilder()
+                .imageUrl(null)
+                .build();
+        given(recipeFacade.createRecipe(createRecipeRequest)).willReturn(expectedRecipe);
+
+        // when & then
+        assertThat(post()
+                .uri(RECIPES_ENDPOINT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createRecipeRequest)))
+                .hasStatus(HttpStatus.CREATED)
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(CREATE_RECIPE_WITHOUT_IMAGE_RESPONSE_RESOURCE));
     }
 
     @Test
@@ -127,6 +152,23 @@ class RecipeControllerTest {
                 .hasStatusOk()
                 .bodyJson()
                 .isStrictlyEqualTo(readTestResource(GET_RECIPES_RESPONSE_RESOURCE));
+    }
+
+    @Test
+    void shouldReturnRecipesWithoutImage() {
+        // given
+        var expectedRecipe = RecipeMother.recipeSummaryDtoBuilder()
+                .imageUrl(null)
+                .build();
+        given(recipeFacade.getRecipes(DEFAULT_WEB_PAGE_REQUEST))
+                .willReturn(new PageImpl<>(List.of(expectedRecipe), DEFAULT_WEB_PAGE_REQUEST, 1));
+
+        // when & then
+        assertThat(get()
+                .uri(RECIPES_ENDPOINT))
+                .hasStatusOk()
+                .bodyJson()
+                .isStrictlyEqualTo(readTestResource(GET_RECIPES_WITHOUT_IMAGE_RESPONSE_RESOURCE));
     }
 
     @Test

@@ -41,8 +41,7 @@ class RecipeEntity extends BaseEntity {
     private String name;
 
     @Setter
-    @Basic(optional = false)
-    @Column(nullable = false, length = 2048)
+    @Column(length = 2048)
     private String imageUrl;
 
     @Setter

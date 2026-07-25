@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -23,7 +24,7 @@ public record CreateRecipeRequest(
         @Size(max = 255)
         String name,
 
-        @NotBlank
+        @Schema(nullable = true)
         @Pattern(
                 regexp = "^(https?://).*$",
                 message = "Must be a valid URL starting with http:// or https://"

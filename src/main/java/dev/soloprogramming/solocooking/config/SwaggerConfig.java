@@ -34,7 +34,30 @@ class SwaggerConfig {
         server.setUrl("/api");
         server.setDescription("Base API path for SoloCooking app");
 
-        var components = new Components();
+        return new OpenAPI()
+                .info(new Info()
+                        .title("SoloCooking API")
+                        .version("v1"))
+                .servers(List.of(server));
+    }
+
+    @Bean
+    GroupedOpenApi soloProgrammingApi() {
+        return GroupedOpenApi.builder()
+                .group("soloprogramming")
+                .displayName("SoloCooking")
+                .pathsToMatch("/recipes/**", "/ingredients/**")
+                .addOpenApiCustomizer(this::addProblemDetailComponents)
+                .build();
+    }
+
+    private void addProblemDetailComponents(OpenAPI openApi) {
+        var components = openApi.getComponents();
+        if (components == null) {
+            components = new Components();
+            openApi.setComponents(components);
+        }
+
         registerSchemas(components, ProblemDetail.class);
         registerSchemas(components, BadRequestProblemDetail.class);
         components.addResponses(
@@ -49,27 +72,16 @@ class SwaggerConfig {
                 "Conflict",
                 problemResponse("Request conflicts with current resource state", PROBLEM_DETAIL_SCHEMA)
         );
-
-        return new OpenAPI()
-                .info(new Info()
-                        .title("SoloCooking API")
-                        .version("v1"))
-                .servers(List.of(server))
-                .components(components);
-    }
-
-    @Bean
-    GroupedOpenApi soloProgrammingApi() {
-        return GroupedOpenApi.builder()
-                .group("soloprogramming")
-                .displayName("SoloCooking")
-                .pathsToMatch("/recipes/**", "/ingredients/**")
-                .build();
     }
 
     private void registerSchemas(Components components, Class<?> schemaType) {
         var resolvedSchema = ModelConverters.getInstance()
                 .resolveAsResolvedSchema(new AnnotatedType(schemaType));
+        resolvedSchema.referencedSchemas.values().forEach(schema -> {
+            if (schema.getProperties() != null) {
+                schema.getProperties().remove("properties");
+            }
+        });
         resolvedSchema.referencedSchemas.forEach(components::addSchemas);
     }
 

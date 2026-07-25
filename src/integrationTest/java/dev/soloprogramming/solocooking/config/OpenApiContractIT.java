@@ -8,7 +8,10 @@ import java.util.stream.StreamSupport;
 
 import dev.soloprogramming.solocooking.common.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.JsonNode;
@@ -20,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@ExtendWith(OutputCaptureExtension.class)
 class OpenApiContractIT extends BaseIntegrationTest {
 
     private static final String OPEN_API_ENDPOINT = API_SERVLET_PATH + "/v3/api-docs/soloprogramming";
@@ -31,7 +35,7 @@ class OpenApiContractIT extends BaseIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void shouldExposeStableOpenApiContract() throws Exception {
+    void shouldExposeStableOpenApiContract(CapturedOutput output) throws Exception {
         // when
         var response = mockMvc.perform(get(OPEN_API_ENDPOINT).servletPath(API_SERVLET_PATH))
                 .andExpect(status().isOk())
@@ -85,15 +89,24 @@ class OpenApiContractIT extends BaseIntegrationTest {
         var schemas = openApi.at("/components/schemas");
         assertRequired(schemas, "RecipeDTO", "id", "name", "imageUrl", "description", "sections", "updatedAt", "createdAt");
         assertRequired(schemas, "RecipeSummaryDTO", "id", "name", "imageUrl", "description", "updatedAt", "createdAt");
+        assertNullable(schemas, "RecipeDTO", "imageUrl");
+        assertNullable(schemas, "RecipeSummaryDTO", "imageUrl");
         assertRequired(schemas, "RecipeSectionDTO", "id", "name", "position", "ingredients");
         assertRequired(schemas, "RecipeIngredientDTO", "id", "ingredientId", "amount", "unit", "note", "position");
-        assertRequired(schemas, "UpdateRecipeRequest", "name", "imageUrl", "description", "sections");
+        assertRequired(schemas, "CreateRecipeRequest", "name", "description", "sections");
+        assertOptional(schemas, "CreateRecipeRequest", "imageUrl");
+        assertNullable(schemas, "CreateRecipeRequest", "imageUrl");
+        assertRequired(schemas, "UpdateRecipeRequest", "name", "description", "sections");
+        assertOptional(schemas, "UpdateRecipeRequest", "imageUrl");
+        assertNullable(schemas, "UpdateRecipeRequest", "imageUrl");
         assertRequired(schemas, "UpdateRecipeSectionRequest", "name", "ingredients");
         assertRequired(schemas, "UpdateRecipeIngredientRequest", "ingredientId", "amount", "unit");
         assertOptional(schemas, "UpdateRecipeSectionRequest", "id");
         assertOptional(schemas, "UpdateRecipeIngredientRequest", "id");
         assertNullable(schemas, "RecipeIngredientDTO", "note");
         assertRequired(schemas, "IngredientDTO", "id", "name");
+        assertThat(schemas.path("ProblemDetail").path("properties").has("properties")).isFalse();
+        assertThat(schemas.path("BadRequestProblemDetail").path("properties").has("properties")).isFalse();
         assertThat(schemas.path("BadRequestProblemDetail").path("properties").path("errors").isMissingNode())
                 .isFalse();
         assertThat(schemas.path("BadRequestProblemDetail")
@@ -109,6 +122,7 @@ class OpenApiContractIT extends BaseIntegrationTest {
         assertRequired(schemas, responseSchemaName(openApi, "/paths/~1recipes/get/responses/200/content/application~1json/schema"), "content", "page");
         assertRequired(schemas, responseSchemaName(openApi, "/paths/~1ingredients/get/responses/200/content/application~1json/schema"), "content", "page");
         assertRequired(schemas, "PageMetadata", "number", "size", "totalElements", "totalPages");
+        assertThat(output).doesNotContain("Json Processing Exception occurred");
     }
 
     private void assertOperation(JsonNode openApi, String operationPointer, String operationId, String responseStatus) {
