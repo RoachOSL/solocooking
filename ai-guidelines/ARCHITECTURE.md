@@ -1,7 +1,7 @@
 # Architecture guidelines
 
 Reusable engineering and architecture backend rules for this repository.
-Project-specific facts and decisions belong in `PROJECT_NOTES.md`. Agent
+Project-specific facts and decisions belong in `ai-guidelines/PROJECT_NOTES.md`. Agent
 workflow rules live in `CLAUDE.md` / `AGENTS.md`. When a reusable
 architectural or engineering decision is agreed, add it here in the relevant
 section.
