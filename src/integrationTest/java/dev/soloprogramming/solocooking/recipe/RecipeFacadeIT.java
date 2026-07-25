@@ -79,6 +79,32 @@ class RecipeFacadeIT extends BaseIntegrationTest {
     }
 
     @Test
+    void shouldAllowAddingAndRemovingRecipeImage() {
+        // given
+        var ingredientId = givenExistingIngredientId();
+        var createRequest = RecipeMother.createRecipeRequestBuilder(ingredientId)
+                .imageUrl(null)
+                .build();
+
+        // when
+        var createdRecipe = recipeFacade.createRecipe(createRequest);
+        var recipeWithImage = recipeFacade.updateRecipe(
+                createdRecipe.id(),
+                updateRecipeImageRequest(ingredientId, "https://example.com/added-later.jpg")
+        );
+        var recipeWithoutImage = recipeFacade.updateRecipe(
+                createdRecipe.id(),
+                updateRecipeImageRequest(ingredientId, null)
+        );
+
+        // then
+        assertThat(createdRecipe.imageUrl()).isNull();
+        assertThat(recipeWithImage.imageUrl()).isEqualTo("https://example.com/added-later.jpg");
+        assertThat(recipeWithoutImage.imageUrl()).isNull();
+        assertThat(recipeFacade.findById(createdRecipe.id()).imageUrl()).isNull();
+    }
+
+    @Test
     void shouldPersistMaximumRecipeFieldLengths() {
         // given
         var ingredientId = givenExistingIngredientId();
@@ -105,6 +131,32 @@ class RecipeFacadeIT extends BaseIntegrationTest {
         assertThat(persistedRecipe)
                 .usingRecursiveComparison(defaultRecursiveComparisonConfiguration())
                 .isEqualTo(createdRecipe);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "ftp://example.com/image.jpg"})
+    void shouldRejectInvalidRecipeImageUrl(String imageUrl) {
+        // given
+        var request = RecipeMother.createRecipeRequestBuilder(givenExistingIngredientId())
+                .imageUrl(imageUrl)
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> recipeFacade.createRecipe(request))
+                .isInstanceOf(ConstraintViolationException.class);
+    }
+
+    @Test
+    void shouldRejectOversizedRecipeImageUrl() {
+        // given
+        var oversizedImageUrl = "https://" + "i".repeat(2041);
+        var request = RecipeMother.createRecipeRequestBuilder(givenExistingIngredientId())
+                .imageUrl(oversizedImageUrl)
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> recipeFacade.createRecipe(request))
+                .isInstanceOf(ConstraintViolationException.class);
     }
 
     @Test
@@ -433,6 +485,20 @@ class RecipeFacadeIT extends BaseIntegrationTest {
                 .isInstanceOfSatisfying(RecipeNotFoundException.class, exception ->
                         assertThat(exception.getReason()).isEqualTo(RecipeTestConstants.RECIPE_NOT_FOUND_MESSAGE)
                 );
+    }
+
+    private UpdateRecipeRequest updateRecipeImageRequest(UUID ingredientId, String imageUrl) {
+        var ingredient = RecipeMother.updateRecipeIngredientRequestBuilder(ingredientId)
+                .id(null)
+                .build();
+        var section = RecipeMother.updateRecipeSectionRequestBuilder(ingredientId)
+                .id(null)
+                .ingredients(List.of(ingredient))
+                .build();
+        return RecipeMother.updateRecipeRequestBuilder(ingredientId)
+                .imageUrl(imageUrl)
+                .sections(List.of(section))
+                .build();
     }
 
     private CreateRecipeRequest createRecipeRequestWithAmount(UUID ingredientId, BigDecimal amount) {

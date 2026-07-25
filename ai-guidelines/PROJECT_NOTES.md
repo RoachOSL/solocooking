@@ -53,6 +53,10 @@ this repository here.
   positivity in both request validation and the database schema.
 - Recipe creation validates referenced ingredient IDs through
   `IngredientFacade`.
+- Recipe image URLs are optional throughout the recipe lifecycle. Create and
+  update requests accept an omitted or null `imageUrl`, and a later update can
+  add or remove it. Responses always include `imageUrl`, using `null` when no
+  image is assigned.
 - Deleting a recipe is idempotent. `DELETE /recipes/{recipeId}` returns no
   content when the recipe is deleted or was already absent.
 - Recipe sections and recipe ingredients store a persisted `position` field.
@@ -113,6 +117,10 @@ this repository here.
 - Runtime error bodies and generated OpenAPI error schemas must stay synchronized.
   Validation failures use `BadRequestProblemDetail`, whose optional `errors` map
   exposes field-level messages to generated frontend clients.
+- Register shared `ProblemDetail` schemas through the grouped OpenAPI customizer,
+  after springdoc clones the base `OpenAPI` bean. Springdoc 3.0.3 clones that
+  bean with an unconfigured mapper that cannot deserialize schema-valued
+  `additionalProperties`.
 - Ingredient conflicts expose stable problem types:
   `urn:solocooking:error:ingredient-already-exists` and
   `urn:solocooking:error:ingredient-in-use`. Frontend code maps these types to its

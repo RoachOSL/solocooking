@@ -14,6 +14,7 @@ import lombok.Builder;
 public record RecipeSummaryDTO(
         UUID id,
         String name,
+        @Schema(nullable = true)
         String imageUrl,
         String description,
         Instant updatedAt,
