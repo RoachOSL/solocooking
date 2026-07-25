@@ -115,6 +115,7 @@ class OpenApiContractIT extends BaseIntegrationTest {
                 .path("additionalProperties")
                 .path("type")
                 .stringValue()).isEqualTo("string");
+        assertRequired(schemas, "CreateIngredientRequest", "name");
         assertStringLength(schemas, "CreateIngredientRequest", "name", 1, 255);
         assertOptional(schemas, "UpdateIngredientRequest", "name");
         assertNullable(schemas, "UpdateIngredientRequest", "name");

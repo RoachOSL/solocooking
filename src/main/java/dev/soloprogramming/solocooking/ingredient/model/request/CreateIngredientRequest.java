@@ -10,7 +10,7 @@ import lombok.Builder;
 @Builder
 public record CreateIngredientRequest(
 
-        @Schema(minLength = 1, maxLength = 255)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, minLength = 1, maxLength = 255)
         @ValidIngredientName
         String name
 ) {
