@@ -35,6 +35,10 @@ this repository here.
 - Ingredient updates are partial. An omitted or null name leaves the stored name
   unchanged; a supplied name uses the same normalization and uniqueness rules as
   creation.
+- `CreateIngredientRequest.name` is required and `UpdateIngredientRequest.name`
+  is optional through `@ValidIngredientName(required = false)`. Because that
+  presence rule lives in a custom constraint, the OpenAPI schema states it
+  explicitly; keep both sides in sync when the constraint changes.
 - Ingredient deletion is idempotent. Deleting an absent ingredient succeeds,
   while deleting an ingredient referenced by a recipe returns a conflict.
 - Ingredient creation checks duplicates before saving. Do not catch broad
